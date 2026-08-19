@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>NOMAD // GEEK STATS (CRT-VT220)</title>
+
+  <!-- PWA & Mobile Display Metadata -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#050805" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    /* 1995 VT220 Green Phosphor CRT Screen Styling */
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: #050805;
+      color: #33ff33;
+      font-family: "Courier New", Courier, "Lucida Console", Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-x: hidden;
+      overflow-y: auto;
+      text-shadow: 0 0 4px rgba(51, 255, 51, 0.65), 0 0 10px rgba(51, 255, 51, 0.25);
+    }
+
+    /* Subtle CRT Scanline Filter Overlay */
+    body::before {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 999;
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
+    }
+
+    .terminal-container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 12px 10px;
+      padding-top: max(12px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    /* Top Nav Bar */
+    .term-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-return {
+      background: transparent;
+      color: #050805;
+      background-color: #33ff33;
+      border: 1px solid #33ff33;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-block;
+      box-shadow: 0 0 8px rgba(51, 255, 51, 0.8);
+      transition: transform 0.1s ease;
+    }
+
+    .btn-return:active {
+      transform: scale(0.95);
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    .term-title {
+      font-weight: 900;
+      font-size: 13px;
+      color: #33ff33;
+      letter-spacing: 1px;
+    }
+
+    /* Section Boxes with ASCII Frames */
+    .term-box {
+      border: 1px solid #1f7a1f;
+      background: rgba(8, 20, 8, 0.7);
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.05);
+    }
+
+    .box-header {
+      font-weight: 900;
+      color: #050805;
+      background-color: #33ff33;
+      padding: 2px 6px;
+      display: inline-block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 0;
+      border-bottom: 1px dashed rgba(51, 255, 51, 0.15);
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #1b9e1b;
+      font-weight: bold;
+    }
+
+    .val {
+      color: #33ff33;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .val-highlight {
+      color: #ffffff;
+      text-shadow: 0 0 6px #33ff33;
+    }
+
+    /* Blinking Block Cursor */
+    .cursor {
+      display: inline-block;
+      width: 9px;
+      height: 14px;
+      background-color: #33ff33;
+      vertical-align: middle;
+      animation: blink 0.9s infinite;
+      box-shadow: 0 0 6px #33ff33;
+      margin-left: 4px;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    .fips-hero {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-shadow: 0 0 8px #33ff33;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="terminal-container">
+    
+    <!-- TOP NAVIGATION & STATUS -->
+    <div class="term-nav">
+      <a href="index.html" class="btn-return">&lt; RETURN TO NAV</a>
+      <div class="term-title">NOMAD TELEMETRY v1.0 <span class="cursor"></span></div>
+    </div>
+
+    <!-- 1. TIME, DATE, TIMEZONE & MILITARY CLOCK -->
+    <div class="term-box">
+      <div class="box-header">[01] CHRONO &amp; REGIONAL LOCALE</div>
+      <div class="data-row">
+        <span class="label">CIVIL TIME (12H):</span>
+        <span class="val val-highlight" id="live-time-12">--:--:-- -- EDT</span>
+      </div>
+      <div class="data-row">
+        <span class="label">MILITARY TIME (24H):</span>
+        <span class="val val-highlight" id="live-time-24">----:-- HRS (UTC ----Z)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">CALENDAR DATE:</span>
+        <span class="val" id="live-date">Loading...</span>
+      </div>
+      <div class="data-row">
+        <span class="label">TIMEZONE OFFSET:</span>
+        <span class="val" id="iana-tz">America/New_York (UTC-4)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">SOLAR REGIME:</span>
+        <span class="val" id="dst-mode">DAYLIGHT SAVING TIME [DST]</span>
+      </div>
+      <div class="data-row">
+        <span class="label">LOCALE DOMAIN:</span>
+        <span class="val">New England / Contiguous US</span>
+      </div>
+    </div>
+
+    <!-- 2. CIVIL DEFENSE & CENSUS GEOID (FIPS) -->
+    <div class="term-box">
+      <div class="box-header">[02] CIVIL DEFENSE &amp; CENSUS FIPS</div>
+      <div class="data-row">
+        <span class="label">FULL CIVIL GEOID:</span>
+        <span class="val fips-hero" id="fips-geoid">25-017-XXXXX</span>
+      </div>
+      <div class="data-row">
+        <span class="label">STATE FIPS CODE:</span>
+        <span class="val" id="fips-state">25 (Massachusetts)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">COUNTY FIPS CODE:</span>
+        <span class="val" id="fips-county">017 (Middlesex County)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">PLACE FIPS CODE:</span>
+        <span class="val" id="fips-place">----- (Resolving...)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">COUNTY SUB (MCD):</span>
+        <span class="val" id="fips-mcd">25-XXXXX</span>
+      </div>
+    </div>
+
+    <!-- 3. COMPLETE REVERSE GEOCODE LOCATION CARD -->
+    <div class="term-box">
+      <div class="box-header">[03] COMPLETE LOCATION CARD</div>
+      <div class="data-row">
+        <span class="label">SURFACE STREET:</span>
+        <span class="val val-highlight" id="street-val">Locating...</span>
+      </div>
+      <div class="data-row">
+        <span class="label">CITY / TOWN:</span>
+        <span class="val" id="city-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="label">COUNTY:</span>
+        <span class="val" id="county-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="label">POSTAL CODE:</span>
+        <span class="val" id="zip-val">--</span>
+      </div>
+      <div class="data-row">
+        <span class="label">STATE / COUNTRY:</span>
+        <span class="val" id="state-country-val">--</span>
+      </div>
+    </div>
+
+    <!-- 4. RAW SATELLITE GPS & ALTIMETER FIX -->
+    <div class="term-box">
+      <div class="box-header">[04] RAW SATELLITE GPS &amp; FIX</div>
+      <div class="data-row">
+        <span class="label">LATITUDE (WGS84):</span>
+        <span class="val val-highlight" id="raw-lat">--.------°</span>
+      </div>
+      <div class="data-row">
+        <span class="label">LONGITUDE (WGS84):</span>
+        <span class="val val-highlight" id="raw-lon">--.------°</span>
+      </div>
+      <div class="data-row">
+        <span class="label">GPS FIX ACCURACY:</span>
+        <span class="val" id="raw-acc">&plusmn;-- FT (-- M)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">RAW GPS ALTITUDE:</span>
+        <span class="val" id="raw-alt">-- FT (-- M)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">OPEN-METEO ELEV:</span>
+        <span class="val" id="raw-elev">-- FT</span>
+      </div>
+      <div class="data-row">
+        <span class="label">COMPASS BEARING:</span>
+        <span class="val" id="raw-bearing">--° N</span>
+      </div>
+    </div>
+
+    <!-- 5. KINEMATIC MOTION SENSORS -->
+    <div class="term-box">
+      <div class="box-header">[05] KINEMATICS &amp; MOTION SENSORS</div>
+      <div class="data-row">
+        <span class="label">SPEED (MPH):</span>
+        <span class="val" id="speed-mph">0.0 MPH</span>
+      </div>
+      <div class="data-row">
+        <span class="label">SPEED (METRIC):</span>
+        <span class="val" id="speed-kmh">0.0 KM/H (0.00 M/S)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">SPEED (NAUTICAL):</span>
+        <span class="val" id="speed-knots">0.00 KNOTS (0.0 FT/S)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">GYRO ORIENTATION:</span>
+        <span class="val" id="gyro-val">&alpha;: 0° | &beta;: 0° | &gamma;: 0°</span>
+      </div>
+      <div class="data-row">
+        <span class="label">SCREEN WAKELOCK:</span>
+        <span class="val" id="wakelock-val">ENGAGED (ACTIVE)</span>
+      </div>
+    </div>
+
+    <!-- 6. REMOTE TELEMETRY LINK HEALTH -->
+    <div class="term-box">
+      <div class="box-header">[06] TELEMETRY LINK HEALTH</div>
+      <div class="data-row">
+        <span class="label">NOMINATIM GEOCODER:</span>
+        <span class="val" id="geo-ping">HTTP 200 (ACTIVE)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">OPEN-METEO API:</span>
+        <span class="val" id="meteo-ping">HTTP 200 (ACTIVE)</span>
+      </div>
+      <div class="data-row">
+        <span class="label">PWA SERVICE WORKER:</span>
+        <span class="val" id="sw-status">TIER-4 CACHE READY</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State FIPS Database
+    const STATE_FIPS = {
+      "Massachusetts": "25", "MA": "25", "New Hampshire": "33", "NH": "33",
+      "Rhode Island": "44", "RI": "44", "Connecticut": "09", "CT": "09",
+      "Maine": "23", "ME": "23", "Vermont": "50", "VT": "50", "New York": "36", "NY": "36"
+    };
+
+    // Massachusetts County FIPS Database
+    const MA_COUNTY_FIPS = {
+      "Middlesex County": "017", "Essex County": "009", "Suffolk County": "025",
+      "Norfolk County": "021", "Worcester County": "027", "Plymouth County": "023",
+      "Bristol County": "005", "Barnstable County": "001", "Berkshire County": "003",
+      "Franklin County": "011", "Hampden County": "013", "Hampshire County": "015"
+    };
+
+    // Massachusetts Municipal Census Place Codes
+    const MA_PLACE_FIPS = {
+      "Lexington": "35215", "Waltham": "72600", "Bedford": "04615", "Concord": "15165",
+      "Lincoln": "35425", "Arlington": "01605", "Belmont": "05070", "Burlington": "09840",
+      "Woburn": "81035", "Winchester": "80510", "Boston": "07000", "Cambridge": "11000",
+      "Somerville": "62535", "Newton": "45560", "Watertown": "74280", "Weston": "77430"
+    };
+
+    let wakeLock = null;
+    let lastLat = null, lastLon = null;
+
+    // Helper: Determine if Date is in Daylight Saving Time (DST)
+    function isDaylightSavingTime(date) {
+      const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+      const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+      return Math.max(jan, jul) !== date.getTimezoneOffset();
+    }
+
+    // 1. Live Chrono Engine (12H, 24H Military, Timezone & DST)
+    function updateClock() {
+      const now = new Date();
+      
+      // Timezone Abbreviation (EDT, EST, CDT, PST, etc.)
+      const tzAbbrev = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+        .formatToParts(now)
+        .find(p => p.type === 'timeZoneName')?.value || '';
+
+      // 12-Hour Civil Time (e.g. 10:04:23 PM EDT)
+      const time12Str = `${now.toLocaleTimeString('en-US', { hour12: true })} ${tzAbbrev}`;
+      
+      // 24-Hour / Military Time (e.g. 2204:23 HRS)
+      const h24 = String(now.getHours()).padStart(2, '0');
+      const m24 = String(now.getMinutes()).padStart(2, '0');
+      const s24 = String(now.getSeconds()).padStart(2, '0');
+      
+      // UTC Zulu Time
+      const utcH = String(now.getUTCHours()).padStart(2, '0');
+      const utcM = String(now.getUTCMinutes()).padStart(2, '0');
+      const time24Str = `${h24}${m24}:${s24} HRS (${h24}:${m24}:${s24} / UTC ${utcH}${utcM}Z)`;
+
+      // Calendar Date
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      
+      document.getElementById('live-time-12').innerText = time12Str;
+      document.getElementById('live-time-24').innerText = time24Str;
+      document.getElementById('live-date').innerText = dateStr;
+
+      // IANA Timezone & UTC Offset
+      try {
+        const iana = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const offsetMin = -now.getTimezoneOffset();
+        const offsetHrs = offsetMin / 60;
+        const offsetSign = offsetHrs >= 0 ? '+' : '';
+        document.getElementById('iana-tz').innerText = `${iana} (UTC${offsetSign}${offsetHrs})`;
+      } catch (e) {}
+
+      // DST vs Standard Time
+      const isDst = isDaylightSavingTime(now);
+      document.getElementById('dst-mode').innerText = isDst 
+        ? `DAYLIGHT SAVING TIME [DST] (${tzAbbrev})` 
+        : `STANDARD TIME [ST] (${tzAbbrev})`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Screen Wake Lock
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+          document.getElementById('wakelock-val').innerText = "ENGAGED (ACTIVE)";
+        }
+      } catch (err) {
+        document.getElementById('wakelock-val').innerText = "STANDALONE MODE";
+      }
+    }
+    requestWakeLock();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+
+    // 3. Gyroscope Sensor Listener
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        const a = e.alpha ? Math.round(e.alpha) : 0;
+        const b = e.beta ? Math.round(e.beta) : 0;
+        const g = e.gamma ? Math.round(e.gamma) : 0;
+        document.getElementById('gyro-val').innerText = `α: ${a}° | β: ${b}° | γ: ${g}°`;
+      });
+    }
+
+    // 4. GPS & Location Telemetry Stream
+    function getCardinalDirection(angle) {
+      const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      return directions[Math.round(angle / 45) % 8];
+    }
+
+    async function fetchReverseGeocode(lat, lon) {
+      const t0 = performance.now();
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+        const latency = Math.round(performance.now() - t0);
+        document.getElementById('geo-ping').innerText = `HTTP 200 (${latency} MS)`;
+
+        if (data && data.address) {
+          const addr = data.address;
+          const road = addr.road || addr.pedestrian || addr.suburb || "Unnamed Road";
+          const houseNum = addr.house_number ? `${addr.house_number.split(';')[0]} ` : '';
+          const city = addr.city || addr.town || addr.village || addr.municipality || "";
+          const county = addr.county || "";
+          const state = addr.state || "";
+          const zip = addr.postcode || "";
+          const country = addr.country || "United States";
+
+          document.getElementById('street-val').innerText = `${houseNum}${road}`;
+          document.getElementById('city-val').innerText = city;
+          document.getElementById('county-val').innerText = county;
+          document.getElementById('zip-val').innerText = zip;
+          document.getElementById('state-country-val').innerText = `${state}, ${country}`;
+
+          // Calculate Official Civil FIPS Codes
+          const stCode = STATE_FIPS[state] || "25";
+          const ctyCode = MA_COUNTY_FIPS[county] || "017";
+          const placeCode = MA_PLACE_FIPS[city] || "35215";
+          const fullGeoid = `${stCode}-${ctyCode}-${placeCode}`;
+
+          document.getElementById('fips-geoid').innerText = fullGeoid;
+          document.getElementById('fips-state').innerText = `${stCode} (${state})`;
+          document.getElementById('fips-county').innerText = `${ctyCode} (${county})`;
+          document.getElementById('fips-place').innerText = `${placeCode} (${city})`;
+          document.getElementById('fips-mcd').innerText = `${stCode}-${placeCode}`;
+        }
+      } catch (err) {
+        document.getElementById('geo-ping').innerText = `OFFLINE / TIMEOUT`;
+      }
+    }
+
+    async function fetchElevation(lat, lon) {
+      const t0 = performance.now();
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const latency = Math.round(performance.now() - t0);
+        document.getElementById('meteo-ping').innerText = `HTTP 200 (${latency} MS)`;
+
+        if (data && data.elevation !== undefined) {
+          const feet = Math.round(data.elevation * 3.28084);
+          document.getElementById('raw-elev').innerText = `${feet.toLocaleString()} FT (${data.elevation} M)`;
+        }
+      } catch (err) {
+        document.getElementById('meteo-ping').innerText = `OFFLINE / CACHED`;
+      }
+    }
+
+    function startDiagnosticsTracking() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude, heading, speed, altitude, accuracy } = pos.coords;
+
+            document.getElementById('raw-lat').innerText = `${latitude.toFixed(6)}° N`;
+            document.getElementById('raw-lon').innerText = `${longitude.toFixed(6)}° W`;
+
+            if (accuracy !== null) {
+              const accFt = Math.round(accuracy * 3.28084);
+              document.getElementById('raw-acc').innerText = `±${accFt} FT (${accuracy.toFixed(1)} M)`;
+            }
+
+            if (altitude !== null) {
+              const altFt = Math.round(altitude * 3.28084);
+              document.getElementById('raw-alt').innerText = `${altFt.toLocaleString()} FT (${altitude.toFixed(1)} M)`;
+            } else {
+              document.getElementById('raw-alt').innerText = `-- FT`;
+            }
+
+            if (heading !== null && !isNaN(heading)) {
+              const card = getCardinalDirection(heading);
+              document.getElementById('raw-bearing').innerText = `${heading.toFixed(1)}° (${card})`;
+            }
+
+            if (speed !== null && !isNaN(speed) && speed >= 0) {
+              const mph = (speed * 2.23694).toFixed(1);
+              const kmh = (speed * 3.6).toFixed(1);
+              const knots = (speed * 1.94384).toFixed(2);
+              const fps = (speed * 3.28084).toFixed(1);
+
+              document.getElementById('speed-mph').innerText = `${mph} MPH`;
+              document.getElementById('speed-kmh').innerText = `${kmh} KM/H (${speed.toFixed(2)} M/S)`;
+              document.getElementById('speed-knots').innerText = `${knots} KNOTS (${fps} FT/S)`;
+            } else {
+              document.getElementById('speed-mph').innerText = `0.0 MPH`;
+              document.getElementById('speed-kmh').innerText = `0.0 KM/H (0.00 M/S)`;
+              document.getElementById('speed-knots').innerText = `0.00 KNOTS (0.0 FT/S)`;
+            }
+
+            // Periodic Geocode & Elevation polling
+            if (lastLat === null || Math.abs(latitude - lastLat) > 0.001 || Math.abs(longitude - lastLon) > 0.001) {
+              lastLat = latitude;
+              lastLon = longitude;
+              fetchReverseGeocode(latitude, longitude);
+              fetchElevation(latitude, longitude);
+            }
+          },
+          (err) => {
+            document.getElementById('street-val').innerText = "GPS STREAM UNAVAILABLE";
+          },
+          { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+        );
+      }
+    }
+
+    window.onload = () => {
+      startDiagnosticsTracking();
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        document.getElementById('sw-status').innerText = "TIER-4 ACTIVE (CACHED)";
+      }
+    };
+  </script>
+</body>
+</html>
