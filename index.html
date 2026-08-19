@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
   
-  <title>NOMAD: RoadTrip</title>
+  <title>NOMAD: RoadTrip PWA</title>
 
   <!-- Web App Manifest & Mobile Display Metadata -->
   <meta name="mobile-web-app-capable" content="yes" />
@@ -165,7 +165,6 @@
     }
 
     /* MAP OVERLAYS */
-    /* Interactive Telemetry Overlay Badge */
     .map-overlay-heading {
       position: absolute;
       top: 8px;
@@ -205,6 +204,22 @@
       border-color: #ffffff !important;
       box-shadow: 0 0 14px rgba(255, 85, 0, 0.85), inset 0 0 6px rgba(0,0,0,0.4) !important;
       padding: 2px 8px !important;
+    }
+
+    /* Synchronized Red Laser "FIRE!" Strobe Animation */
+    @keyframes galagaFireStrobe {
+      0%, 15%    { color: #ff0044; border-color: #ff0044; box-shadow: 0 0 20px #ff0044; transform: scale(1.06); }
+      22%        { color: #ffffff; border-color: #ffffff; box-shadow: 0 0 6px #ffffff; transform: scale(1.0); }
+      28%, 43%   { color: #ff0044; border-color: #ff0044; box-shadow: 0 0 20px #ff0044; transform: scale(1.06); }
+      50%        { color: #ffffff; border-color: #ffffff; box-shadow: 0 0 6px #ffffff; transform: scale(1.0); }
+      56%, 75%   { color: #ff0044; border-color: #ff0044; box-shadow: 0 0 20px #ff0044; transform: scale(1.06); }
+      85%, 100%  { color: #ff0044; border-color: #ff0044; box-shadow: 0 0 10px #ff0044; transform: scale(1.0); }
+    }
+
+    .map-overlay-heading.galaga-fire-active {
+      font-weight: 900 !important;
+      letter-spacing: 2px !important;
+      animation: galagaFireStrobe 1.15s ease-in-out forwards !important;
     }
 
     /* Enlarged Compass Overlay (64px x 64px) */
@@ -259,38 +274,34 @@
       transform-origin: center center;
     }
 
+    /* Lower-Left: Stacked Vertical Interstate Shields */
     .map-overlay-interstate {
       position: absolute;
       bottom: 2%;
       left: 8px;
       z-index: 10;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid #444444;
-      border-radius: 8px;
-      padding: 3px 5px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 32px;
-      min-height: 32px;
+      gap: 6px;
+      background: transparent;
+      border: none;
     }
 
+    /* Lower-Right: Stacked Vertical Classic Route Badges */
     .map-overlay-route {
       position: absolute;
       bottom: 2%;
       right: 8px;
       z-index: 10;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid #444444;
-      border-radius: 8px;
-      padding: 3px 5px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 32px;
-      min-height: 32px;
+      gap: 6px;
+      background: transparent;
+      border: none;
     }
 
     .map-overlay-interstate:empty,
@@ -338,7 +349,7 @@
       cursor: pointer;
       pointer-events: auto;
       user-select: none;
-      transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.12s ease;
+      transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.12s ease, width 0.2s ease, height 0.2s ease;
     }
 
     .vehicle-overlay-marker:active {
@@ -357,10 +368,23 @@
       width: 38px;
       height: 38px;
       transform-origin: center center;
-      transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.2s ease;
+      transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.2s ease, width 0.2s ease, height 0.2s ease;
     }
 
-    /* DYNAMIC 2X PULSATING VEHICLE ENGINES */
+    /* GALAXIAN FIGHTER SCALING */
+    .dashboard.galaga-theme .vehicle-overlay-marker {
+      width: 54px;
+      height: 54px;
+      margin-left: -27px;
+      margin-top: -27px;
+    }
+
+    .dashboard.galaga-theme #vehicle-overlay-svg {
+      width: 50px;
+      height: 50px;
+    }
+
+    /* DYNAMIC PULSATING ENGINES */
     @keyframes vehicleHornPulse {
       0%   { transform: scale(1.85); }
       50%  { transform: scale(2.2); }
@@ -368,9 +392,9 @@
     }
 
     @keyframes galagaLaserPulse {
-      0%   { transform: scale(1.8); }
-      40%  { transform: scale(2.3); }
-      100% { transform: scale(1.8); }
+      0%   { transform: scale(1.7); }
+      35%  { transform: scale(2.2); }
+      100% { transform: scale(1.7); }
     }
 
     .vehicle-overlay-marker.vehicle-pulsing-horn {
@@ -388,7 +412,7 @@
     }
 
     .vehicle-overlay-marker.vehicle-pulsing-laser #vehicle-overlay-svg {
-      filter: drop-shadow(0 0 16px #00d4ff) drop-shadow(0 0 28px #ff0055) !important;
+      filter: drop-shadow(0 0 18px #00d4ff) drop-shadow(0 0 30px #ff0044) !important;
     }
 
     .card-content-body {
@@ -427,11 +451,13 @@
       margin-top: 2px;
     }
 
+    /* Enlarged Badge Container (46px) */
     .highway-shield-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 28px;
+      height: 46px;
+      width: 46px;
     }
 
     .weather-container {
@@ -452,7 +478,6 @@
       justify-content: center;
     }
 
-    /* Temperature Number with Spacing */
     .weather-temp {
       font-size: clamp(2.4rem, 8vh, 3.4rem);
       font-weight: bold;
@@ -483,7 +508,6 @@
       margin-bottom: 4px;
     }
 
-    /* Weather Details Row with Integrated SVG Badges */
     .weather-details-stacked {
       display: flex;
       align-items: center;
@@ -557,7 +581,6 @@
       line-height: 1;
     }
 
-    /* Speed Sign Value */
     .speed-sign-value {
       font-size: clamp(3.8rem, 11vh, 5.2rem);
       font-weight: bold;
@@ -672,7 +695,7 @@
       font-size: 0.95rem;
       color: #cccccc;
       line-height: 1.4;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .modal-link-btn {
@@ -683,14 +706,38 @@
       color: #ffffff;
       text-decoration: none;
       border-radius: 10px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
       transition: background-color 0.15s ease;
     }
 
     .modal-link-btn:active {
       background-color: #0056b3;
+    }
+
+    /* Terminal GEEK STATS Button */
+    .modal-stats-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px;
+      background-color: rgba(51, 255, 51, 0.15);
+      border: 1.5px solid #33ff33;
+      color: #33ff33;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      box-shadow: 0 0 10px rgba(51, 255, 51, 0.25);
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    .modal-stats-btn:active {
+      background-color: #33ff33;
+      color: #000000;
+      transform: scale(0.97);
     }
 
     .modal-close-btn {
@@ -794,10 +841,10 @@
         </div>
       </div>
 
-      <!-- Lower-Left Overlay: Interstate Badge -->
+      <!-- Lower-Left Overlay: Stacked Interstate Badges -->
       <div class="map-overlay-interstate" id="interstate-badge-container"></div>
 
-      <!-- Lower-Right Overlay: Route Badge -->
+      <!-- Lower-Right Overlay: Stacked Classic Route Badges -->
       <div class="map-overlay-route" id="route-badge-container"></div>
 
       <!-- Dedicated Independent Vehicle Overlay Marker (Tap: Map Theme | Hold: Horn / Laser) -->
@@ -853,7 +900,7 @@
     </div>
   </div>
 
-  <!-- BRANDING ABOUT MODAL OVERLAY -->
+  <!-- BRANDING ABOUT MODAL OVERLAY (With GEEK STATS LINK) -->
   <div class="modal-overlay" id="about-modal" onclick="closeAboutModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <a href="features.html" class="modal-title-link" title="View Features & Guide">
@@ -864,6 +911,10 @@
       <div class="modal-body">
         Real-time telemetry, GPS tracking, and heads-up navigation dashboard.
       </div>
+      
+      <!-- GEEK STATS Terminal Diagnostics Link -->
+      <a href="geek-stats.html" class="modal-stats-btn">&gt; GEEK STATS (VT220) _</a>
+
       <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer" class="modal-link-btn">Visit Website</a>
       <div>
         <button class="modal-close-btn" onclick="closeAboutModal()">Close</button>
@@ -918,6 +969,10 @@
     let lastGeocodeTime = 0;
     let wakeLock = null;
 
+    // Active Route Concurrency State
+    let activeInterstateNums = [];
+    let activeRouteNums = [];
+
     // Galaga Arcade Easter Egg State
     let isGalagaMode = false;
     let audioCtx = null;
@@ -970,13 +1025,14 @@
 
     /* Massachusetts Surface Road to Route Concurrency Mapping */
     const massachusettsRouteConcurrency = [
-      { pattern: /Marrett Road/i, route: "2A" },
-      { pattern: /Bedford (Road|Street)/i, route: "62" },
-      { pattern: /Concord (Turnpike|Ave)/i, route: "2" },
-      { pattern: /Great Road/i, route: "4" },
-      { pattern: /Middlesex Turnpike/i, route: "3A" },
-      { pattern: /Lexington (Road|Street)/i, route: "2A" },
-      { pattern: /Hartwell (Avenue|Ave)/i, route: "225" }
+      { pattern: /Marrett Road/i, routes: ["2A"] },
+      { pattern: /Bedford (Road|Street)/i, routes: ["62", "4", "225"] },
+      { pattern: /Concord (Turnpike|Ave)/i, routes: ["2"] },
+      { pattern: /Great Road/i, routes: ["4", "225"] },
+      { pattern: /Massachusetts (Avenue|Ave)/i, routes: ["4", "225"] },
+      { pattern: /Middlesex Turnpike/i, routes: ["3A"] },
+      { pattern: /Lexington (Road|Street)/i, routes: ["2A"] },
+      { pattern: /Hartwell (Avenue|Ave)/i, routes: ["225"] }
     ];
 
     function abbreviateStreetName(streetName) {
@@ -995,7 +1051,6 @@
         .replace(/\bTurnpike\b/gi, 'Tpk.');
     }
 
-    /* Haversine Distance Helper in Meters */
     function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1008,7 +1063,6 @@
       return R * c;
     }
 
-    /* Robust Pixel-Based Auto-Shrinker Engine */
     function autoShrinkStreetName() {
       const el = document.getElementById('street-name');
       const card = document.getElementById('location-card');
@@ -1039,7 +1093,6 @@
       return audioCtx;
     }
 
-    /* 1. Arcade Mode Transition Sounds */
     function playArcadeSound(isActivation) {
       try {
         const ctx = getAudioContext();
@@ -1070,13 +1123,11 @@
       } catch (e) {}
     }
 
-    /* 2. Dixie "General Lee" Musical Air Horn (12-Note Phrase) */
     function playDixieHorn() {
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
 
-        // Frequencies: G4, E4, C4, C4, C4, D4, E4, F4, G4, G4, G4, E4
         const dixieNotes = [
           [392.00, 0.16], [329.63, 0.16], [261.63, 0.22], [261.63, 0.12], 
           [261.63, 0.16], [293.66, 0.16], [329.63, 0.16], [349.23, 0.16], 
@@ -1110,7 +1161,6 @@
           offset += dur * 0.95;
         });
 
-        // Trigger 2x Pulsating Car Animation
         const vehicleMarker = document.getElementById('vehicle-overlay');
         if (vehicleMarker) {
           clearTimeout(vehiclePulseTimeout);
@@ -1122,7 +1172,6 @@
           }, 2600);
         }
 
-        // Flash Authentic Octagonal General Lee "01" on Telemetry Badge
         const badgeEl = document.getElementById('heading-text');
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
@@ -1145,16 +1194,15 @@
       } catch (e) {}
     }
 
-    /* 3. Galaga Dual-Laser Blaster Sound: Triple Salvo (pew-pew ... pew-pew ... pew-pew!) */
     function playGalagaLaser() {
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
 
         const salvos = [
-          [0.00, 0.09],  // Salvo 1: pew-pew
-          [0.32, 0.41],  // Salvo 2: pew-pew
-          [0.64, 0.73]   // Salvo 3: pew-pew
+          [0.00, 0.09],
+          [0.32, 0.41],
+          [0.64, 0.73]
         ];
 
         salvos.forEach(([t1, t2]) => {
@@ -1177,7 +1225,6 @@
           });
         });
 
-        // Trigger 2x Pulsating Galaga Ship Animation
         const vehicleMarker = document.getElementById('vehicle-overlay');
         if (vehicleMarker) {
           clearTimeout(vehiclePulseTimeout);
@@ -1189,26 +1236,20 @@
           }, 1150);
         }
 
-        // Flash "FIRE!" on Telemetry Overlay
         const badgeEl = document.getElementById('heading-text');
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
           badgeEl.innerText = 'FIRE!';
-          badgeEl.style.borderColor = '#ffe600';
-          badgeEl.style.color = '#ffe600';
-          badgeEl.style.boxShadow = '0 0 16px rgba(255, 230, 0, 0.85)';
+          badgeEl.classList.add('galaga-fire-active');
 
           hudBannerTimeout = setTimeout(() => {
-            badgeEl.style.borderColor = '';
-            badgeEl.style.color = '';
-            badgeEl.style.boxShadow = '';
+            badgeEl.classList.remove('galaga-fire-active');
             renderTelemetryBadge();
           }, 1150);
         }
       } catch (e) {}
     }
 
-    /* 4. "First Call" (Call to the Post) Bugle Fanfare Engine */
     function playFirstCallFanfare(onComplete) {
       try {
         const ctx = getAudioContext();
@@ -1248,7 +1289,6 @@
           offset += dur * 0.92;
         });
 
-        // Flash "PANIC!" on HUD
         const badgeEl = document.getElementById('heading-text');
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
@@ -1266,7 +1306,6 @@
       }
     }
 
-    /* GALAGA MODE TOGGLE (Option C: FIGHTER / CRUISE) */
     function toggleGalagaMode() {
       isGalagaMode = !isGalagaMode;
       const dashboard = document.getElementById('main-dashboard');
@@ -1315,32 +1354,33 @@
       }
     }
 
+    /* High-Readability Interstate Shield (46px) */
     function createInterstateSVG(num) {
       return `
         <div class="highway-shield-badge">
-          <svg width="28" height="28" viewBox="0 0 100 100">
-            <path d="M 50,4 C 65,4 88,14 96,18 C 96,55 82,82 50,96 C 18,82 4,55 4,18 C 12,14 35,4 50,4 Z" fill="#ffffff" stroke="#ffffff" stroke-width="2" />
+          <svg width="46" height="46" viewBox="0 0 100 100" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.75));">
+            <path d="M 50,4 C 65,4 88,14 96,18 C 96,55 82,82 50,96 C 18,82 4,55 4,18 C 12,14 35,4 50,4 Z" fill="#ffffff" stroke="#ffffff" stroke-width="2.5" />
             <path d="M 50,7 C 64,7 86,16 93,20 C 93,28 93,32 93,32 L 7,32 C 7,32 7,28 7,20 C 14,16 36,7 50,7 Z" fill="#cc0000" />
             <path d="M 7,32 L 93,32 C 93,54 80,80 50,93 C 20,80 7,54 7,32 Z" fill="#0033cc" />
-            <text x="50" y="73" fill="#ffffff" font-size="${num.length > 2 ? '34' : '42'}" font-weight="900" font-family="Arial, sans-serif" text-anchor="middle">${num}</text>
+            <text x="50" y="74" fill="#ffffff" font-size="${num.length > 2 ? '36' : '44'}" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" text-anchor="middle">${num}</text>
           </svg>
         </div>
       `;
     }
 
+    /* High-Readability Classic Highway Route Shield (46px) */
     function createRouteSVG(num) {
       return `
         <div class="highway-shield-badge">
-          <svg width="28" height="28" viewBox="0 0 100 100">
-            <rect x="4" y="4" width="92" height="92" rx="16" ry="16" fill="#ffffff" stroke="#000000" stroke-width="7" />
-            <rect x="9" y="9" width="82" height="82" rx="12" ry="12" fill="none" stroke="#ffffff" stroke-width="3" />
-            <text x="50" y="65" fill="#000000" font-size="${num.length > 2 ? '38' : '48'}" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle">${num}</text>
+          <svg width="46" height="46" viewBox="0 0 100 100" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.75));">
+            <rect x="4" y="4" width="92" height="92" rx="18" ry="18" fill="#ffffff" stroke="#000000" stroke-width="8" />
+            <rect x="9" y="9" width="82" height="82" rx="13" ry="13" fill="none" stroke="#ffffff" stroke-width="3.5" />
+            <text x="50" y="65" fill="#000000" font-size="${num.length > 2 ? '40' : '50'}" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" text-anchor="middle">${num}</text>
           </svg>
         </div>
       `;
     }
 
-    /* Strict Cardinal Direction Snapping for Road Names */
     function getCardinalRoadDirection(heading) {
       if (heading === null || isNaN(heading)) return '';
       const norm = (heading % 360 + 360) % 360;
@@ -1350,7 +1390,6 @@
       return 'West';
     }
 
-    /* Directional Snapping Engine for Numbered Highways */
     function getHighwayDirection(routeNumber, heading) {
       if (heading === null || isNaN(heading)) return '';
 
@@ -1384,6 +1423,27 @@
       }
     }
 
+    /* Rerender Stacked Interstates and State Routes */
+    function renderHighwayBadges() {
+      const interstateContainer = document.getElementById('interstate-badge-container');
+      if (interstateContainer) {
+        if (activeInterstateNums && activeInterstateNums.length > 0) {
+          interstateContainer.innerHTML = activeInterstateNums.map(num => createInterstateSVG(num)).join('');
+        } else {
+          interstateContainer.innerHTML = '';
+        }
+      }
+
+      const routeContainer = document.getElementById('route-badge-container');
+      if (routeContainer) {
+        if (activeRouteNums && activeRouteNums.length > 0) {
+          routeContainer.innerHTML = activeRouteNums.map(num => createRouteSVG(num)).join('');
+        } else {
+          routeContainer.innerHTML = '';
+        }
+      }
+    }
+
     /* TELEMETRY BADGE FUNCTIONS */
     function toggleTelemetryMode(event) {
       if (event) event.stopPropagation();
@@ -1395,7 +1455,7 @@
       const badgeEl = document.getElementById('heading-text');
       if (!badgeEl) return;
 
-      badgeEl.classList.remove('general-lee-active');
+      badgeEl.classList.remove('general-lee-active', 'galaga-fire-active');
       badgeEl.style.borderColor = '';
       badgeEl.style.color = '';
       badgeEl.style.boxShadow = '';
@@ -1446,19 +1506,6 @@
         }
       }
       requestWakeLock();
-    }
-
-    function setupFirstTapFullscreen() {
-      const enableAutoFullscreen = () => {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-          toggleFullScreen();
-        }
-        document.removeEventListener('touchstart', enableAutoFullscreen);
-        document.removeEventListener('click', enableAutoFullscreen);
-      };
-
-      document.addEventListener('touchstart', enableAutoFullscreen, { once: true });
-      document.addEventListener('click', enableAutoFullscreen, { once: true });
     }
 
     document.addEventListener('fullscreenchange', () => {
@@ -1749,7 +1796,6 @@
           const touch = e.changedTouches[0];
           const deltaY = touch.clientY - twoFingerStartY;
 
-          // Two fingers flicked down at least 70px in under 450ms
           if (elapsed <= 450 && deltaY >= 70) {
             playFirstCallFanfare(() => {
               window.location.href = 'disco.html';
@@ -1883,9 +1929,7 @@
         if (document.visibilityState === 'visible' && 'wakeLock' in navigator && (wakeLock === null || wakeLock.released)) {
           wakeLock = await navigator.wakeLock.request('screen');
         }
-      } catch (err) {
-        // Quietly handle non-active contexts
-      }
+      } catch (err) {}
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -1902,7 +1946,7 @@
         sun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
         cloudSun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.94 11.23a5 5 0 0 0-8.92 2.12 3.5 3.5 0 0 0 .98 6.65h8a4 4 0 0 0 .94-7.77z" stroke="#a0a0a0"/></svg>`,
         cloud: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8.5a7 7 0 0 1-1.2-13.8 8 8 0 0 1 14.8 2.3 4.5 4.5 0 0 1-.6 11.5Z"/></svg>`,
-        rain: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"/><path d="M8 13v8"/><path d="M12 15v8"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" stroke="#a0a0a0"/></svg>`,
+        rain: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"/><path d="M8 13v8"/><path d="M12 15v8"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" stroke="#a0a0a0"/></svg>`,
         thunder: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
         snow: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>`
       };
@@ -1984,66 +2028,72 @@
           const rawHwy = addr.highway || "";
           const combinedSearch = [rawRoad, rawRef, rawHwy, addr.official_name, addr.name].filter(Boolean).join(' ');
 
-          // --- 1. DUAL HIGHWAY & SHIELD IDENTIFICATION ---
-          let interstateNum = null;
-          let routeNum = null;
+          // --- 1. DUAL HIGHWAY & SHIELD IDENTIFICATION (STACKED SETS) ---
+          const detectedInterstates = new Set();
+          const detectedRoutes = new Set();
 
+          // Known Massachusetts Highway Corridors
           if (/Yankee Division/i.test(combinedSearch)) {
-            interstateNum = "95";
-            routeNum = "128";
+            detectedInterstates.add("95");
+            detectedRoutes.add("128");
           } else if (/Massachusetts Turnpike|Mass Pike/i.test(combinedSearch)) {
-            interstateNum = "90";
+            detectedInterstates.add("90");
           } else if (/Pilgrim Highway|Southeast Expressway/i.test(combinedSearch)) {
-            interstateNum = "93";
-            routeNum = "3";
+            detectedInterstates.add("93");
+            detectedRoutes.add("3");
           }
 
-          if (!interstateNum) {
-            const iMatch = combinedSearch.match(/\b(?:I-?|Interstate\s+)(\d{1,3})\b/i);
-            if (iMatch) interstateNum = iMatch[1];
+          // Extract all Interstate references
+          const interstateRegex = /\b(?:I-?|Interstate\s+)(\d{1,3})\b/gi;
+          let iMatch;
+          while ((iMatch = interstateRegex.exec(combinedSearch)) !== null) {
+            detectedInterstates.add(iMatch[1]);
           }
 
-          if (!routeNum) {
-            const rMatch = combinedSearch.match(/\b(?:US-?|Route\s?|Rt\.?\s?|MA-?|State Hwy\s?|State Route\s?)(\d+[A-Z]?)\b/i);
-            if (rMatch) {
-              routeNum = rMatch[1];
-            } else if (rawRef && /^(Rt\.\s?\d+|\d+[A-Z]?)$/i.test(rawRef.trim())) {
-              routeNum = rawRef.trim().replace(/^Rt\.\s?/i, '');
-            }
+          // Extract all Route references
+          const routeRegex = /\b(?:US-?|Route\s?|Rt\.?\s?|MA-?|State Hwy\s?|State Route\s?)(\d+[A-Z]?)\b/gi;
+          let rMatch;
+          while ((rMatch = routeRegex.exec(combinedSearch)) !== null) {
+            detectedRoutes.add(rMatch[1].toUpperCase());
           }
 
-          if (!routeNum) {
-            for (const item of massachusettsRouteConcurrency) {
-              if (item.pattern.test(rawRoad) || item.pattern.test(combinedSearch)) {
-                routeNum = item.route;
-                break;
+          if (rawRef) {
+            const refParts = rawRef.split(/[,;/|]/);
+            refParts.forEach(p => {
+              const clean = p.trim().toUpperCase();
+              const intClean = clean.replace(/^(I-?|INTERSTATE\s*)/i, '');
+              const rtClean = clean.replace(/^(RT\.?\s*|ROUTE\s*|MA-?\s*)/i, '');
+
+              if (/^\d{1,3}$/.test(intClean) && /\bI\b|INTERSTATE/i.test(clean)) {
+                detectedInterstates.add(intClean);
+              } else if (/^\d+[A-Z]?$/.test(rtClean)) {
+                detectedRoutes.add(rtClean);
               }
+            });
+          }
+
+          // Check Concurrency Dictionary
+          for (const item of massachusettsRouteConcurrency) {
+            if (item.pattern.test(rawRoad) || item.pattern.test(combinedSearch)) {
+              item.routes.forEach(r => detectedRoutes.add(r));
             }
           }
 
-          const interstateContainer = document.getElementById('interstate-badge-container');
-          if (interstateNum) {
-            interstateContainer.innerHTML = createInterstateSVG(interstateNum);
-          } else {
-            interstateContainer.innerHTML = '';
-          }
+          activeInterstateNums = Array.from(detectedInterstates);
+          activeRouteNums = Array.from(detectedRoutes);
 
-          const routeContainer = document.getElementById('route-badge-container');
-          if (routeNum) {
-            routeContainer.innerHTML = createRouteSVG(routeNum);
-          } else {
-            routeContainer.innerHTML = '';
-          }
+          renderHighwayBadges();
 
           // --- 2. STREET NAME FORMATTING & LOCAL SURFACE DECOUPLING ---
           let displayRoadName = rawRoad;
-          const isInterstateFreeway = interstateNum !== null || /^(I-\d+|Massachusetts Turnpike|Mass Pike)/i.test(displayRoadName);
+          const isInterstateFreeway = activeInterstateNums.length > 0 || /^(I-\d+|Massachusetts Turnpike|Mass Pike)/i.test(displayRoadName);
 
           if (isInterstateFreeway) {
-            if (interstateNum) {
-              displayRoadName = `I-${interstateNum}`;
+            if (activeInterstateNums.length > 0) {
+              const primaryInt = activeInterstateNums[0];
+              displayRoadName = `I-${primaryInt}`;
               if (currentHeading !== null && !isNaN(currentHeading)) {
-                displayRoadName = `${displayRoadName} ${getHighwayDirection(interstateNum, currentHeading)}`;
+                displayRoadName = `${displayRoadName} ${getHighwayDirection(primaryInt, currentHeading)}`;
               }
             } else if (/Massachusetts Turnpike|Mass Pike/i.test(displayRoadName)) {
               displayRoadName = "Mass Pike";
@@ -2165,6 +2215,7 @@
       if (heading !== null && !isNaN(heading)) {
         currentHeading = heading;
         renderTelemetryBadge();
+        renderHighwayBadges();
 
         const vehicleSvg = document.getElementById('vehicle-overlay-svg');
         if (vehicleSvg) {
@@ -2186,7 +2237,6 @@
       }
     }
 
-    /* Native Pivot Camera Update */
     function updateMapCamera(lngLat) {
       if (!map) return;
 
@@ -2235,6 +2285,7 @@
               updateHeading(heading);
             } else {
               renderTelemetryBadge();
+              renderHighwayBadges();
             }
 
             rawSpeedMps = speed;
@@ -2269,7 +2320,6 @@
       startTracking();
       requestWakeLock();
       setupInteractions();
-      setupFirstTapFullscreen();
     };
   </script>
 
