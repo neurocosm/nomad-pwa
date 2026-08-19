@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>NOMAD: RoadTrip - GPS Setup Guide</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      background-color: #0b0c10;
+      color: #e0e6ed;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 16px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1f2937;
+      margin-bottom: 24px;
+    }
+
+    .header-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .header-tagline {
+      font-size: 0.85rem;
+      color: #00d4ff;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .btn-back {
+      background: #1f2937;
+      color: #4cd964;
+      border: 1px solid #374151;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-back:active {
+      transform: scale(0.94);
+      background: #374151;
+    }
+
+    /* Notice Box */
+    .notice-box {
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid #00d4ff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #d1f4ff;
+    }
+
+    /* Setup Cards */
+    .setup-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .os-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+    }
+
+    .badge-apple { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+    .badge-android { background: rgba(76, 217, 100, 0.15); color: #4cd964; }
+
+    .step-list {
+      list-style: none;
+      counter-reset: step-counter;
+    }
+
+    .step-item {
+      position: relative;
+      padding-left: 36px;
+      margin-bottom: 14px;
+      font-size: 0.92rem;
+      color: #c9d1d9;
+    }
+
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-item::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      background: #21262d;
+      border: 1px solid #4cd964;
+      color: #4cd964;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .step-item strong {
+      color: #ffffff;
+    }
+
+    .sub-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #00d4ff;
+      margin: 12px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 0.85rem;
+      color: #6e7681;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <div class="header-title">NOMAD: RoadTrip</div>
+        <div class="header-tagline">GPS Permission Guide</div>
+      </div>
+      <a href="features.html" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        FEATURES
+      </a>
+    </div>
+
+    <div class="notice-box">
+      🛰️ <strong>Real-Time Tracking:</strong> NOMAD requires hardware GPS access to calculate live speed, bearing heading, elevation, and concurrent highway routing. High accuracy / precise mode ensures zero telemetry lag.
+    </div>
+
+    <!-- iOS Section -->
+    <div class="setup-card">
+      <div class="card-title">
+        <span class="os-badge badge-apple">🍎</span>
+        iOS (iPhone &amp; iPad / Safari)
+      </div>
+
+      <div class="sub-section-title">1. System-Level Location Services</div>
+      <ul class="step-list">
+        <li class="step-item">Open your iPhone <strong>Settings</strong> app.</li>
+        <li class="step-item">Scroll down and tap <strong>Privacy &amp; Security</strong> &rarr; <strong>Location Services</strong>.</li>
+        <li class="step-item">Ensure the top <strong>Location Services</strong> toggle is turned <strong>ON</strong> (green).</li>
+        <li class="step-item">Scroll down to <strong>Safari Websites</strong> (or Chrome if using Chrome on iOS).</li>
+        <li class="step-item">Set to <strong>While Using the App</strong> and toggle <strong>Precise Location</strong> to <strong>ON</strong>.</li>
+      </ul>
+
+      <div class="sub-section-title" style="margin-top: 18px;">2. Safari In-Browser Site Setting</div>
+      <ul class="step-list">
+        <li class="step-item">While on NOMAD in Safari, tap the <strong>aA</strong> icon in the address bar.</li>
+        <li class="step-item">Tap <strong>Website Settings</strong> &rarr; <strong>Location</strong> &rarr; select <strong>Allow</strong>.</li>
+      </ul>
+    </div>
+
+    <!-- Android Section -->
+    <div class="setup-card">
+      <div class="card-title">
+        <span class="os-badge badge-android">🤖</span>
+        Android (Google Chrome)
+      </div>
+
+      <div class="sub-section-title">1. System GPS Permission</div>
+      <ul class="step-list">
+        <li class="step-item">Open the phone <strong>Settings</strong> app.</li>
+        <li class="step-item">Tap <strong>Location</strong> and make sure <strong>Use location</strong> is toggled <strong>ON</strong>.</li>
+        <li class="step-item">Tap <strong>App permissions</strong> &rarr; select <strong>Chrome</strong>.</li>
+        <li class="step-item">Choose <strong>Allow only while using the app</strong> and enable <strong>Use precise location</strong>.</li>
+      </ul>
+
+      <div class="sub-section-title" style="margin-top: 18px;">2. Chrome Site Permission</div>
+      <ul class="step-list">
+        <li class="step-item">While on NOMAD in Chrome, tap the <strong>Tune / Padlock icon</strong> to the left of the URL.</li>
+        <li class="step-item">Tap <strong>Permissions</strong> &rarr; <strong>Location</strong> &rarr; select <strong>Allow</strong>.</li>
+        <li class="step-item">Refresh the tab to establish real-time GPS lock.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      NOMAD: RoadTrip Navigation Dashboard &bull; BostonyFX
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOMAD - PWA Icon Generator</title>
+  <style>
+    body {
+      background: #0b0c10;
+      color: #e0e6ed;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px;
+      margin: 0;
+    }
+    h1 { margin-bottom: 6px; color: #ffffff; }
+    p { color: #8b949e; margin-bottom: 24px; text-align: center; max-width: 480px; }
+    canvas {
+      border-radius: 24px;
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.25);
+      margin-bottom: 24px;
+      background: #000000;
+    }
+    .btn {
+      background: #00d4ff;
+      color: #000000;
+      font-weight: 900;
+      font-size: 1rem;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(0, 212, 255, 0.6);
+      transition: transform 0.1s ease;
+    }
+    .btn:active { transform: scale(0.95); }
+    .status { margin-top: 14px; font-size: 0.85rem; color: #4cd964; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <h1>NOMAD Icon Engine</h1>
+  <p>Renders high-res, safe-zone compliant PWA icons with neon telemetry styling.</p>
+
+  <canvas id="preview" width="300" height="300"></canvas>
+  <button class="btn" onclick="generateAndDownloadAll()">Download All 5 PWA Icons</button>
+  <div class="status" id="status"></div>
+
+  <script>
+    const SIZES = [
+      { name: 'icon-192.png', size: 192, maskable: false },
+      { name: 'icon-512.png', size: 512, maskable: false },
+      { name: 'icon-maskable-192.png', size: 192, maskable: true },
+      { name: 'icon-maskable-512.png', size: 512, maskable: true },
+      { name: 'apple-touch-icon.png', size: 180, maskable: false }
+    ];
+
+    function drawNomadIcon(ctx, size) {
+      const c = size / 2;
+      
+      // 1. Background
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, size, size);
+
+      // 2. Concentric Radar Rings
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.15)';
+      ctx.lineWidth = size * 0.015;
+      ctx.beginPath();
+      ctx.arc(c, c - size * 0.04, size * 0.38, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+      ctx.beginPath();
+      ctx.arc(c, c - size * 0.04, size * 0.26, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3. Navigation Chevron (Pointing NE / Forward)
+      ctx.save();
+      ctx.translate(c, c - size * 0.04);
+      ctx.rotate(-Math.PI / 4); // 45 deg tilt
+
+      const s = size * 0.42;
+
+      // Outer glow
+      ctx.shadowColor = '#00d4ff';
+      ctx.shadowBlur = size * 0.06;
+
+      // Left Wing (Cyan)
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.6);
+      ctx.lineTo(-s * 0.45, s * 0.5);
+      ctx.lineTo(0, s * 0.2);
+      ctx.closePath();
+      ctx.fillStyle = '#00d4ff';
+      ctx.fill();
+
+      // Right Wing (Racing Orange)
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.6);
+      ctx.lineTo(s * 0.45, s * 0.5);
+      ctx.lineTo(0, s * 0.2);
+      ctx.closePath();
+      ctx.fillStyle = '#ff5500';
+      ctx.fill();
+
+      // Center Ridge
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = size * 0.015;
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.6);
+      ctx.lineTo(0, s * 0.2);
+      ctx.stroke();
+
+      ctx.restore();
+
+      // 4. "NOMAD" High-Contrast Typography
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = size * 0.04;
+      ctx.font = `900 ${Math.floor(size * 0.14)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.letterSpacing = `${size * 0.01}px`;
+      ctx.fillText('NOMAD', c, size * 0.86);
+
+      // HUD Green Accents on typography sides
+      ctx.fillStyle = '#4cd964';
+      ctx.fillRect(c - size * 0.32, size * 0.845, size * 0.04, size * 0.02);
+      ctx.fillRect(c + size * 0.28, size * 0.845, size * 0.04, size * 0.02);
+    }
+
+    // Render Preview
+    const prevCanvas = document.getElementById('preview');
+    drawNomadIcon(prevCanvas.getContext('2d'), 300);
+
+    function downloadCanvas(canvas, filename) {
+      const a = document.createElement('a');
+      a.download = filename;
+      a.href = canvas.toDataURL('image/png');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function generateAndDownloadAll() {
+      const status = document.getElementById('status');
+      status.innerText = 'Exporting icons...';
+
+      SIZES.forEach((item, index) => {
+        setTimeout(() => {
+          const offscreen = document.createElement('canvas');
+          offscreen.width = item.size;
+          offscreen.height = item.size;
+          const ctx = offscreen.getContext('2d');
+          drawNomadIcon(ctx, item.size);
+          downloadCanvas(offscreen, item.name);
+
+          if (index === SIZES.length - 1) {
+            status.innerText = '✅ All 5 icons downloaded! Place them inside the /icons folder.';
+          }
+        }, index * 250);
+      });
+    }
+  </script>
+</body>
+</html>
