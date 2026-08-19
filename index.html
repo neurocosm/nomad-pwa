@@ -690,20 +690,21 @@
       font-size: 0.95rem;
       color: #cccccc;
       line-height: 1.4;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
+    /* Modal Navigation Buttons */
     .modal-link-btn {
       display: inline-block;
       width: 100%;
-      padding: 12px;
+      padding: 11px;
       background-color: #007aff;
       color: #ffffff;
       text-decoration: none;
       border-radius: 10px;
-      font-size: 1.05rem;
+      font-size: 1.0rem;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       transition: background-color 0.15s ease;
     }
 
@@ -711,20 +712,43 @@
       background-color: #0056b3;
     }
 
+    /* Visualizer Arcade Hub Button */
+    .modal-vis-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 11px;
+      background: linear-gradient(90deg, rgba(255, 0, 127, 0.25), rgba(0, 212, 255, 0.25));
+      border: 1.5px solid #ff007f;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 1.0rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      box-shadow: 0 0 12px rgba(255, 0, 127, 0.35);
+      transition: transform 0.1s ease, background 0.15s;
+    }
+
+    .modal-vis-btn:active {
+      transform: scale(0.97);
+      background: rgba(255, 0, 127, 0.4);
+    }
+
     /* Terminal GEEK STATS Button */
     .modal-stats-btn {
       display: inline-block;
       width: 100%;
-      padding: 12px;
-      background-color: rgba(51, 255, 51, 0.15);
+      padding: 11px;
+      background-color: rgba(51, 255, 51, 0.12);
       border: 1.5px solid #33ff33;
       color: #33ff33;
       text-decoration: none;
       border-radius: 10px;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 900;
       margin-bottom: 12px;
-      box-shadow: 0 0 10px rgba(51, 255, 51, 0.25);
+      box-shadow: 0 0 10px rgba(51, 255, 51, 0.2);
       transition: background-color 0.15s ease, transform 0.1s ease;
       font-family: "Courier New", Courier, monospace;
     }
@@ -907,7 +931,10 @@
         Real-time telemetry, GPS tracking, and heads-up navigation dashboard.
       </div>
       
-      <!-- GEEK STATS Terminal Diagnostics Link -->
+      <!-- VISUALIZER ARCADE LINK -->
+      <a href="visualizer.html" class="modal-vis-btn">✨ VISUALIZER ARCADE ↗</a>
+
+      <!-- GEEK STATS TERMINAL LINK -->
       <a href="geek-stats.html" class="modal-stats-btn">&gt; GEEK STATS (VT220) _</a>
 
       <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer" class="modal-link-btn">Visit Website</a>
@@ -1747,7 +1774,7 @@
         }
       });
 
-      // 5. Two-Finger Swipe Down Gesture: Bugle Fanfare -> Engage Panic Mode!
+      // 5. Two-Finger Swipe Down Gesture: Bugle Fanfare -> Engage Visualizer Arcade!
       const mapCard = document.getElementById('map-card');
       let twoFingerStartY = 0;
       let twoFingerStartTime = 0;
@@ -1771,7 +1798,7 @@
 
           if (elapsed <= 450 && deltaY >= 70) {
             playFirstCallFanfare(() => {
-              window.location.href = 'disco.html';
+              window.location.href = 'visualizer.html';
             });
           }
           isTwoFingerGesture = false;
