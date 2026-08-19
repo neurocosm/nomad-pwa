@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>NOMAD // VISUALIZER ARCADE</title>
+
+  <!-- PWA & Mobile Display Metadata -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0d0d12" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: #0d0d12;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top Nav Bar */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s ease, background-color 0.15s;
+    }
+
+    .nav-btn:active {
+      transform: scale(0.94);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .hub-title {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #00d4ff;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+
+    /* Hero Header */
+    .hero-header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .hero-heading {
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #ff007f, #00d4ff, #ffe600);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .hero-sub {
+      font-size: 0.85rem;
+      color: #888899;
+      font-weight: 600;
+    }
+
+    /* Visualizer Cards List */
+    .cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .vis-card {
+      background: #171720;
+      border: 1.5px solid #282836;
+      border-radius: 16px;
+      padding: 16px 18px;
+      text-decoration: none;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+      transition: transform 0.12s ease, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .vis-card:active {
+      transform: scale(0.97);
+    }
+
+    /* Card Themes */
+    .vis-card.disco-theme:active {
+      border-color: #ff007f;
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+    }
+
+    .vis-card.festival-theme:active {
+      border-color: #00ffff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    }
+
+    .vis-card.disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    .vis-card.disabled:active {
+      transform: none;
+    }
+
+    .vis-icon-wrap {
+      font-size: 2.4rem;
+      line-height: 1;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    .vis-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .vis-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+    }
+
+    .vis-desc {
+      font-size: 0.8rem;
+      color: #aaaaaa;
+      font-weight: 500;
+      line-height: 1.25;
+    }
+
+    .vis-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .disco-theme .vis-action { color: #ff007f; border: 1px solid rgba(255, 0, 127, 0.4); }
+    .festival-theme .vis-action { color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.4); }
+    .disabled .vis-action { color: #777788; border: 1px solid rgba(255, 255, 255, 0.1); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Top Navigation -->
+    <div class="top-nav">
+      <a href="index.html" class="nav-btn">&lt; RETURN TO MAP</a>
+      <div class="hub-title">VISUALIZER ARCADE</div>
+    </div>
+
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <div class="hero-heading">SELECT YOUR VIBE</div>
+      <div class="hero-sub">Audio-reactive light shows &amp; cockpit visualizers</div>
+    </div>
+
+    <!-- Cards List -->
+    <div class="cards-grid">
+      
+      <!-- 1. Panic Disco -->
+      <a href="disco.html" class="vis-card disco-theme">
+        <div class="vis-icon-wrap">🪩</div>
+        <div class="vis-info">
+          <div class="vis-title">PANIC DISCO</div>
+          <div class="vis-desc">High-energy party strobe &amp; rotating laser beams.</div>
+        </div>
+        <div class="vis-action">LAUNCH ↗</div>
+      </a>
+
+      <!-- 2. Festival of Joy -->
+      <a href="festival.html" class="vis-card festival-theme">
+        <div class="vis-icon-wrap">🍄</div>
+        <div class="vis-info">
+          <div class="vis-title">FESTIVAL OF JOY</div>
+          <div class="vis-desc">Psychedelic kaleidoscope &amp; mic-reactive cool mushroom.</div>
+        </div>
+        <div class="vis-action">LAUNCH ↗</div>
+      </a>
+
+      <!-- 3. The Slam Dance (Coming Soon) -->
+      <div class="vis-card disabled">
+        <div class="vis-icon-wrap">⚡</div>
+        <div class="vis-info">
+          <div class="vis-title">THE SLAM DANCE</div>
+          <div class="vis-desc">High-contrast punk rock mosh pit visualizer.</div>
+        </div>
+        <div class="vis-action">SOON</div>
+      </div>
+
+      <!-- 4. Holiday Specials (Coming Soon) -->
+      <div class="vis-card disabled">
+        <div class="vis-icon-wrap">🎃</div>
+        <div class="vis-info">
+          <div class="vis-title">HOLIDAY PRESETS</div>
+          <div class="vis-desc">Halloween, Christmas &amp; seasonal reactive themes.</div>
+        </div>
+        <div class="vis-action">SOON</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Screen Wake Lock Engine -->
+  <script>
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+    requestWakeLock();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+  </script>
+</body>
+</html>
