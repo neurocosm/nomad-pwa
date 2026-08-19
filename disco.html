@@ -34,68 +34,6 @@
       z-index: 1;
     }
 
-    .start-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 20;
-      background: rgba(5, 0, 12, 0.88);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px;
-      backdrop-filter: blur(8px);
-      transition: opacity 0.3s ease;
-    }
-
-    .start-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .disco-title {
-      font-size: clamp(1.8rem, 6vw, 2.5rem);
-      font-weight: 900;
-      letter-spacing: 3px;
-      color: #ff007f;
-      text-shadow: 0 0 15px #ff007f, 0 0 30px #00f0ff;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-    }
-
-    .disco-subtext {
-      font-size: 1.05rem;
-      color: #00f0ff;
-      font-weight: 600;
-      margin-bottom: 28px;
-      max-width: 320px;
-      line-height: 1.4;
-    }
-
-    .btn-start-mic {
-      background: #ff007f;
-      color: #ffffff;
-      font-size: 1.2rem;
-      font-weight: 800;
-      padding: 16px 36px;
-      border-radius: 40px;
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 20px rgba(255, 0, 127, 0.8), 0 0 40px rgba(0, 240, 255, 0.4);
-      cursor: pointer;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      transition: transform 0.15s ease, background 0.15s ease;
-    }
-
-    .btn-start-mic:active {
-      transform: scale(0.94);
-      background: #d6006b;
-    }
-
     .top-hud-bar {
       position: absolute;
       top: max(12px, env(safe-area-inset-top));
@@ -159,12 +97,6 @@
 <body>
 
   <canvas id="visualizer-canvas"></canvas>
-
-  <div class="start-overlay" id="start-overlay">
-    <div class="disco-title">PANIC MODE</div>
-    <div class="disco-subtext">Tap below to activate real-time audio reactivity.</div>
-    <button class="btn-start-mic" onclick="startAudioReactiveEngine()">ENGAGE DISCO</button>
-  </div>
 
   <div class="top-hud-bar">
     <div class="hud-chip">DISCO ACTIVE</div>
@@ -245,16 +177,27 @@
         sourceNode = audioContext.createMediaStreamSource(stream);
         sourceNode.connect(analyser);
 
-        document.getElementById('start-overlay').classList.add('hidden');
         isRunning = true;
         renderVisualizer();
       } catch (err) {
-        console.warn("Microphone access fallback:", err);
-        document.getElementById('start-overlay').classList.add('hidden');
+        console.warn("Microphone auto-start ambient fallback:", err);
         isRunning = true;
         renderSyntheticVisualizer();
       }
     }
+
+    // Auto-start on page load without click-step
+    window.addEventListener('load', () => {
+      startAudioReactiveEngine();
+      requestWakeLock();
+    });
+
+    // Fallback user interaction listener for strict browser autoplay policies
+    window.addEventListener('pointerdown', () => {
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }, { once: true });
 
     function renderVisualizer() {
       if (!isRunning) return;
@@ -327,7 +270,7 @@
       ctx.translate(centerX, centerY);
       ctx.rotate(rotationAngle);
 
-      // Clamped Radial Beams (never exceed screen bounds)
+      // Clamped Radial Beams
       const maxAllowedBeam = (Math.min(width, height) * 0.38);
       const numBeams = 16;
       for (let b = 0; b < numBeams; b++) {
@@ -378,7 +321,7 @@
 
       ctx.restore();
 
-      // --- 4. GIANT STAR-EYED EMOJI (🤩) IN CENTER OF CIRCLES ---
+      // --- 4. GIANT STAR-EYED EMOJI (🤩) IN CENTER ---
       const now = Date.now();
       if (bassRatio > 0.68 && (now - lastFlipTime > 650)) {
         const direction = Math.random() > 0.5 ? 1 : -1;
@@ -456,7 +399,6 @@
 
       ctx.restore();
 
-      // Synthetic Emoji Fallback
       emojiAngle += 0.03;
       const baseFontSize = Math.min(width, height) * 0.18;
       const emojiScale = 1.0 + (synthBass * 0.4);
@@ -486,6 +428,18 @@
       }
       window.location.href = 'index.html';
     }
+
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
   </script>
 </body>
 </html>
