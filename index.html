@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
   
-  <title>NOMAD: RoadTrip PWA</title>
+  <title>NOMAD: RoadTrip</title>
 
   <!-- Web App Manifest & Mobile Display Metadata -->
   <meta name="mobile-web-app-capable" content="yes" />
@@ -222,7 +222,7 @@
       animation: galagaFireStrobe 1.15s ease-in-out forwards !important;
     }
 
-    /* Enlarged Compass Overlay (64px x 64px) */
+    /* Compass Overlay (64px x 64px) */
     .map-overlay-compass {
       position: absolute;
       top: 8px;
@@ -274,32 +274,28 @@
       transform-origin: center center;
     }
 
-    /* Lower-Left: Stacked Vertical Interstate Shields */
+    /* Lower-Left: Interstate Shield Container */
     .map-overlay-interstate {
       position: absolute;
       bottom: 2%;
       left: 8px;
       z-index: 10;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
       background: transparent;
       border: none;
     }
 
-    /* Lower-Right: Stacked Vertical Classic Route Badges */
+    /* Lower-Right: Classic Route Shield Container */
     .map-overlay-route {
       position: absolute;
       bottom: 2%;
       right: 8px;
       z-index: 10;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
       background: transparent;
       border: none;
     }
@@ -371,17 +367,17 @@
       transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.2s ease, width 0.2s ease, height 0.2s ease;
     }
 
-    /* GALAXIAN FIGHTER SCALING */
+    /* GALAXIAN FIGHTER SCALING (48px) */
     .dashboard.galaga-theme .vehicle-overlay-marker {
-      width: 54px;
-      height: 54px;
-      margin-left: -27px;
-      margin-top: -27px;
+      width: 52px;
+      height: 52px;
+      margin-left: -26px;
+      margin-top: -26px;
     }
 
     .dashboard.galaga-theme #vehicle-overlay-svg {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
     }
 
     /* DYNAMIC PULSATING ENGINES */
@@ -651,7 +647,6 @@
       transform: scale(1);
     }
 
-    /* Hyperlinked Modal Title & Guide Subtext */
     .modal-title-link {
       text-decoration: none;
       display: inline-block;
@@ -841,10 +836,10 @@
         </div>
       </div>
 
-      <!-- Lower-Left Overlay: Stacked Interstate Badges -->
+      <!-- Lower-Left Overlay: Interstate Badge -->
       <div class="map-overlay-interstate" id="interstate-badge-container"></div>
 
-      <!-- Lower-Right Overlay: Stacked Classic Route Badges -->
+      <!-- Lower-Right Overlay: Classic Route Badge -->
       <div class="map-overlay-route" id="route-badge-container"></div>
 
       <!-- Dedicated Independent Vehicle Overlay Marker (Tap: Map Theme | Hold: Horn / Laser) -->
@@ -900,7 +895,7 @@
     </div>
   </div>
 
-  <!-- BRANDING ABOUT MODAL OVERLAY (With GEEK STATS LINK) -->
+  <!-- BRANDING ABOUT MODAL OVERLAY -->
   <div class="modal-overlay" id="about-modal" onclick="closeAboutModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <a href="features.html" class="modal-title-link" title="View Features & Guide">
@@ -969,10 +964,6 @@
     let lastGeocodeTime = 0;
     let wakeLock = null;
 
-    // Active Route Concurrency State
-    let activeInterstateNums = [];
-    let activeRouteNums = [];
-
     // Galaga Arcade Easter Egg State
     let isGalagaMode = false;
     let audioCtx = null;
@@ -1025,14 +1016,13 @@
 
     /* Massachusetts Surface Road to Route Concurrency Mapping */
     const massachusettsRouteConcurrency = [
-      { pattern: /Marrett Road/i, routes: ["2A"] },
-      { pattern: /Bedford (Road|Street)/i, routes: ["62", "4", "225"] },
-      { pattern: /Concord (Turnpike|Ave)/i, routes: ["2"] },
-      { pattern: /Great Road/i, routes: ["4", "225"] },
-      { pattern: /Massachusetts (Avenue|Ave)/i, routes: ["4", "225"] },
-      { pattern: /Middlesex Turnpike/i, routes: ["3A"] },
-      { pattern: /Lexington (Road|Street)/i, routes: ["2A"] },
-      { pattern: /Hartwell (Avenue|Ave)/i, routes: ["225"] }
+      { pattern: /Marrett Road/i, route: "2A" },
+      { pattern: /Bedford (Road|Street)/i, route: "62" },
+      { pattern: /Concord (Turnpike|Ave)/i, route: "2" },
+      { pattern: /Great Road/i, route: "4" },
+      { pattern: /Middlesex Turnpike/i, route: "3A" },
+      { pattern: /Lexington (Road|Street)/i, route: "2A" },
+      { pattern: /Hartwell (Avenue|Ave)/i, route: "225" }
     ];
 
     function abbreviateStreetName(streetName) {
@@ -1316,18 +1306,22 @@
 
       if (isGalagaMode) {
         dashboard.classList.add('galaga-theme');
-        vehicleSvg.setAttribute('viewBox', '0 0 24 24');
+        vehicleSvg.setAttribute('viewBox', '0 0 32 32');
         vehicleSvg.removeAttribute('fill');
         vehicleSvg.removeAttribute('stroke');
-        vehicleSvg.style.filter = 'drop-shadow(0 0 8px #00d4ff)';
+        vehicleSvg.style.filter = 'drop-shadow(0 0 10px #00d4ff)';
         vehicleSvg.innerHTML = `
-          <polygon points="12,2 14,9 14,19 10,19 10,9" fill="#ffffff" stroke="#000" stroke-width="0.5"/>
-          <polygon points="12,2 13.5,7 10.5,7" fill="#ff0044"/>
-          <polygon points="10,9 10,18 2,19 5,13" fill="#00d4ff"/>
-          <polygon points="2,19 5,13 2,12" fill="#ff0044"/>
-          <polygon points="14,9 14,18 22,19 19,13" fill="#00d4ff"/>
-          <polygon points="22,19 19,13 22,12" fill="#ff0044"/>
-          <rect x="10.5" y="19" width="3" height="3" fill="#ffcc00"/>
+          <!-- Center Fuselage -->
+          <polygon points="16,1 19,10 19,26 13,26 13,10" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
+          <polygon points="16,1 18,8 14,8" fill="#ff0044"/>
+          <!-- Left Wing -->
+          <polygon points="13,10 13,25 2,26 6,17" fill="#00d4ff"/>
+          <polygon points="2,26 6,17 2,15" fill="#ff0044"/>
+          <!-- Right Wing -->
+          <polygon points="19,10 19,25 30,26 26,17" fill="#00d4ff"/>
+          <polygon points="30,26 26,17 30,15" fill="#ff0044"/>
+          <!-- Engine Flame Accent -->
+          <rect x="14" y="26" width="4" height="4" fill="#ffcc00"/>
         `;
 
         if (badgeEl) {
@@ -1420,27 +1414,6 @@
         return (heading >= 270 || heading < 90) ? 'North' : 'South';
       } else {
         return (heading >= 0 && heading < 180) ? 'East' : 'West';
-      }
-    }
-
-    /* Rerender Stacked Interstates and State Routes */
-    function renderHighwayBadges() {
-      const interstateContainer = document.getElementById('interstate-badge-container');
-      if (interstateContainer) {
-        if (activeInterstateNums && activeInterstateNums.length > 0) {
-          interstateContainer.innerHTML = activeInterstateNums.map(num => createInterstateSVG(num)).join('');
-        } else {
-          interstateContainer.innerHTML = '';
-        }
-      }
-
-      const routeContainer = document.getElementById('route-badge-container');
-      if (routeContainer) {
-        if (activeRouteNums && activeRouteNums.length > 0) {
-          routeContainer.innerHTML = activeRouteNums.map(num => createRouteSVG(num)).join('');
-        } else {
-          routeContainer.innerHTML = '';
-        }
       }
     }
 
@@ -2028,72 +2001,66 @@
           const rawHwy = addr.highway || "";
           const combinedSearch = [rawRoad, rawRef, rawHwy, addr.official_name, addr.name].filter(Boolean).join(' ');
 
-          // --- 1. DUAL HIGHWAY & SHIELD IDENTIFICATION (STACKED SETS) ---
-          const detectedInterstates = new Set();
-          const detectedRoutes = new Set();
+          // --- 1. HIGHWAY & SHIELD IDENTIFICATION ---
+          let interstateNum = null;
+          let routeNum = null;
 
-          // Known Massachusetts Highway Corridors
           if (/Yankee Division/i.test(combinedSearch)) {
-            detectedInterstates.add("95");
-            detectedRoutes.add("128");
+            interstateNum = "95";
+            routeNum = "128";
           } else if (/Massachusetts Turnpike|Mass Pike/i.test(combinedSearch)) {
-            detectedInterstates.add("90");
+            interstateNum = "90";
           } else if (/Pilgrim Highway|Southeast Expressway/i.test(combinedSearch)) {
-            detectedInterstates.add("93");
-            detectedRoutes.add("3");
+            interstateNum = "93";
+            routeNum = "3";
           }
 
-          // Extract all Interstate references
-          const interstateRegex = /\b(?:I-?|Interstate\s+)(\d{1,3})\b/gi;
-          let iMatch;
-          while ((iMatch = interstateRegex.exec(combinedSearch)) !== null) {
-            detectedInterstates.add(iMatch[1]);
+          if (!interstateNum) {
+            const iMatch = combinedSearch.match(/\b(?:I-?|Interstate\s+)(\d{1,3})\b/i);
+            if (iMatch) interstateNum = iMatch[1];
           }
 
-          // Extract all Route references
-          const routeRegex = /\b(?:US-?|Route\s?|Rt\.?\s?|MA-?|State Hwy\s?|State Route\s?)(\d+[A-Z]?)\b/gi;
-          let rMatch;
-          while ((rMatch = routeRegex.exec(combinedSearch)) !== null) {
-            detectedRoutes.add(rMatch[1].toUpperCase());
-          }
-
-          if (rawRef) {
-            const refParts = rawRef.split(/[,;/|]/);
-            refParts.forEach(p => {
-              const clean = p.trim().toUpperCase();
-              const intClean = clean.replace(/^(I-?|INTERSTATE\s*)/i, '');
-              const rtClean = clean.replace(/^(RT\.?\s*|ROUTE\s*|MA-?\s*)/i, '');
-
-              if (/^\d{1,3}$/.test(intClean) && /\bI\b|INTERSTATE/i.test(clean)) {
-                detectedInterstates.add(intClean);
-              } else if (/^\d+[A-Z]?$/.test(rtClean)) {
-                detectedRoutes.add(rtClean);
-              }
-            });
-          }
-
-          // Check Concurrency Dictionary
-          for (const item of massachusettsRouteConcurrency) {
-            if (item.pattern.test(rawRoad) || item.pattern.test(combinedSearch)) {
-              item.routes.forEach(r => detectedRoutes.add(r));
+          if (!routeNum) {
+            const rMatch = combinedSearch.match(/\b(?:US-?|Route\s?|Rt\.?\s?|MA-?|State Hwy\s?|State Route\s?)(\d+[A-Z]?)\b/i);
+            if (rMatch) {
+              routeNum = rMatch[1];
+            } else if (rawRef && /^(Rt\.\s?\d+|\d+[A-Z]?)$/i.test(rawRef.trim())) {
+              routeNum = rawRef.trim().replace(/^Rt\.\s?/i, '');
             }
           }
 
-          activeInterstateNums = Array.from(detectedInterstates);
-          activeRouteNums = Array.from(detectedRoutes);
+          if (!routeNum) {
+            for (const item of massachusettsRouteConcurrency) {
+              if (item.pattern.test(rawRoad) || item.pattern.test(combinedSearch)) {
+                routeNum = item.route;
+                break;
+              }
+            }
+          }
 
-          renderHighwayBadges();
+          const interstateContainer = document.getElementById('interstate-badge-container');
+          if (interstateNum) {
+            interstateContainer.innerHTML = createInterstateSVG(interstateNum);
+          } else {
+            interstateContainer.innerHTML = '';
+          }
+
+          const routeContainer = document.getElementById('route-badge-container');
+          if (routeNum) {
+            routeContainer.innerHTML = createRouteSVG(routeNum);
+          } else {
+            routeContainer.innerHTML = '';
+          }
 
           // --- 2. STREET NAME FORMATTING & LOCAL SURFACE DECOUPLING ---
           let displayRoadName = rawRoad;
-          const isInterstateFreeway = activeInterstateNums.length > 0 || /^(I-\d+|Massachusetts Turnpike|Mass Pike)/i.test(displayRoadName);
+          const isInterstateFreeway = interstateNum !== null || /^(I-\d+|Massachusetts Turnpike|Mass Pike)/i.test(displayRoadName);
 
           if (isInterstateFreeway) {
-            if (activeInterstateNums.length > 0) {
-              const primaryInt = activeInterstateNums[0];
-              displayRoadName = `I-${primaryInt}`;
+            if (interstateNum) {
+              displayRoadName = `I-${interstateNum}`;
               if (currentHeading !== null && !isNaN(currentHeading)) {
-                displayRoadName = `${displayRoadName} ${getHighwayDirection(primaryInt, currentHeading)}`;
+                displayRoadName = `${displayRoadName} ${getHighwayDirection(interstateNum, currentHeading)}`;
               }
             } else if (/Massachusetts Turnpike|Mass Pike/i.test(displayRoadName)) {
               displayRoadName = "Mass Pike";
@@ -2215,7 +2182,6 @@
       if (heading !== null && !isNaN(heading)) {
         currentHeading = heading;
         renderTelemetryBadge();
-        renderHighwayBadges();
 
         const vehicleSvg = document.getElementById('vehicle-overlay-svg');
         if (vehicleSvg) {
@@ -2285,7 +2251,6 @@
               updateHeading(heading);
             } else {
               renderTelemetryBadge();
-              renderHighwayBadges();
             }
 
             rawSpeedMps = speed;
