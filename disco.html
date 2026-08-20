@@ -6,6 +6,12 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>Panic: At The Disco</title>
 
+  <!-- PWA & Mobile Display Metadata -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#05000c" />
+
   <style>
     * {
       box-sizing: border-box;
@@ -34,6 +40,7 @@
       z-index: 1;
     }
 
+    /* Top Navigation / HUD Bar */
     .top-hud-bar {
       position: absolute;
       top: max(12px, env(safe-area-inset-top));
@@ -47,18 +54,40 @@
       pointer-events: none;
     }
 
-    .hud-chip {
+    .nav-btn-hub {
+      pointer-events: auto;
       background: rgba(0, 0, 0, 0.75);
-      border: 1.5px solid #00f0ff;
+      backdrop-filter: blur(8px);
       color: #00f0ff;
-      font-size: 0.9rem;
+      border: 1.5px solid #00f0ff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .nav-btn-hub:active {
+      transform: scale(0.92);
+      background: rgba(0, 240, 255, 0.25);
+    }
+
+    .hud-title-badge {
+      background: rgba(0, 0, 0, 0.75);
+      border: 1.5px solid #ff007f;
+      color: #ff007f;
+      font-size: 0.85rem;
       font-weight: 800;
       padding: 6px 14px;
       border-radius: 20px;
       letter-spacing: 1px;
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
     }
 
+    /* Bottom HUD Container */
     .bottom-hud-container {
       position: absolute;
       bottom: max(16px, env(safe-area-inset-bottom));
@@ -70,13 +99,13 @@
       pointer-events: auto;
     }
 
-    .btn-back-drive {
+    .btn-back-nomad {
       background: rgba(0, 0, 0, 0.85);
       border: 2px solid #4cd964;
       color: #4cd964;
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 900;
-      padding: 14px 32px;
+      padding: 12px 28px;
       border-radius: 30px;
       box-shadow: 0 0 15px rgba(76, 217, 100, 0.5), inset 0 0 10px rgba(76, 217, 100, 0.2);
       cursor: pointer;
@@ -88,7 +117,7 @@
       transition: transform 0.15s ease, background 0.15s ease;
     }
 
-    .btn-back-drive:active {
+    .btn-back-nomad:active {
       transform: scale(0.92);
       background: rgba(76, 217, 100, 0.25);
     }
@@ -98,17 +127,19 @@
 
   <canvas id="visualizer-canvas"></canvas>
 
+  <!-- Top HUD: Left = Visualizers Hub | Right = Visualizer Name -->
   <div class="top-hud-bar">
-    <div class="hud-chip">DISCO ACTIVE</div>
-    <div class="hud-chip" id="bpm-badge">SYNCING...</div>
+    <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <div class="hud-title-badge">PANIC: DISCO</div>
   </div>
 
+  <!-- Bottom HUD: Return to NOMAD Dashboard -->
   <div class="bottom-hud-container">
-    <button class="btn-back-drive" onclick="returnToDashboard()">
+    <button class="btn-back-nomad" onclick="returnToDashboard()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
-      BACK TO DRIVING
+      BACK TO NOMAD
     </button>
   </div>
 
@@ -120,6 +151,7 @@
     let dataArray = null;
     let bufferLength = 0;
     let isRunning = false;
+    let wakeLock = null;
 
     const canvas = document.getElementById('visualizer-canvas');
     const ctx = canvas.getContext('2d');
@@ -127,7 +159,7 @@
     let rotationAngle = 0;
     let particles = [];
 
-    // Star-Eyed Emoji State (Independent Random Spin & Momentum)
+    // Star-Eyed Emoji State
     let emojiAngle = 0;
     let emojiSpinSpeed = 0.025;
     let emojiTargetSpinSpeed = 0.025;
@@ -186,13 +218,29 @@
       }
     }
 
-    // Auto-start on page load without click-step
+    // Screen WakeLock to prevent dimming
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible' && (wakeLock === null || wakeLock.released)) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+
+    // Auto-engage on page load
     window.addEventListener('load', () => {
       startAudioReactiveEngine();
       requestWakeLock();
     });
 
-    // Fallback user interaction listener for strict browser autoplay policies
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+    window.addEventListener('focus', requestWakeLock);
+    window.addEventListener('touchstart', requestWakeLock, { passive: true });
+    setInterval(requestWakeLock, 15000);
+
+    // AudioContext resume trigger for mobile browsers
     window.addEventListener('pointerdown', () => {
       if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
@@ -210,19 +258,17 @@
       const centerX = width / 2;
       const centerY = height / 2;
 
-      // Bass Calculation (First 8 bins)
+      // Bass calculation (first 8 frequency bins)
       let bassSum = 0;
-      for (let i = 0; i < 8; i++) {
-        bassSum += dataArray[i];
-      }
+      for (let i = 0; i < 8; i++) bassSum += dataArray[i];
       const bassAvg = bassSum / 8;
       const bassRatio = bassAvg / 255;
 
-      // Dark fade trails
+      // Motion trails
       ctx.fillStyle = `rgba(5, 0, 12, ${0.2 + (1 - bassRatio) * 0.12})`;
       ctx.fillRect(0, 0, width, height);
 
-      // --- 1. VERTICAL FLOATING PARTICLES ---
+      // 1. Floating Sparkles
       particles.forEach(p => {
         p.y -= p.speed * (1 + bassRatio * 3.5);
         if (p.y < 0) {
@@ -237,7 +283,7 @@
         ctx.fill();
       });
 
-      // --- 2. DUAL VERTICAL EQ TOWERS (LEFT & RIGHT) ---
+      // 2. Dual Side EQ Towers
       const numBars = 24;
       const barHeight = (height * 0.6) / numBars;
       const barStartY = height * 0.2;
@@ -247,21 +293,16 @@
         const freqVal = dataArray[Math.floor((i / numBars) * (bufferLength * 0.65))] / 255;
         const currentBarWidth = Math.max(4, freqVal * maxBarWidth);
         const y = barStartY + i * barHeight;
-
-        // Color Gradient: Cyan at bottom, Yellow in mid, Pink at top
         const barColor = i < 8 ? '#00f0ff' : i < 16 ? '#ffe600' : '#ff0055';
 
-        // Left Tower
         ctx.fillStyle = barColor;
         ctx.shadowBlur = 10;
         ctx.shadowColor = barColor;
         ctx.fillRect(8, y + 2, currentBarWidth, barHeight - 4);
-
-        // Right Tower (Mirrored)
         ctx.fillRect(width - 8 - currentBarWidth, y + 2, currentBarWidth, barHeight - 4);
       }
 
-      // --- 3. CENTER TUNNEL & CLAMPED RADIAL BEAMS ---
+      // 3. Radial Disco Beams & Wave Rings
       rotationAngle += 0.008 + bassRatio * 0.02;
       const pulseScale = 0.85 + bassRatio * 0.4;
       const radiusBase = Math.min(width, height) * 0.22 * pulseScale;
@@ -270,8 +311,7 @@
       ctx.translate(centerX, centerY);
       ctx.rotate(rotationAngle);
 
-      // Clamped Radial Beams
-      const maxAllowedBeam = (Math.min(width, height) * 0.38);
+      const maxAllowedBeam = Math.min(width, height) * 0.38;
       const numBeams = 16;
       for (let b = 0; b < numBeams; b++) {
         const beamAngle = (b / numBeams) * Math.PI * 2;
@@ -293,7 +333,6 @@
         ctx.stroke();
       }
 
-      // Central Waveform Rings
       const numPoints = 48;
       for (let ring = 1; ring <= 2; ring++) {
         ctx.beginPath();
@@ -321,7 +360,7 @@
 
       ctx.restore();
 
-      // --- 4. GIANT STAR-EYED EMOJI (🤩) IN CENTER ---
+      // 4. Center Star-Eyed Emoji
       const now = Date.now();
       if (bassRatio > 0.68 && (now - lastFlipTime > 650)) {
         const direction = Math.random() > 0.5 ? 1 : -1;
@@ -348,25 +387,12 @@
 
       ctx.shadowColor = bassRatio > 0.55 ? '#ffe600' : '#ff007f';
       ctx.shadowBlur = 16 + (bassRatio * 35);
-
       ctx.font = `${baseFontSize}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('🤩', 0, 0);
 
       ctx.restore();
-
-      // Top HUD update
-      const badge = document.getElementById('bpm-badge');
-      if (badge && bassAvg > 140) {
-        badge.innerText = `BASS: ${Math.round(bassAvg)}`;
-        badge.style.color = '#ff007f';
-        badge.style.borderColor = '#ff007f';
-      } else if (badge) {
-        badge.innerText = `AUDIO SYNC`;
-        badge.style.color = '#00f0ff';
-        badge.style.borderColor = '#00f0ff';
-      }
     }
 
     function renderSyntheticVisualizer() {
@@ -428,18 +454,6 @@
       }
       window.location.href = 'index.html';
     }
-
-    let wakeLock = null;
-    async function requestWakeLock() {
-      try {
-        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
-      } catch (err) {}
-    }
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') requestWakeLock();
-    });
   </script>
 </body>
 </html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>NOMAD // THE SLAM DANCE</title>
+
+  <!-- PWA & Mobile Display Metadata -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #slamdance-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background-color: #000000;
+    }
+
+    /* Standardized Top HUD Bar */
+    .top-hud-bar {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .nav-btn-hub {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      color: #39ff14;
+      border: 1.5px solid #39ff14;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      text-decoration: none;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .nav-btn-hub:active {
+      transform: scale(0.92);
+      background: rgba(57, 255, 20, 0.3);
+    }
+
+    .hud-title-badge {
+      background: rgba(0, 0, 0, 0.85);
+      border: 1.5px solid #ff0044;
+      color: #ff0044;
+      font-size: 0.85rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 1.5px;
+      box-shadow: 0 0 12px rgba(255, 0, 68, 0.5);
+    }
+
+    /* Center Mascot Container */
+    .stage-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .punk-mascot-wrap {
+      filter: drop-shadow(0 0 28px rgba(255, 0, 68, 0.85));
+      transform-origin: center center;
+      transition: transform 0.05s ease-out;
+    }
+
+    .punk-mascot-svg {
+      width: clamp(230px, 62vw, 320px);
+      height: auto;
+    }
+
+    /* Standardized Bottom HUD Container */
+    .bottom-hud-container {
+      position: absolute;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      z-index: 10;
+      pointer-events: auto;
+    }
+
+    .btn-back-nomad {
+      background: rgba(0, 0, 0, 0.92);
+      border: 2px solid #4cd964;
+      color: #4cd964;
+      font-size: 1.05rem;
+      font-weight: 900;
+      padding: 12px 28px;
+      border-radius: 30px;
+      box-shadow: 0 0 15px rgba(76, 217, 100, 0.5), inset 0 0 10px rgba(76, 217, 100, 0.2);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-back-nomad:active {
+      transform: scale(0.92);
+      background: rgba(76, 217, 100, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="slamdance-canvas"></canvas>
+
+  <!-- Top HUD: Left = Hub Link | Right = Title Badge -->
+  <div class="top-hud-bar">
+    <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <div class="hud-title-badge">THE SLAM DANCE</div>
+  </div>
+
+  <!-- Center Stage: Punk Skull with Horns & Crossed Drumsticks -->
+  <div class="stage-container">
+    <div class="punk-mascot-wrap" id="punk-mascot">
+      <svg class="punk-mascot-svg" viewBox="0 0 320 280">
+        <defs>
+          <radialGradient id="skullGrad" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="70%" stop-color="#cccccc"/>
+            <stop offset="100%" stop-color="#777777"/>
+          </radialGradient>
+
+          <!-- Wood Grain Drumstick Gradient -->
+          <linearGradient id="stickGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fdf4e3"/>
+            <stop offset="50%" stop-color="#deb887"/>
+            <stop offset="100%" stop-color="#a0522d"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 1. CROSSED DRUMSTICKS (UNDER CHIN) -->
+        <g stroke="#000000" stroke-width="2.5" stroke-linejoin="round">
+          <ellipse cx="62" cy="188" rx="6" ry="4" transform="rotate(-32 62 188)" fill="#fdf4e3"/>
+          <polygon points="66,190 258,252 254,258 64,194" fill="url(#stickGrad)"/>
+          <ellipse cx="256" cy="255" rx="4.5" ry="6" transform="rotate(-32 256 255)" fill="#deb887"/>
+        </g>
+
+        <g stroke="#000000" stroke-width="2.5" stroke-linejoin="round">
+          <ellipse cx="258" cy="188" rx="6" ry="4" transform="rotate(32 258 188)" fill="#fdf4e3"/>
+          <polygon points="254,190 62,252 66,258 256,194" fill="url(#stickGrad)"/>
+          <ellipse cx="64" cy="255" rx="4.5" ry="6" transform="rotate(32 64 255)" fill="#deb887"/>
+        </g>
+
+        <!-- 2. ROCK HORNS HANDS (\m/) -->
+        <!-- Left Horns Hand -->
+        <g transform="translate(18, 90) rotate(-18)" stroke="#000000" stroke-width="3" stroke-linejoin="round">
+          <rect x="12" y="32" width="28" height="34" rx="8" fill="#ffffff"/>
+          <rect x="12" y="2" width="7" height="34" rx="3.5" fill="#ffffff"/>
+          <rect x="33" y="2" width="7" height="34" rx="3.5" fill="#ffffff"/>
+          <rect x="19" y="18" width="14" height="20" rx="6" fill="#e0e0e0"/>
+          <path d="M 12,42 Q 24,36 30,44" fill="#d0d0d0"/>
+          <rect x="10" y="62" width="32" height="12" rx="3" fill="#111111"/>
+          <circle cx="16" cy="68" r="2.5" fill="#39ff14"/>
+          <circle cx="26" cy="68" r="2.5" fill="#ff0044"/>
+          <circle cx="36" cy="68" r="2.5" fill="#39ff14"/>
+        </g>
+
+        <!-- Right Horns Hand -->
+        <g transform="translate(262, 75) rotate(18)" stroke="#000000" stroke-width="3" stroke-linejoin="round">
+          <rect x="12" y="32" width="28" height="34" rx="8" fill="#ffffff"/>
+          <rect x="12" y="2" width="7" height="34" rx="3.5" fill="#ffffff"/>
+          <rect x="33" y="2" width="7" height="34" rx="3.5" fill="#ffffff"/>
+          <rect x="19" y="18" width="14" height="20" rx="6" fill="#e0e0e0"/>
+          <path d="M 40,42 Q 28,36 22,44" fill="#d0d0d0"/>
+          <rect x="10" y="62" width="32" height="12" rx="3" fill="#111111"/>
+          <circle cx="16" cy="68" r="2.5" fill="#39ff14"/>
+          <circle cx="26" cy="68" r="2.5" fill="#ff0044"/>
+          <circle cx="36" cy="68" r="2.5" fill="#39ff14"/>
+        </g>
+
+        <!-- 3. MOHAWK SPIKES -->
+        <polygon points="160,4 145,48 175,48" fill="#ff0044" stroke="#000000" stroke-width="3"/>
+        <polygon points="136,16 128,58 154,54" fill="#39ff14" stroke="#000000" stroke-width="3"/>
+        <polygon points="184,16 166,54 192,58" fill="#39ff14" stroke="#000000" stroke-width="3"/>
+        <polygon points="116,34 112,74 136,68" fill="#ff0044" stroke="#000000" stroke-width="3"/>
+        <polygon points="204,34 184,68 208,74" fill="#ff0044" stroke="#000000" stroke-width="3"/>
+
+        <!-- 4. SKULL CRANIUM -->
+        <path d="M 100,110 C 90,60 230,60 220,110 C 220,140 205,150 200,180 L 120,180 C 115,150 100,140 100,110 Z" 
+              fill="url(#skullGrad)" stroke="#000000" stroke-width="6" stroke-linejoin="round"/>
+
+        <!-- 5. EYE SOCKETS & NOSE -->
+        <ellipse cx="128" cy="116" rx="18" ry="22" fill="#000000"/>
+        <ellipse cx="192" cy="116" rx="18" ry="22" fill="#000000"/>
+        <circle id="eye-glow-left" cx="128" cy="116" r="6" fill="#39ff14"/>
+        <circle id="eye-glow-right" cx="192" cy="116" r="6" fill="#39ff14"/>
+        <polygon points="160,136 152,154 168,154" fill="#000000"/>
+
+        <!-- 6. TEETH / JAW -->
+        <rect x="128" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
+        <rect x="144" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
+        <rect x="160" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
+        <rect x="176" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
+
+        <!-- 7. SAFETY PIN PIERCE -->
+        <path d="M 92,145 Q 80,165 102,175 L 122,155" fill="none" stroke="#e0e0e0" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="92" cy="145" r="5" fill="#aaaaaa" stroke="#000000" stroke-width="1.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Bottom HUD: Return to NOMAD Dashboard -->
+  <div class="bottom-hud-container">
+    <button class="btn-back-nomad" onclick="returnToDashboard()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      BACK TO NOMAD
+    </button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('slamdance-canvas');
+    // Disable alpha compositing buffer for pitch-black performance
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const punkMascot = document.getElementById('punk-mascot');
+    const eyeGlowLeft = document.getElementById('eye-glow-left');
+    const eyeGlowRight = document.getElementById('eye-glow-right');
+
+    let width, height, centerX, centerY;
+    let time = 0;
+
+    // Audio Reactive State
+    let audioCtx = null;
+    let analyser = null;
+    let streamReference = null;
+    let dataArray = null;
+    let bufferLength = 0;
+    let isMicActive = false;
+    let isRunning = false;
+    let wakeLock = null;
+
+    let bassRatio = 0;
+    let midRatio = 0;
+    let trebleRatio = 0;
+
+    // Mosh Spark Particles Pool
+    let sparks = [];
+    const sparkCount = 45;
+
+    // Instrument Emojis Emitter Pool
+    const musicGlyphs = ['🎸', '🥁', '🎷', '🎺', '🪕', '⚡', '💥', '🤘', '🎵', '🎶', '🔊', '🎙️'];
+    let instrumentParticles = [];
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      centerX = width / 2;
+      centerY = height / 2;
+      initSparks();
+    }
+
+    function initSparks() {
+      sparks = [];
+      for (let i = 0; i < sparkCount; i++) {
+        sparks.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          size: Math.random() * 3 + 1.5,
+          color: i % 3 === 0 ? '#39ff14' : (i % 3 === 1 ? '#ff0044' : '#ffffff'),
+          life: Math.random()
+        });
+      }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function spawnInstrument(speedMult = 1.0, count = 1) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = (2.0 + Math.random() * 4.0) * speedMult;
+        const glyph = musicGlyphs[Math.floor(Math.random() * musicGlyphs.length)];
+
+        instrumentParticles.push({
+          x: centerX + Math.cos(angle) * 40,
+          y: centerY + Math.sin(angle) * 40,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          glyph: glyph,
+          size: 20 + Math.random() * 16,
+          alpha: 1.0,
+          rotation: (Math.random() - 0.5) * 0.8,
+          rotSpeed: (Math.random() - 0.5) * 0.08
+        });
+      }
+    }
+
+    async function startAudioEngine() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        streamReference = stream;
+
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
+        }
+
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.72;
+
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+
+        const source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
+
+        isMicActive = true;
+        isRunning = true;
+        renderLoop();
+      } catch (err) {
+        console.warn("Microphone auto-start ambient fallback active:", err);
+        isMicActive = false;
+        isRunning = true;
+        renderLoop();
+      }
+    }
+
+    // Persistent Screen WakeLock
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+
+    window.addEventListener('load', () => {
+      startAudioEngine();
+      requestWakeLock();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+    window.addEventListener('focus', requestWakeLock);
+    window.addEventListener('touchstart', requestWakeLock, { passive: true });
+    setInterval(requestWakeLock, 15000);
+
+    window.addEventListener('pointerdown', () => {
+      if (!isMicActive && !audioCtx) startAudioEngine();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true });
+
+    function renderLoop() {
+      if (!isRunning) return;
+      requestAnimationFrame(renderLoop);
+
+      time += 0.04;
+
+      if (isMicActive && analyser) {
+        analyser.getByteFrequencyData(dataArray);
+
+        // Lows / Bass Kick (Bins 0 to 6)
+        let bassSum = 0;
+        for (let i = 0; i < 6; i++) bassSum += dataArray[i];
+        bassRatio = bassSum / 6 / 255;
+
+        // Mids / Guitars (Bins 8 to 28)
+        let midSum = 0;
+        for (let i = 8; i < 28; i++) midSum += dataArray[i];
+        midRatio = midSum / 20 / 255;
+
+        // Highs / Cymbals (Bins 30 to 65)
+        let trebleSum = 0;
+        for (let i = 30; i < 65; i++) trebleSum += dataArray[i];
+        trebleRatio = trebleSum / 35 / 255;
+
+        if (trebleRatio > 0.38 && Math.random() < 0.75) {
+          spawnInstrument(1.6, Math.floor(trebleRatio * 3) + 1);
+        } else if (Math.random() < 0.07) {
+          spawnInstrument(1.0, 1);
+        }
+      } else {
+        bassRatio = 0.35 + Math.sin(time * 6) * 0.25;
+        midRatio = 0.25 + Math.cos(time * 4) * 0.2;
+        trebleRatio = 0.2 + Math.sin(time * 8) * 0.15;
+        if (Math.random() < 0.08) spawnInstrument(1.0, 1);
+      }
+
+      // 1. Dynamic Headbanging Mascot & Eye Glow
+      const headbangScale = 1.0 + bassRatio * 0.45;
+      const headbangTilt = (Math.sin(time * 8) * 6) * (0.4 + bassRatio);
+      punkMascot.style.transform = `scale(${headbangScale}) rotate(${headbangTilt}deg)`;
+
+      if (eyeGlowLeft && eyeGlowRight) {
+        const eyeColor = trebleRatio > 0.4 ? '#ff0044' : '#39ff14';
+        eyeGlowLeft.setAttribute('fill', eyeColor);
+        eyeGlowRight.setAttribute('fill', eyeColor);
+      }
+
+      // 2. High-Contrast Jet Black Clear with Reset Shadow State
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+      ctx.globalAlpha = 1.0;
+
+      // Dark background trail without gray build-up
+      ctx.fillStyle = bassRatio > 0.82 ? 'rgba(25, 0, 6, 0.25)' : 'rgba(0, 0, 0, 0.18)';
+      ctx.fillRect(0, 0, width, height);
+
+      // 3. Audio-Reactive Electric Oscilloscope Ring
+      ctx.save();
+      ctx.translate(centerX, centerY);
+
+      const numPoints = 64;
+      const baseRadius = Math.min(width, height) * 0.32;
+
+      ctx.beginPath();
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2;
+        const freqIdx = Math.floor((i / numPoints) * (bufferLength || 32));
+        const amp = isMicActive ? (dataArray[freqIdx] / 255) : Math.sin(time * 5 + i);
+        const dist = baseRadius + (amp * 65 * (1 + bassRatio * 0.8));
+
+        const x = Math.cos(angle) * dist;
+        const y = Math.sin(angle) * dist;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = bassRatio > 0.6 ? '#ff0044' : '#39ff14';
+      ctx.lineWidth = 3 + midRatio * 4;
+      ctx.shadowBlur = 16 + bassRatio * 20;
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.stroke();
+
+      // 4. Jagged Lightning Flashes
+      if (bassRatio > 0.65) {
+        const numBolts = Math.floor(bassRatio * 4) + 1;
+        for (let b = 0; b < numBolts; b++) {
+          const boltAngle = (b / numBolts) * Math.PI * 2 + time;
+          const endDist = Math.min(width, height) * 0.48;
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          let currentX = 0;
+          let currentY = 0;
+          const segments = 6;
+          for (let s = 1; s <= segments; s++) {
+            const stepDist = (endDist / segments) * s;
+            const jitter = (Math.random() - 0.5) * 45;
+            currentX = Math.cos(boltAngle) * stepDist + Math.sin(boltAngle) * jitter;
+            currentY = Math.sin(boltAngle) * stepDist + Math.cos(boltAngle) * jitter;
+            ctx.lineTo(currentX, currentY);
+          }
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          ctx.shadowBlur = 18;
+          ctx.shadowColor = '#39ff14';
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+
+      // 5. Mosh Sparks & Shards
+      for (let i = 0; i < sparks.length; i++) {
+        const p = sparks[i];
+        p.x += p.vx * (1 + bassRatio * 3);
+        p.y += p.vy * (1 + bassRatio * 3);
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * (1 + trebleRatio * 1.5), 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+      }
+
+      // 6. Emanating 360° Musical Instrument Emojis
+      for (let i = instrumentParticles.length - 1; i >= 0; i--) {
+        const p = instrumentParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotSpeed;
+        p.alpha *= 0.982;
+        p.size += 0.12;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.font = `${p.size}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
+        ctx.globalAlpha = p.alpha;
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 12;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.glyph, 0, 0);
+        ctx.restore();
+
+        if (p.alpha < 0.02 || p.x < -60 || p.x > width + 60 || p.y < -60 || p.y > height + 60) {
+          instrumentParticles.splice(i, 1);
+        }
+      }
+    }
+
+    function returnToDashboard() {
+      isRunning = false;
+      if (streamReference) {
+        streamReference.getTracks().forEach(track => track.stop());
+      }
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close();
+      }
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

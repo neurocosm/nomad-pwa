@@ -45,44 +45,54 @@
       z-index: 1;
     }
 
-    /* Top Navigation Bar */
-    .top-nav {
+    /* Standardized Top HUD Bar */
+    .top-hud-bar {
       position: absolute;
-      top: 0;
+      top: max(12px, env(safe-area-inset-top));
       left: 0;
-      right: 0;
-      z-index: 100;
+      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 14px;
-      padding-top: max(12px, env(safe-area-inset-top));
+      padding: 0 16px;
+      z-index: 10;
       pointer-events: none;
     }
 
-    .nav-btn {
+    .nav-btn-hub {
       pointer-events: auto;
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
-      color: #ffffff;
-      border: 1.5px solid rgba(255, 255, 255, 0.35);
-      padding: 8px 14px;
+      color: #00f0ff;
+      border: 1.5px solid #00f0ff;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.85rem;
       font-weight: 800;
       text-decoration: none;
       letter-spacing: 0.5px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      transition: transform 0.15s ease, background 0.15s ease;
     }
 
-    .nav-btn:active {
+    .nav-btn-hub:active {
       transform: scale(0.92);
-      border-color: #ff007f;
-      background: rgba(255, 0, 127, 0.3);
+      background: rgba(0, 240, 255, 0.25);
     }
 
-    /* Center Visual Container */
+    .hud-title-badge {
+      background: rgba(0, 0, 0, 0.75);
+      border: 1.5px solid #ff007f;
+      color: #ff007f;
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+    }
+
+    /* Center Visual Stage */
     .stage-container {
       position: relative;
       z-index: 10;
@@ -105,64 +115,39 @@
       height: auto;
     }
 
-    /* Bottom Hands-Free Status Banner */
-    .status-panel {
+    /* Standardized Bottom HUD Container */
+    .bottom-hud-container {
       position: absolute;
-      bottom: max(18px, env(safe-area-inset-bottom));
-      z-index: 100;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      left: 0;
+      width: 100%;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      pointer-events: none;
-    }
-
-    .status-card {
-      background: rgba(0, 0, 0, 0.75);
-      border: 1.5px solid rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(10px);
-      padding: 8px 20px;
-      border-radius: 24px;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-    }
-
-    .status-title {
-      font-size: clamp(1.05rem, 3.8vw, 1.3rem);
-      font-weight: 900;
-      letter-spacing: 2px;
-      background: linear-gradient(90deg, #ff007f, #00ffff, #ffe600, #ff007f);
-      background-size: 300% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: rainbowShine 4s linear infinite;
-    }
-
-    @keyframes rainbowShine {
-      to { background-position: 300% center; }
-    }
-
-    .status-sub {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #4cd964;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-top: 1px;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 6px;
+      z-index: 10;
+      pointer-events: auto;
     }
 
-    .vu-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #4cd964;
-      box-shadow: 0 0 8px #4cd964;
-      display: inline-block;
-      transition: transform 0.05s ease;
+    .btn-back-nomad {
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #4cd964;
+      color: #4cd964;
+      font-size: 1.05rem;
+      font-weight: 900;
+      padding: 12px 28px;
+      border-radius: 30px;
+      box-shadow: 0 0 15px rgba(76, 217, 100, 0.5), inset 0 0 10px rgba(76, 217, 100, 0.2);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-back-nomad:active {
+      transform: scale(0.92);
+      background: rgba(76, 217, 100, 0.25);
     }
   </style>
 </head>
@@ -171,10 +156,10 @@
   <!-- Fullscreen Canvas -->
   <canvas id="kaleidoscope-canvas"></canvas>
 
-  <!-- Top Navigation -->
-  <div class="top-nav">
-    <a href="disco.html" class="nav-btn">&lt; VISUALIZERS</a>
-    <a href="index.html" class="nav-btn">MAP &gt;</a>
+  <!-- Top HUD: Left = Visualizers Hub | Right = Visualizer Name -->
+  <div class="top-hud-bar">
+    <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <div class="hud-title-badge">FESTIVAL OF JOY</div>
   </div>
 
   <!-- Center Stage Mascot -->
@@ -227,15 +212,14 @@
     </div>
   </div>
 
-  <!-- Status Banner -->
-  <div class="status-panel">
-    <div class="status-card">
-      <div class="status-title">FESTIVAL OF JOY</div>
-      <div class="status-sub" id="audio-status-label">
-        <span class="vu-dot" id="vu-meter"></span>
-        <span id="audio-status-text">INITIALIZING AUDIO...</span>
-      </div>
-    </div>
+  <!-- Bottom HUD: Return to NOMAD Dashboard -->
+  <div class="bottom-hud-container">
+    <button class="btn-back-nomad" onclick="returnToDashboard()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      BACK TO NOMAD
+    </button>
   </div>
 
   <!-- Audio Analysis, Small Floating Icons & Kaleidoscope Engine -->
@@ -245,8 +229,6 @@
     const mushroomHero = document.getElementById('mushroom-hero');
     const sunglassLeft = document.getElementById('sunglass-left');
     const sunglassRight = document.getElementById('sunglass-right');
-    const vuMeter = document.getElementById('vu-meter');
-    const audioStatusText = document.getElementById('audio-status-text');
 
     let width, height, centerX, centerY;
     let baseHue = 0;
@@ -269,8 +251,10 @@
     // Web Audio State
     let audioCtx = null;
     let analyser = null;
+    let streamReference = null;
     let dataArray = null;
     let isMicActive = false;
+    let wakeLock = null;
 
     let bassEnergy = 0;
     let midEnergy = 0;
@@ -284,7 +268,6 @@
       initOrbiters();
     }
 
-    // Initialize 16 Petite Orbiting Stream Elements (Upper & Lower)
     function initOrbiters() {
       orbiters = [];
       const count = 16;
@@ -298,7 +281,7 @@
           bobOffset: Math.random() * Math.PI * 2,
           rot: Math.random() * Math.PI * 2,
           rotSpeed: (Math.random() - 0.5) * 0.03,
-          size: 14 + Math.random() * 8, // Petite size: 14px to 22px
+          size: 14 + Math.random() * 8,
           glimmerHue: Math.random() * 360
         });
       }
@@ -307,13 +290,11 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // 1. Particle Note / Mini-Sparkle Emitter
     function spawnNote(speedMult = 1.0, count = 1) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = (1.5 + Math.random() * 3.5) * speedMult;
         
-        // 80% Musical Notes, 20% Tiny Sparkle / Mini Mushroom
         const isNote = Math.random() < 0.8;
         const glyph = isNote 
           ? noteGlyphs[Math.floor(Math.random() * noteGlyphs.length)]
@@ -334,11 +315,16 @@
       }
     }
 
-    // 2. Auto-Start Microphone Audio Engine
     async function initAudio() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        streamReference = stream;
+
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
+        }
+
         const source = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
@@ -348,13 +334,19 @@
         dataArray = new Uint8Array(analyser.frequencyBinCount);
 
         isMicActive = true;
-        if (audioStatusText) audioStatusText.innerText = "AUDIO REACTIVE (LIVE)";
-        if (vuMeter) vuMeter.style.backgroundColor = "#4cd964";
       } catch (err) {
         console.warn("Microphone auto-start ambient fallback active:", err);
-        if (audioStatusText) audioStatusText.innerText = "COCKPIT AMBIENT GROOVE";
-        if (vuMeter) vuMeter.style.backgroundColor = "#00d4ff";
+        isMicActive = false;
       }
+    }
+
+    // Screen WakeLock to prevent dimming
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible' && (wakeLock === null || wakeLock.released)) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
     }
 
     window.addEventListener('load', () => {
@@ -362,12 +354,18 @@
       requestWakeLock();
     });
 
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+    window.addEventListener('focus', requestWakeLock);
+    window.addEventListener('touchstart', requestWakeLock, { passive: true });
+    setInterval(requestWakeLock, 15000);
+
     window.addEventListener('pointerdown', () => {
-      if (!isMicActive) initAudio();
+      if (!isMicActive && !audioCtx) initAudio();
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }, { once: true });
 
-    // 3. Main 60 FPS Render Loop
     function render() {
       const now = performance.now();
       
@@ -403,11 +401,6 @@
         } else if (Math.random() < 0.08) {
           spawnNote(1.0, 1);
         }
-
-        if (vuMeter) {
-          const vuScale = 1.0 + (bassEnergy + midEnergy) * 1.2;
-          vuMeter.style.transform = `scale(${vuScale})`;
-        }
       } else {
         // Ambient Fallback Mode
         bassEnergy = 0.18 + Math.sin(time * 3) * 0.1;
@@ -433,11 +426,11 @@
         sunglassRight.style.filter = `drop-shadow(0 0 ${midEnergy * 14}px ${glowColor})`;
       }
 
-      // Background Fade Trail for Optical Flow
+      // Background Fade Trail
       ctx.fillStyle = 'rgba(5, 0, 10, 0.22)';
       ctx.fillRect(0, 0, width, height);
 
-      // --- A. KALEIDOSCOPE SACRED MANDALA & CORNER GEARS ---
+      // --- A. KALEIDOSCOPE SACRED MANDALA ---
       ctx.save();
       ctx.translate(centerX, centerY);
 
@@ -447,7 +440,7 @@
         ctx.save();
         ctx.rotate(s * angleStep + time * 0.09);
 
-        const numRings = 9; // Expanded to 9 rings to fill outer corners
+        const numRings = 9;
         for (let r = 1; r <= numRings; r++) {
           const bassExpansion = bassEnergy * 42 * (r / numRings);
           const dist = r * (Math.min(width, height) * 0.062) + Math.sin(time * 2 + r) * 14 + bassExpansion;
@@ -480,13 +473,12 @@
 
       ctx.restore();
 
-      // --- B. UPPER & LOWER ORBITING PETITE ICONS ---
+      // --- B. UPPER & LOWER ORBITING ICONS ---
       for (let i = 0; i < orbiters.length; i++) {
         const orb = orbiters[i];
         orb.x += orb.speedX * (1.0 + bassEnergy * 0.8);
         orb.rot += orb.rotSpeed;
 
-        // Wrap around horizontally
         if (orb.x < -30) orb.x = width + 30;
         if (orb.x > width + 30) orb.x = -30;
 
@@ -538,19 +530,15 @@
     }
     render();
 
-    // Screen Wake Lock
-    let wakeLock = null;
-    async function requestWakeLock() {
-      try {
-        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
-      } catch (err) {}
+    function returnToDashboard() {
+      if (streamReference) {
+        streamReference.getTracks().forEach(track => track.stop());
+      }
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close();
+      }
+      window.location.href = 'index.html';
     }
-    requestWakeLock();
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') requestWakeLock();
-    });
   </script>
 </body>
 </html>

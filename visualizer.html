@@ -10,254 +10,235 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0d0d12" />
+  <meta name="theme-color" content="#000000" />
 
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-touch-callout: none;
       user-select: none;
+      -webkit-touch-callout: none;
     }
 
     html, body {
       width: 100%;
-      min-height: 100vh;
-      min-height: 100dvh;
-      background-color: #0d0d12;
+      height: 100vh;
+      height: 100dvh;
+      background-color: #050508;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-
-    .container {
-      max-width: 540px;
-      margin: 0 auto;
-      padding: 14px 16px;
-      padding-top: max(14px, env(safe-area-inset-top));
-      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-    }
-
-    /* Top Nav Bar */
-    .top-nav {
-      display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      padding: 16px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
     }
 
-    .nav-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1.5px solid rgba(255, 255, 255, 0.25);
-      color: #ffffff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 800;
-      text-decoration: none;
-      letter-spacing: 0.5px;
-      transition: transform 0.1s ease, background-color 0.15s;
-    }
-
-    .nav-btn:active {
-      transform: scale(0.94);
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .hub-title {
-      font-size: 0.85rem;
-      font-weight: 900;
-      color: #00d4ff;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-    }
-
-    /* Hero Header */
-    .hero-header {
+    /* Top Header Section */
+    .arcade-header {
       text-align: center;
-      margin-bottom: 8px;
+      margin-top: 4px;
     }
 
-    .hero-heading {
-      font-size: clamp(1.4rem, 5vw, 1.8rem);
+    .arcade-title {
+      font-size: clamp(1.4rem, 5vw, 1.85rem);
       font-weight: 900;
-      letter-spacing: 1px;
-      background: linear-gradient(90deg, #ff007f, #00d4ff, #ffe600);
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #00f0ff, #ff007f, #ffe600, #39ff14);
+      background-size: 300% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 4px;
+      animation: rainbowShift 6s linear infinite;
     }
 
-    .hero-sub {
-      font-size: 0.85rem;
+    @keyframes rainbowShift {
+      to { background-position: 300% center; }
+    }
+
+    .arcade-subtitle {
+      font-size: 0.8rem;
+      font-weight: 700;
       color: #888899;
-      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
     }
 
-    /* Visualizer Cards List */
-    .cards-grid {
-      display: flex;
-      flex-direction: column;
+    /* 2x2 Arcade Launch Grid */
+    .visualizer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       gap: 12px;
+      width: 100%;
+      max-width: 480px;
+      flex: 1;
+      margin: 14px 0;
+      min-height: 0;
     }
 
     .vis-card {
-      background: #171720;
-      border: 1.5px solid #282836;
+      background: #101018;
       border-radius: 16px;
-      padding: 16px 18px;
-      text-decoration: none;
-      color: #ffffff;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-      transition: transform 0.12s ease, border-color 0.2s, box-shadow 0.2s;
+      justify-content: center;
+      text-decoration: none;
+      padding: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
     }
 
     .vis-card:active {
-      transform: scale(0.97);
+      transform: scale(0.94);
     }
 
-    /* Card Themes */
-    .vis-card.disco-theme:active {
-      border-color: #ff007f;
-      box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+    /* Theme 1: Disco */
+    .card-disco {
+      border: 2px solid #ff007f;
+      box-shadow: 0 0 14px rgba(255, 0, 127, 0.35);
+    }
+    .card-disco:active {
+      background: rgba(255, 0, 127, 0.15);
     }
 
-    .vis-card.festival-theme:active {
-      border-color: #00ffff;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    /* Theme 2: Festival */
+    .card-festival {
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    }
+    .card-festival:active {
+      background: rgba(0, 240, 255, 0.15);
     }
 
-    .vis-card.disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      border-style: dashed;
+    /* Theme 3: Slam Dance */
+    .card-slamdance {
+      border: 2px solid #39ff14;
+      box-shadow: 0 0 14px rgba(57, 255, 20, 0.35);
+    }
+    .card-slamdance:active {
+      background: rgba(57, 255, 20, 0.15);
     }
 
-    .vis-card.disabled:active {
-      transform: none;
+    /* Theme 4: Seasons */
+    .card-seasons {
+      border: 2px solid #ffbb00;
+      box-shadow: 0 0 14px rgba(255, 187, 0, 0.35);
+    }
+    .card-seasons:active {
+      background: rgba(255, 187, 0, 0.15);
     }
 
-    .vis-icon-wrap {
-      font-size: 2.4rem;
+    .card-icon {
+      font-size: clamp(2.2rem, 7.5vw, 3.0rem);
+      margin-bottom: 6px;
       line-height: 1;
-      min-width: 48px;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
+    }
+
+    .card-name {
+      font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       text-align: center;
     }
 
-    .vis-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
+    .card-disco .card-name { color: #ff007f; }
+    .card-festival .card-name { color: #00f0ff; }
+    .card-slamdance .card-name { color: #39ff14; }
+    .card-seasons .card-name { color: #ffbb00; }
 
-    .vis-title {
-      font-size: 1.15rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      color: #ffffff;
-    }
-
-    .vis-desc {
-      font-size: 0.8rem;
+    .card-desc {
+      font-size: 0.72rem;
       color: #aaaaaa;
-      font-weight: 500;
-      line-height: 1.25;
+      font-weight: 600;
+      margin-top: 3px;
+      text-align: center;
     }
 
-    .vis-action {
+    /* Bottom HUD Button */
+    .btn-back-nomad {
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #4cd964;
+      color: #4cd964;
+      font-size: 1.05rem;
+      font-weight: 900;
+      padding: 12px 32px;
+      border-radius: 30px;
+      box-shadow: 0 0 15px rgba(76, 217, 100, 0.5), inset 0 0 10px rgba(76, 217, 100, 0.2);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
+      gap: 10px;
+      text-decoration: none;
+      transition: transform 0.15s ease, background 0.15s ease;
     }
 
-    .disco-theme .vis-action { color: #ff007f; border: 1px solid rgba(255, 0, 127, 0.4); }
-    .festival-theme .vis-action { color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.4); }
-    .disabled .vis-action { color: #777788; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .btn-back-nomad:active {
+      transform: scale(0.92);
+      background: rgba(76, 217, 100, 0.25);
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    
-    <!-- Top Navigation -->
-    <div class="top-nav">
-      <a href="index.html" class="nav-btn">&lt; RETURN TO MAP</a>
-      <div class="hub-title">VISUALIZER ARCADE</div>
-    </div>
-
-    <!-- Hero Header -->
-    <div class="hero-header">
-      <div class="hero-heading">SELECT YOUR VIBE</div>
-      <div class="hero-sub">Audio-reactive light shows &amp; cockpit visualizers</div>
-    </div>
-
-    <!-- Cards List -->
-    <div class="cards-grid">
-      
-      <!-- 1. Panic Disco -->
-      <a href="disco.html" class="vis-card disco-theme">
-        <div class="vis-icon-wrap">🪩</div>
-        <div class="vis-info">
-          <div class="vis-title">PANIC DISCO</div>
-          <div class="vis-desc">High-energy party strobe &amp; rotating laser beams.</div>
-        </div>
-        <div class="vis-action">LAUNCH ↗</div>
-      </a>
-
-      <!-- 2. Festival of Joy -->
-      <a href="festival.html" class="vis-card festival-theme">
-        <div class="vis-icon-wrap">🍄</div>
-        <div class="vis-info">
-          <div class="vis-title">FESTIVAL OF JOY</div>
-          <div class="vis-desc">Psychedelic kaleidoscope &amp; mic-reactive cool mushroom.</div>
-        </div>
-        <div class="vis-action">LAUNCH ↗</div>
-      </a>
-
-      <!-- 3. The Slam Dance (Coming Soon) -->
-      <div class="vis-card disabled">
-        <div class="vis-icon-wrap">⚡</div>
-        <div class="vis-info">
-          <div class="vis-title">THE SLAM DANCE</div>
-          <div class="vis-desc">High-contrast punk rock mosh pit visualizer.</div>
-        </div>
-        <div class="vis-action">SOON</div>
-      </div>
-
-      <!-- 4. Holiday Specials (Coming Soon) -->
-      <div class="vis-card disabled">
-        <div class="vis-icon-wrap">🎃</div>
-        <div class="vis-info">
-          <div class="vis-title">HOLIDAY PRESETS</div>
-          <div class="vis-desc">Halloween, Christmas &amp; seasonal reactive themes.</div>
-        </div>
-        <div class="vis-action">SOON</div>
-      </div>
-
-    </div>
-
+  <!-- Header -->
+  <div class="arcade-header">
+    <div class="arcade-title">VISUALIZER ARCADE</div>
+    <div class="arcade-subtitle">Audio-Reactive Cockpit FX</div>
   </div>
 
-  <!-- Screen Wake Lock Engine -->
+  <!-- 2x2 Launch Grid -->
+  <div class="visualizer-grid">
+    <!-- 1. DISCO -->
+    <a href="disco.html" class="vis-card card-disco">
+      <div class="card-icon">🤩</div>
+      <div class="card-name">Panic: Disco</div>
+      <div class="card-desc">Radial Beams &amp; Dual EQ</div>
+    </a>
+
+    <!-- 2. FESTIVAL OF JOY -->
+    <a href="festival.html" class="vis-card card-festival">
+      <div class="card-icon">🍄</div>
+      <div class="card-name">Festival of Joy</div>
+      <div class="card-desc">360° Mandala &amp; Notes</div>
+    </a>
+
+    <!-- 3. THE SLAM DANCE -->
+    <a href="slamdance.html" class="vis-card card-slamdance">
+      <div class="card-icon">🤘</div>
+      <div class="card-name">The Slam Dance</div>
+      <div class="card-desc">Punk Skull &amp; Instruments</div>
+    </a>
+
+    <!-- 4. SEASONS -->
+    <a href="seasons.html" class="vis-card card-seasons">
+      <div class="card-icon">☀️</div>
+      <div class="card-name">Seasons</div>
+      <div class="card-desc">Auto Calendar Horizons</div>
+    </a>
+  </div>
+
+  <!-- Bottom Return Button -->
+  <a href="index.html" class="btn-back-nomad">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    BACK TO NOMAD
+  </a>
+
   <script>
+    // Screen WakeLock
     let wakeLock = null;
     async function requestWakeLock() {
       try {
@@ -266,10 +247,14 @@
         }
       } catch (err) {}
     }
-    requestWakeLock();
+
+    window.addEventListener('load', requestWakeLock);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') requestWakeLock();
     });
+    window.addEventListener('focus', requestWakeLock);
+    window.addEventListener('touchstart', requestWakeLock, { passive: true });
+    setInterval(requestWakeLock, 15000);
   </script>
 </body>
 </html>
