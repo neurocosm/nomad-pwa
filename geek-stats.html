@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=4.0, user-scalable=yes, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
   <title>NOMAD // GEEK STATS (CRT-VT220)</title>
 
   <!-- PWA & Mobile Display Metadata -->
@@ -138,6 +139,62 @@
     .val-highlight {
       color: #ffffff;
       text-shadow: 0 0 6px #ffb000;
+    }
+
+    /* Black Box Ascii Table Formatting */
+    .blackbox-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      font-size: 11px;
+      overflow-x: auto;
+      display: block;
+    }
+
+    .blackbox-table th {
+      border-bottom: 1px solid #ffb000;
+      color: #ffffff;
+      text-align: left;
+      padding: 4px 6px;
+      white-space: nowrap;
+    }
+
+    .blackbox-table td {
+      border-bottom: 1px dashed rgba(255, 176, 0, 0.2);
+      padding: 4px 6px;
+      white-space: nowrap;
+      color: #ffc947;
+    }
+
+    .blackbox-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Terminal Action Utility Toolbar */
+    .blackbox-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-term-action {
+      background: rgba(255, 176, 0, 0.15);
+      border: 1px solid #ffb000;
+      color: #ffb000;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-term-action:active {
+      background-color: #ffb000;
+      color: #000000;
+      transform: scale(0.96);
     }
 
     /* Blinking Block Cursor */
@@ -326,6 +383,36 @@
       </div>
     </div>
 
+    <!-- 7. BLACK BOX FLIGHT RECORDER LOG -->
+    <div class="term-box">
+      <div class="box-header">[07] BLACK BOX FLIGHT RECORDER (LAST 5 DETECTIONS)</div>
+      <div id="blackbox-stream-container">
+        <table class="blackbox-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>TIME (LOCAL)</th>
+              <th>ROUTE / SHIELD</th>
+              <th>COORDINATES</th>
+              <th>MPH</th>
+              <th>HDG</th>
+            </tr>
+          </thead>
+          <tbody id="blackbox-table-body">
+            <tr>
+              <td colspan="6" style="text-align: center; color: #888888;">[ NO FLIGHT EVENTS RECORDED YET ]</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="blackbox-actions">
+        <button class="btn-term-action" onclick="exportBlackBoxLog()">💾 EXPORT .LOG</button>
+        <button class="btn-term-action" id="btn-copy-csv" onclick="copyBlackBoxCSV()">📋 COPY CSV</button>
+        <button class="btn-term-action" onclick="purgeBlackBoxLog()">🗑️ PURGE RECORDER</button>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -492,6 +579,118 @@
       }
     }
 
+    // 5. Black Box Flight Recorder Parser & Renderer
+    function getBlackBoxLogs() {
+      try {
+        const raw = localStorage.getItem('nomad_blackbox_log');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function renderBlackBoxTable() {
+      const tbody = document.getElementById('blackbox-table-body');
+      const logs = getBlackBoxLogs();
+
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888888;">[ NO FLIGHT EVENTS RECORDED YET ]</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      logs.forEach((item, index) => {
+        const d = new Date(item.timestamp);
+        const timeStr = d.toLocaleTimeString('en-US', { hour12: false });
+        
+        let shieldBadge = '';
+        if (item.interstateShield && item.routeShield) {
+          shieldBadge = `[I-${item.interstateShield}] / RT-${item.routeShield}`;
+        } else if (item.interstateShield) {
+          shieldBadge = `[I-${item.interstateShield}]`;
+        } else if (item.routeShield) {
+          shieldBadge = `[RT-${item.routeShield}]`;
+        } else {
+          shieldBadge = item.roadName || 'WAY';
+        }
+
+        const coords = `${item.lat.toFixed(4)},${item.lon.toFixed(4)}`;
+
+        html += `
+          <tr>
+            <td style="color: #ffffff; font-weight: bold;">[${index + 1}]</td>
+            <td>${timeStr}</td>
+            <td style="color: #ffffff; font-weight: 700;">${shieldBadge}</td>
+            <td>${coords}</td>
+            <td>${item.speedMph}</td>
+            <td>${item.heading}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function formatLogsAsCSV(logs) {
+      let csv = "TIMESTAMP,LATITUDE,LONGITUDE,ROAD_NAME,INTERSTATE_SHIELD,ROUTE_SHIELD,SPEED_MPH,HEADING\n";
+      logs.forEach(l => {
+        const road = `"${(l.roadName || '').replace(/"/g, '""')}"`;
+        const iShield = l.interstateShield || '';
+        const rShield = l.routeShield || '';
+        csv += `${l.timestamp},${l.lat},${l.lon},${road},${iShield},${rShield},${l.speedMph},"${l.heading}"\n`;
+      });
+      return csv;
+    }
+
+    function exportBlackBoxLog() {
+      const logs = getBlackBoxLogs();
+      if (logs.length === 0) {
+        alert("Black Box is empty. No telemetry to export.");
+        return;
+      }
+
+      const csvData = formatLogsAsCSV(logs);
+      const blob = new Blob([csvData], { type: 'text/plain;charset=utf-8' });
+      
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const dateTag = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const filename = `NOMAD-BLACKBOX-${dateTag}.log`;
+
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function copyBlackBoxCSV() {
+      const logs = getBlackBoxLogs();
+      if (logs.length === 0) {
+        alert("Black Box is empty. No telemetry to copy.");
+        return;
+      }
+
+      const csvData = formatLogsAsCSV(logs);
+      const copyBtn = document.getElementById('btn-copy-csv');
+
+      navigator.clipboard.writeText(csvData).then(() => {
+        if (copyBtn) {
+          const orig = copyBtn.innerText;
+          copyBtn.innerText = "COPIED!";
+          setTimeout(() => { copyBtn.innerText = orig; }, 1500);
+        }
+      });
+    }
+
+    function purgeBlackBoxLog() {
+      if (confirm("Purge all recorded Black Box route events?")) {
+        localStorage.removeItem('nomad_blackbox_log');
+        renderBlackBoxTable();
+      }
+    }
+
     function startDiagnosticsTracking() {
       if ("geolocation" in navigator) {
         navigator.geolocation.watchPosition(
@@ -533,7 +732,6 @@
               document.getElementById('speed-knots').innerText = `0.00 KNOTS (0.0 FT/S)`;
             }
 
-            // Fixed coordinate reference: Check distance and trigger reverse geocode & elevation
             if (lastLat === null || Math.abs(latitude - lastLat) > 0.001 || Math.abs(longitude - lastLon) > 0.001) {
               lastLat = latitude;
               lastLon = longitude;
@@ -552,6 +750,7 @@
 
     window.onload = () => {
       startDiagnosticsTracking();
+      renderBlackBoxTable();
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         document.getElementById('sw-status').innerText = "TIER-4 ACTIVE (CACHED)";
       }

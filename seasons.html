@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
   <title>NOMAD // SEASONS</title>
 
   <!-- PWA & Mobile Display Metadata -->
@@ -80,11 +81,17 @@
       background: rgba(0, 240, 255, 0.3);
     }
 
-    /* Top-Center Horizontal Season Override Controls */
-    .season-picker-strip {
+    /* Top-Center Controls Strip */
+    .controls-strip {
       pointer-events: auto;
       display: flex;
       gap: 6px;
+      align-items: center;
+    }
+
+    .season-picker-strip {
+      display: flex;
+      gap: 5px;
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
       padding: 3px 6px;
@@ -96,8 +103,8 @@
     .season-pill-btn {
       background: transparent;
       border: none;
-      font-size: 1.15rem;
-      padding: 4px 8px;
+      font-size: 1.1rem;
+      padding: 3px 6px;
       border-radius: 16px;
       cursor: pointer;
       line-height: 1;
@@ -114,6 +121,32 @@
       transform: scale(1.1);
     }
 
+    .mode-toggle-btn {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #ffbb00;
+      color: #ffbb00;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 5px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 187, 0, 0.4);
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .mode-toggle-btn:active {
+      transform: scale(0.92);
+    }
+
+    .mode-toggle-btn.mic-active {
+      border-color: #ff80bf;
+      color: #ff80bf;
+      box-shadow: 0 0 12px rgba(255, 128, 191, 0.6);
+    }
+
     .hud-title-badge {
       pointer-events: auto;
       background: rgba(0, 0, 0, 0.75);
@@ -125,11 +158,10 @@
       border-radius: 20px;
       letter-spacing: 0.5px;
       box-shadow: 0 0 12px rgba(255, 187, 0, 0.4);
-      transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
       white-space: nowrap;
     }
 
-    /* Center Stage Mascot Container */
+    /* Center Stage Container */
     .stage-container {
       position: relative;
       z-index: 10;
@@ -150,7 +182,7 @@
       height: auto;
     }
 
-    /* Standardized Bottom HUD Container */
+    /* Standardized Bottom HUD */
     .bottom-hud-container {
       position: absolute;
       bottom: max(16px, env(safe-area-inset-bottom));
@@ -190,27 +222,26 @@
 
   <canvas id="seasons-canvas"></canvas>
 
-  <!-- Top HUD Bar -->
   <div class="top-hud-bar">
     <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
 
-    <!-- Top-Center Manual Season Switcher -->
-    <div class="season-picker-strip">
-      <button class="season-pill-btn" id="btn-spring" onclick="applySeason(0)" title="Spring">🌸</button>
-      <button class="season-pill-btn" id="btn-summer" onclick="applySeason(1)" title="Summer">☀️</button>
-      <button class="season-pill-btn" id="btn-autumn" onclick="applySeason(2)" title="Autumn">🎃</button>
-      <button class="season-pill-btn" id="btn-winter" onclick="applySeason(3)" title="Winter">❄️</button>
+    <div class="controls-strip">
+      <div class="season-picker-strip">
+        <button class="season-pill-btn" id="btn-spring" onclick="applySeason(0)" title="Spring">🌸</button>
+        <button class="season-pill-btn" id="btn-summer" onclick="applySeason(1)" title="Summer">☀️</button>
+        <button class="season-pill-btn" id="btn-autumn" onclick="applySeason(2)" title="Autumn">🎃</button>
+        <button class="season-pill-btn" id="btn-winter" onclick="applySeason(3)" title="Winter">❄️</button>
+      </div>
+      <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">🍃 TELEMETRY</button>
     </div>
 
     <div class="hud-title-badge" id="season-badge">SEASON: DETECTING...</div>
   </div>
 
-  <!-- Center Stage Dynamic Mascot -->
   <div class="stage-container">
     <div class="season-mascot-wrap" id="season-mascot"></div>
   </div>
 
-  <!-- Bottom HUD: Return to NOMAD Dashboard -->
   <div class="bottom-hud-container">
     <button class="btn-back-nomad" onclick="returnToDashboard()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -225,25 +256,27 @@
     const ctx = canvas.getContext('2d');
     const mascotEl = document.getElementById('season-mascot');
     const badgeEl = document.getElementById('season-badge');
+    const modeBtn = document.getElementById('mode-btn');
 
     let width, height, centerX, centerY;
     let time = 0;
 
-    // Audio Reactive Engine State
     let audioCtx = null;
     let analyser = null;
     let streamReference = null;
-    let dataArray = null;
-    let bufferLength = 0;
+    let dataArray = new Uint8Array(128);
+    let bufferLength = 128;
     let isMicActive = false;
-    let isRunning = false;
+    let isRunning = true;
     let wakeLock = null;
+
+    let currentSpeedMPH = 45;
+    let watchId = null;
 
     let bassRatio = 0;
     let midRatio = 0;
     let trebleRatio = 0;
 
-    // 4 Seasonal Theme Profiles
     const SEASON_PROFILES = [
       {
         id: 'spring',
@@ -387,13 +420,13 @@
       const day = now.getDate();
 
       if ((month === 3 && day >= 20) || month === 4 || month === 5 || (month === 6 && day <= 20)) {
-        return 0; // Spring
+        return 0;
       } else if ((month === 6 && day >= 21) || month === 7 || month === 8 || (month === 9 && day <= 21)) {
-        return 1; // Summer
+        return 1;
       } else if ((month === 9 && day >= 22) || month === 10 || month === 11 || (month === 12 && day <= 20)) {
-        return 2; // Autumn
+        return 2;
       } else {
-        return 3; // Winter
+        return 3;
       }
     }
 
@@ -406,7 +439,6 @@
       badgeEl.style.color = profile.hudColor;
       badgeEl.style.boxShadow = `0 0 12px ${profile.hudColor}66`;
 
-      // Update Top-Center Override Pills
       document.querySelectorAll('.season-pill-btn').forEach(btn => btn.classList.remove('active'));
       const activeBtn = document.getElementById(profile.btnId);
       if (activeBtn) activeBtn.classList.add('active');
@@ -416,7 +448,6 @@
       floatingElements = [];
     }
 
-    // Particle Emitter System (High Density)
     let floatingElements = [];
 
     function resizeCanvas() {
@@ -428,6 +459,20 @@
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
+
+    function initGPS() {
+      if ('geolocation' in navigator) {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
+              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+            }
+          },
+          (err) => console.log('GPS velocity fallback:', err),
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+      }
+    }
 
     function spawnSeasonalParticle(speedMult = 1.0, count = 1) {
       const profile = SEASON_PROFILES[currentSeasonIndex];
@@ -450,39 +495,61 @@
       }
     }
 
-    // Web Audio Input
-    async function startAudioEngine() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        streamReference = stream;
+    async function toggleInputMode() {
+      if (!isMicActive) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            },
+            video: false
+          });
+          streamReference = stream;
 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.75;
+
+          bufferLength = analyser.frequencyBinCount;
+          dataArray = new Uint8Array(bufferLength);
+
+          const source = audioCtx.createMediaStreamSource(stream);
+          source.connect(analyser);
+
+          isMicActive = true;
+          modeBtn.innerHTML = '🎙️ CABIN MIC';
+          modeBtn.classList.add('mic-active');
+        } catch (err) {
+          console.warn("Microphone access denied:", err);
+          isMicActive = false;
+          modeBtn.innerHTML = '🍃 TELEMETRY';
+          modeBtn.classList.remove('mic-active');
         }
-
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.75;
-
-        bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-
-        const source = audioCtx.createMediaStreamSource(stream);
-        source.connect(analyser);
-
-        isMicActive = true;
-        isRunning = true;
-        renderLoop();
-      } catch (err) {
-        console.warn("Microphone auto-start ambient fallback:", err);
+      } else {
+        stopMicStream();
         isMicActive = false;
-        isRunning = true;
-        renderLoop();
+        modeBtn.innerHTML = '🍃 TELEMETRY';
+        modeBtn.classList.remove('mic-active');
       }
     }
 
-    // Screen WakeLock
+    function stopMicStream() {
+      if (streamReference) {
+        streamReference.getTracks().forEach(track => track.stop());
+        streamReference = null;
+      }
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close();
+        audioCtx = null;
+      }
+      analyser = null;
+    }
+
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator && document.visibilityState === 'visible') {
@@ -493,8 +560,9 @@
 
     window.addEventListener('load', () => {
       applySeason(getAutomaticSeasonIndex());
-      startAudioEngine();
+      initGPS();
       requestWakeLock();
+      renderLoop();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -504,12 +572,6 @@
     window.addEventListener('touchstart', requestWakeLock, { passive: true });
     setInterval(requestWakeLock, 15000);
 
-    window.addEventListener('pointerdown', () => {
-      if (!isMicActive && !audioCtx) startAudioEngine();
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true });
-
-    // Main 60 FPS Engine
     function renderLoop() {
       if (!isRunning) return;
       requestAnimationFrame(renderLoop);
@@ -532,24 +594,26 @@
         for (let i = 30; i < 65; i++) trebleSum += dataArray[i];
         trebleRatio = trebleSum / 35 / 255;
 
-        // Extra busy spawns for seasonal beats
         if (trebleRatio > 0.30 && Math.random() < 0.88) {
           spawnSeasonalParticle(1.6, Math.floor(trebleRatio * 3) + 1);
         } else if (Math.random() < 0.14) {
           spawnSeasonalParticle(1.0, 1);
         }
       } else {
-        bassRatio = 0.28 + Math.sin(time * 3) * 0.2;
-        midRatio = 0.24 + Math.cos(time * 2.5) * 0.16;
-        trebleRatio = 0.22 + Math.sin(time * 4) * 0.15;
-        if (Math.random() < 0.14) spawnSeasonalParticle(1.0, 1);
+        // Telemetry Drive Kinetic Synthesis
+        const speedScale = Math.min(1.75, Math.max(0.6, currentSpeedMPH / 45));
+        bassRatio = 0.22 + Math.sin(time * 2.5 * speedScale) * 0.18;
+        midRatio = 0.18 + Math.cos(time * 2.0 * speedScale) * 0.14;
+        trebleRatio = 0.16 + Math.sin(time * 3.5 * speedScale) * 0.12;
+
+        if (Math.random() < 0.14 * speedScale) spawnSeasonalParticle(1.0 * speedScale, 1);
       }
 
       ctx.shadowBlur = 0;
       ctx.shadowColor = 'transparent';
       ctx.globalAlpha = 1.0;
 
-      // 1. SKY GRADIENT (TOP HALF)
+      // 1. Sky Gradient
       const skyGrad = ctx.createLinearGradient(0, 0, 0, height * 0.65);
       skyGrad.addColorStop(0, profile.skyGradient[0]);
       skyGrad.addColorStop(0.5, profile.skyGradient[1]);
@@ -569,13 +633,13 @@
       ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
       ctx.fill();
 
-      // 2. ROLLING GROUND / TERRAIN HORIZON (BOTTOM HALF)
+      // 2. Rolling Horizon
       const groundGrad = ctx.createLinearGradient(0, height * 0.45, 0, height);
       groundGrad.addColorStop(0, profile.groundGradient[2]);
       groundGrad.addColorStop(0.35, profile.groundGradient[1]);
       groundGrad.addColorStop(1, profile.groundGradient[0]);
 
-      // Back Dunes / Hills
+      // Back Hills
       ctx.beginPath();
       ctx.moveTo(0, height);
       for (let x = 0; x <= width; x += 12) {
@@ -589,7 +653,7 @@
       ctx.fill();
       ctx.globalAlpha = 1.0;
 
-      // Fore Dunes / Meadow Wave
+      // Fore Dunes
       ctx.beginPath();
       ctx.moveTo(0, height);
       for (let x = 0; x <= width; x += 12) {
@@ -601,7 +665,7 @@
       ctx.fillStyle = groundGrad;
       ctx.fill();
 
-      // Crest Foam / Rim Accent
+      // Rim Stroke
       ctx.beginPath();
       for (let x = 0; x <= width; x += 12) {
         const hill = Math.cos(x * 0.007 - time * 1.4) * 36 + Math.sin(x * 0.014 + time) * 16 + (bassRatio * 35);
@@ -652,7 +716,7 @@
 
       ctx.restore();
 
-      // 5. High-Energy Seasonal Emojis Emitter
+      // 5. Seasonal Emojis Emitter
       for (let i = floatingElements.length - 1; i >= 0; i--) {
         const p = floatingElements[i];
         p.x += p.vx * (1 + bassRatio * 1.5);
@@ -681,12 +745,8 @@
 
     function returnToDashboard() {
       isRunning = false;
-      if (streamReference) {
-        streamReference.getTracks().forEach(track => track.stop());
-      }
-      if (audioCtx && audioCtx.state !== 'closed') {
-        audioCtx.close();
-      }
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      stopMicStream();
       window.location.href = 'index.html';
     }
   </script>

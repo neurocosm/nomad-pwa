@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
   <title>Panic: At The Disco</title>
 
   <!-- PWA & Mobile Display Metadata -->
@@ -75,6 +76,36 @@
       background: rgba(0, 240, 255, 0.25);
     }
 
+    /* Interactive Telemetry / Mic Toggle Pill */
+    .mode-toggle-btn {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #00f0ff;
+      color: #00f0ff;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .mode-toggle-btn:active {
+      transform: scale(0.92);
+    }
+
+    .mode-toggle-btn.mic-active {
+      border-color: #ff007f;
+      color: #ff007f;
+      box-shadow: 0 0 14px rgba(255, 0, 127, 0.6);
+    }
+
     .hud-title-badge {
       background: rgba(0, 0, 0, 0.75);
       border: 1.5px solid #ff007f;
@@ -127,9 +158,10 @@
 
   <canvas id="visualizer-canvas"></canvas>
 
-  <!-- Top HUD: Left = Visualizers Hub | Right = Visualizer Name -->
+  <!-- Top HUD: Left = Visualizers Hub | Center = Engine Mode | Right = Name -->
   <div class="top-hud-bar">
     <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">⚡ VELOCITY SYNTH</button>
     <div class="hud-title-badge">PANIC: DISCO</div>
   </div>
 
@@ -148,13 +180,20 @@
     let analyser = null;
     let sourceNode = null;
     let streamReference = null;
-    let dataArray = null;
-    let bufferLength = 0;
-    let isRunning = false;
+    let dataArray = new Uint8Array(128);
+    let bufferLength = 128;
+    let isRunning = true;
+    let isMicActive = false;
     let wakeLock = null;
+
+    // GPS Telemetry Engine State
+    let currentSpeedMPH = 45;
+    let kineticPhase = 0;
+    let watchId = null;
 
     const canvas = document.getElementById('visualizer-canvas');
     const ctx = canvas.getContext('2d');
+    const modeBtn = document.getElementById('mode-btn');
 
     let rotationAngle = 0;
     let particles = [];
@@ -189,33 +228,74 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    async function startAudioReactiveEngine() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        streamReference = stream;
-
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-        }
-
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.78;
-
-        bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-
-        sourceNode = audioContext.createMediaStreamSource(stream);
-        sourceNode.connect(analyser);
-
-        isRunning = true;
-        renderVisualizer();
-      } catch (err) {
-        console.warn("Microphone auto-start ambient fallback:", err);
-        isRunning = true;
-        renderSyntheticVisualizer();
+    // Start Live GPS Telemetry Watch
+    function initGPS() {
+      if ('geolocation' in navigator) {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
+              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+            }
+          },
+          (err) => console.log('GPS velocity fallback:', err),
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
       }
+    }
+
+    // Toggle between Kinetic Engine & Live Mic
+    async function toggleInputMode() {
+      if (!isMicActive) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            },
+            video: false
+          });
+          streamReference = stream;
+
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioContext.state === 'suspended') await audioContext.resume();
+
+          analyser = audioContext.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.78;
+          bufferLength = analyser.frequencyBinCount;
+          dataArray = new Uint8Array(bufferLength);
+
+          sourceNode = audioContext.createMediaStreamSource(stream);
+          sourceNode.connect(analyser);
+
+          isMicActive = true;
+          modeBtn.innerHTML = '🎙️ CABIN MIC';
+          modeBtn.classList.add('mic-active');
+        } catch (err) {
+          console.warn('Microphone access denied:', err);
+          isMicActive = false;
+          modeBtn.innerHTML = '⚡ VELOCITY SYNTH';
+          modeBtn.classList.remove('mic-active');
+        }
+      } else {
+        stopMicStream();
+        isMicActive = false;
+        modeBtn.innerHTML = '⚡ VELOCITY SYNTH';
+        modeBtn.classList.remove('mic-active');
+      }
+    }
+
+    function stopMicStream() {
+      if (streamReference) {
+        streamReference.getTracks().forEach(t => t.stop());
+        streamReference = null;
+      }
+      if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+        audioContext = null;
+      }
+      analyser = null;
     }
 
     // Screen WakeLock to prevent dimming
@@ -227,10 +307,10 @@
       } catch (err) {}
     }
 
-    // Auto-engage on page load
     window.addEventListener('load', () => {
-      startAudioReactiveEngine();
+      initGPS();
       requestWakeLock();
+      renderLoop();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -240,29 +320,35 @@
     window.addEventListener('touchstart', requestWakeLock, { passive: true });
     setInterval(requestWakeLock, 15000);
 
-    // AudioContext resume trigger for mobile browsers
-    window.addEventListener('pointerdown', () => {
-      if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
-      }
-    }, { once: true });
-
-    function renderVisualizer() {
+    function renderLoop() {
       if (!isRunning) return;
-      requestAnimationFrame(renderVisualizer);
-
-      analyser.getByteFrequencyData(dataArray);
+      requestAnimationFrame(renderLoop);
 
       const width = window.innerWidth;
       const height = window.innerHeight;
       const centerX = width / 2;
       const centerY = height / 2;
 
-      // Bass calculation (first 8 frequency bins)
-      let bassSum = 0;
-      for (let i = 0; i < 8; i++) bassSum += dataArray[i];
-      const bassAvg = bassSum / 8;
-      const bassRatio = bassAvg / 255;
+      let bassRatio = 0;
+
+      if (isMicActive && analyser) {
+        analyser.getByteFrequencyData(dataArray);
+        let bassSum = 0;
+        for (let i = 0; i < 8; i++) bassSum += dataArray[i];
+        bassRatio = (bassSum / 8) / 255;
+      } else {
+        // Generative Kinetic Telemetry Engine (Procedural FFT)
+        const bpm = 90 + Math.min(65, currentSpeedMPH * 0.85);
+        kineticPhase += (bpm / 60) * 0.04;
+
+        const kick = Math.pow(Math.max(0, Math.sin(kineticPhase * Math.PI * 2)), 4);
+        bassRatio = 0.25 + kick * 0.55;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const wave = Math.sin(kineticPhase * 3 + (i * 0.15)) * 0.5 + 0.5;
+          dataArray[i] = Math.floor((kick * 0.6 + wave * 0.4) * 220);
+        }
+      }
 
       // Motion trails
       ctx.fillStyle = `rgba(5, 0, 12, ${0.2 + (1 - bassRatio) * 0.12})`;
@@ -395,63 +481,10 @@
       ctx.restore();
     }
 
-    function renderSyntheticVisualizer() {
-      if (!isRunning) return;
-      requestAnimationFrame(renderSyntheticVisualizer);
-
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const centerX = width / 2;
-      const centerY = height / 2;
-
-      ctx.fillStyle = 'rgba(5, 0, 12, 0.2)';
-      ctx.fillRect(0, 0, width, height);
-
-      rotationAngle += 0.015;
-      const t = Date.now() * 0.004;
-      const synthBass = (Math.sin(t) + 1) / 2;
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(rotationAngle);
-
-      ctx.beginPath();
-      ctx.arc(0, 0, 70 + synthBass * 50, 0, Math.PI * 2);
-      ctx.strokeStyle = '#00f0ff';
-      ctx.lineWidth = 4;
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = '#ff007f';
-      ctx.stroke();
-
-      ctx.restore();
-
-      emojiAngle += 0.03;
-      const baseFontSize = Math.min(width, height) * 0.18;
-      const emojiScale = 1.0 + (synthBass * 0.4);
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(emojiAngle);
-      ctx.scale(emojiScale, emojiScale);
-
-      ctx.shadowColor = '#ffe600';
-      ctx.shadowBlur = 18;
-      ctx.font = `${baseFontSize}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🤩', 0, 0);
-
-      ctx.restore();
-    }
-
     function returnToDashboard() {
       isRunning = false;
-      if (streamReference) {
-        streamReference.getTracks().forEach(track => track.stop());
-      }
-      if (audioContext && audioContext.state !== 'closed') {
-        audioContext.close();
-      }
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      stopMicStream();
       window.location.href = 'index.html';
     }
   </script>

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
   <title>NOMAD // FESTIVAL OF JOY</title>
 
   <!-- PWA & Mobile Display Metadata -->
@@ -35,7 +36,6 @@
       justify-content: center;
     }
 
-    /* Fullscreen Canvas */
     #kaleidoscope-canvas {
       position: absolute;
       top: 0;
@@ -80,6 +80,35 @@
       background: rgba(0, 240, 255, 0.25);
     }
 
+    .mode-toggle-btn {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #00f0ff;
+      color: #00f0ff;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .mode-toggle-btn:active {
+      transform: scale(0.92);
+    }
+
+    .mode-toggle-btn.mic-active {
+      border-color: #ff007f;
+      color: #ff007f;
+      box-shadow: 0 0 14px rgba(255, 0, 127, 0.6);
+    }
+
     .hud-title-badge {
       background: rgba(0, 0, 0, 0.75);
       border: 1.5px solid #ff007f;
@@ -103,7 +132,6 @@
       pointer-events: none;
     }
 
-    /* Hero Mushroom */
     .mushroom-wrap {
       filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.9));
       transform-origin: center center;
@@ -153,16 +181,14 @@
 </head>
 <body>
 
-  <!-- Fullscreen Canvas -->
   <canvas id="kaleidoscope-canvas"></canvas>
 
-  <!-- Top HUD: Left = Visualizers Hub | Right = Visualizer Name -->
   <div class="top-hud-bar">
     <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">🌌 SPEED HARMONICS</button>
     <div class="hud-title-badge">FESTIVAL OF JOY</div>
   </div>
 
-  <!-- Center Stage Mascot -->
   <div class="stage-container">
     <div class="mushroom-wrap" id="mushroom-hero">
       <svg class="mushroom-svg" viewBox="0 0 240 220">
@@ -181,26 +207,21 @@
           </radialGradient>
         </defs>
 
-        <!-- 1. Stem (Tan/Cream Base) -->
         <path d="M 82,120 C 78,160 84,200 120,200 C 156,200 162,160 158,120 Z" 
               fill="#f7ecd5" stroke="#4a3525" stroke-width="5" stroke-linejoin="round" />
 
-        <!-- 2. Smile Expression -->
         <path d="M 104,168 Q 120,184 136,168" 
               fill="none" stroke="#4a3525" stroke-width="4.5" stroke-linecap="round" />
 
-        <!-- 3. Cool Sunglasses -->
         <rect x="114" y="141" width="12" height="4" fill="#000000" rx="2" />
         <polygon id="sunglass-left" points="90,136 114,136 110,154 94,154" fill="url(#sunglassesGrad)" stroke="#000000" stroke-width="4" stroke-linejoin="round" />
         <polygon id="sunglass-right" points="126,136 150,136 146,154 130,154" fill="url(#sunglassesGrad)" stroke="#000000" stroke-width="4" stroke-linejoin="round" />
         <polygon points="93,138 99,138 96,150 92,150" fill="rgba(255, 255, 255, 0.75)" />
         <polygon points="129,138 135,138 132,150 128,150" fill="rgba(255, 255, 255, 0.75)" />
 
-        <!-- 4. Mushroom Cap -->
         <path d="M 22,125 C 20,45 220,45 218,125 C 200,135 40,135 22,125 Z" 
               fill="url(#capGrad)" stroke="#300004" stroke-width="5.5" stroke-linejoin="round" />
 
-        <!-- 5. Classic White Polka Dots -->
         <ellipse cx="120" cy="72" rx="16" ry="15" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
         <ellipse cx="64" cy="94" rx="14" ry="13" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
         <ellipse cx="176" cy="94" rx="14" ry="13" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
@@ -212,7 +233,6 @@
     </div>
   </div>
 
-  <!-- Bottom HUD: Return to NOMAD Dashboard -->
   <div class="bottom-hud-container">
     <button class="btn-back-nomad" onclick="returnToDashboard()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -222,39 +242,39 @@
     </button>
   </div>
 
-  <!-- Audio Analysis, Small Floating Icons & Kaleidoscope Engine -->
   <script>
     const canvas = document.getElementById('kaleidoscope-canvas');
     const ctx = canvas.getContext('2d');
     const mushroomHero = document.getElementById('mushroom-hero');
     const sunglassLeft = document.getElementById('sunglass-left');
     const sunglassRight = document.getElementById('sunglass-right');
+    const modeBtn = document.getElementById('mode-btn');
 
     let width, height, centerX, centerY;
     let baseHue = 0;
     let symmetry = 8;
     let time = 0;
 
-    // Autonomous Symmetry Progression
     const symmetryModes = [8, 12, 16, 6, 10];
     let modeIndex = 0;
     let lastSymmetryShiftTime = 0;
 
-    // Emanating Musical Notes Particle Pool
     const noteGlyphs = ['♪', '♫', '♬', '♩', '♭', '♯'];
     let notes = [];
 
-    // Upper & Lower Orbiting Mini Cosmic Elements Pool
     const cosmicEmojis = ['🍄', '✨', '🌈', '🛸', '☮️', '🌻', '🪐', '💫', '💖'];
     let orbiters = [];
 
-    // Web Audio State
+    // Audio & Telemetry State
     let audioCtx = null;
     let analyser = null;
     let streamReference = null;
     let dataArray = null;
     let isMicActive = false;
     let wakeLock = null;
+
+    let currentSpeedMPH = 45;
+    let watchId = null;
 
     let bassEnergy = 0;
     let midEnergy = 0;
@@ -290,6 +310,20 @@
     window.addEventListener('resize', resize);
     resize();
 
+    function initGPS() {
+      if ('geolocation' in navigator) {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
+              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+            }
+          },
+          (err) => console.log('GPS velocity fallback:', err),
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+      }
+    }
+
     function spawnNote(speedMult = 1.0, count = 1) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -315,32 +349,59 @@
       }
     }
 
-    async function initAudio() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        streamReference = stream;
+    async function toggleInputMode() {
+      if (!isMicActive) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            },
+            video: false
+          });
+          streamReference = stream;
 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+          const source = audioCtx.createMediaStreamSource(stream);
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.75;
+
+          source.connect(analyser);
+          dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+          isMicActive = true;
+          modeBtn.innerHTML = '🎙️ CABIN MIC';
+          modeBtn.classList.add('mic-active');
+        } catch (err) {
+          console.warn("Microphone access denied:", err);
+          isMicActive = false;
+          modeBtn.innerHTML = '🌌 SPEED HARMONICS';
+          modeBtn.classList.remove('mic-active');
         }
-
-        const source = audioCtx.createMediaStreamSource(stream);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.75;
-
-        source.connect(analyser);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-        isMicActive = true;
-      } catch (err) {
-        console.warn("Microphone auto-start ambient fallback active:", err);
+      } else {
+        stopMicStream();
         isMicActive = false;
+        modeBtn.innerHTML = '🌌 SPEED HARMONICS';
+        modeBtn.classList.remove('mic-active');
       }
     }
 
-    // Screen WakeLock to prevent dimming
+    function stopMicStream() {
+      if (streamReference) {
+        streamReference.getTracks().forEach(track => track.stop());
+        streamReference = null;
+      }
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close();
+        audioCtx = null;
+      }
+      analyser = null;
+    }
+
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator && document.visibilityState === 'visible' && (wakeLock === null || wakeLock.released)) {
@@ -350,8 +411,9 @@
     }
 
     window.addEventListener('load', () => {
-      initAudio();
+      initGPS();
       requestWakeLock();
+      render();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -361,76 +423,64 @@
     window.addEventListener('touchstart', requestWakeLock, { passive: true });
     setInterval(requestWakeLock, 15000);
 
-    window.addEventListener('pointerdown', () => {
-      if (!isMicActive && !audioCtx) initAudio();
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true });
-
     function render() {
       const now = performance.now();
       
-      // Autonomous Symmetry Shift every 14 seconds
       if (now - lastSymmetryShiftTime > 14000) {
         lastSymmetryShiftTime = now;
         modeIndex = (modeIndex + 1) % symmetryModes.length;
         symmetry = symmetryModes[modeIndex];
       }
 
-      // Extract Audio Dynamics
       if (isMicActive && analyser) {
         analyser.getByteFrequencyData(dataArray);
 
-        // Lows / Sub-Bass & Kicks (Bins 0 to 6)
         let bassSum = 0;
         for (let i = 0; i < 6; i++) bassSum += dataArray[i];
         bassEnergy = bassSum / 6 / 255;
 
-        // Mids / Vocals & Speech (Bins 8 to 24)
         let midSum = 0;
         for (let i = 8; i < 24; i++) midSum += dataArray[i];
         midEnergy = midSum / 16 / 255;
 
-        // Highs / Cymbals & Snare (Bins 28 to 65)
         let trebleSum = 0;
         for (let i = 28; i < 65; i++) trebleSum += dataArray[i];
         trebleEnergy = trebleSum / 37 / 255;
 
-        // Dynamic note / sparkle spawns
         if (trebleEnergy > 0.35 && Math.random() < 0.7) {
           spawnNote(1.5, Math.floor(trebleEnergy * 3) + 1);
         } else if (Math.random() < 0.08) {
           spawnNote(1.0, 1);
         }
       } else {
-        // Ambient Fallback Mode
-        bassEnergy = 0.18 + Math.sin(time * 3) * 0.1;
-        midEnergy = 0.12 + Math.cos(time * 2.5) * 0.08;
-        trebleEnergy = 0.1;
-        if (Math.random() < 0.09) spawnNote(1.0, 1);
+        // Speed Harmonics Kinetic Generator
+        const speedScale = Math.min(1.8, Math.max(0.6, currentSpeedMPH / 45));
+        time += 0.035 * speedScale;
+
+        bassEnergy = 0.22 + Math.sin(time * 2.2) * 0.18;
+        midEnergy = 0.18 + Math.cos(time * 3.1) * 0.14;
+        trebleEnergy = 0.15 + Math.sin(time * 4.5) * 0.12;
+
+        if (Math.random() < 0.12 * speedScale) spawnNote(1.0 * speedScale, 1);
       }
 
-      // Spin Speed & Hue Rotation
       const spinSpeed = 0.012 + bassEnergy * 0.035;
-      time += spinSpeed;
       baseHue = (baseHue + 0.35 + midEnergy * 0.8) % 360;
 
-      // Pulse Mascot Mushroom to Bass
       const mushroomScale = 1.0 + bassEnergy * 0.38;
       const mushroomTilt = Math.sin(time * 2.4) * (2.5 + bassEnergy * 4);
       mushroomHero.style.transform = `scale(${mushroomScale}) rotate(${mushroomTilt}deg)`;
 
-      // Vocal Aura Glow on Sunglasses
       if (sunglassLeft && sunglassRight) {
         const glowColor = `hsla(${baseHue}, 100%, 65%, ${0.2 + midEnergy * 0.8})`;
         sunglassLeft.style.filter = `drop-shadow(0 0 ${midEnergy * 14}px ${glowColor})`;
         sunglassRight.style.filter = `drop-shadow(0 0 ${midEnergy * 14}px ${glowColor})`;
       }
 
-      // Background Fade Trail
       ctx.fillStyle = 'rgba(5, 0, 10, 0.22)';
       ctx.fillRect(0, 0, width, height);
 
-      // --- A. KALEIDOSCOPE SACRED MANDALA ---
+      // Kaleidoscope Mandala
       ctx.save();
       ctx.translate(centerX, centerY);
 
@@ -473,7 +523,7 @@
 
       ctx.restore();
 
-      // --- B. UPPER & LOWER ORBITING ICONS ---
+      // Orbiting Icons
       for (let i = 0; i < orbiters.length; i++) {
         const orb = orbiters[i];
         orb.x += orb.speedX * (1.0 + bassEnergy * 0.8);
@@ -500,7 +550,7 @@
         ctx.restore();
       }
 
-      // --- C. EMANATING 360° MUSICAL NOTES & MINI SPARKLES ---
+      // Emojis Emitter
       for (let i = notes.length - 1; i >= 0; i--) {
         const n = notes[i];
         n.x += n.vx;
@@ -528,15 +578,10 @@
 
       requestAnimationFrame(render);
     }
-    render();
 
     function returnToDashboard() {
-      if (streamReference) {
-        streamReference.getTracks().forEach(track => track.stop());
-      }
-      if (audioCtx && audioCtx.state !== 'closed') {
-        audioCtx.close();
-      }
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      stopMicStream();
       window.location.href = 'index.html';
     }
   </script>

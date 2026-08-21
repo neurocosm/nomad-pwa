@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
   <title>NOMAD // THE SLAM DANCE</title>
 
   <!-- PWA & Mobile Display Metadata -->
@@ -80,6 +81,35 @@
       background: rgba(57, 255, 20, 0.3);
     }
 
+    .mode-toggle-btn {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #39ff14;
+      color: #39ff14;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .mode-toggle-btn:active {
+      transform: scale(0.92);
+    }
+
+    .mode-toggle-btn.mic-active {
+      border-color: #ff0044;
+      color: #ff0044;
+      box-shadow: 0 0 14px rgba(255, 0, 68, 0.6);
+    }
+
     .hud-title-badge {
       background: rgba(0, 0, 0, 0.85);
       border: 1.5px solid #ff0044;
@@ -154,13 +184,12 @@
 
   <canvas id="slamdance-canvas"></canvas>
 
-  <!-- Top HUD: Left = Hub Link | Right = Title Badge -->
   <div class="top-hud-bar">
     <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">💥 KINETIC CADENCE</button>
     <div class="hud-title-badge">THE SLAM DANCE</div>
   </div>
 
-  <!-- Center Stage: Punk Skull with Horns & Crossed Drumsticks -->
   <div class="stage-container">
     <div class="punk-mascot-wrap" id="punk-mascot">
       <svg class="punk-mascot-svg" viewBox="0 0 320 280">
@@ -171,7 +200,6 @@
             <stop offset="100%" stop-color="#777777"/>
           </radialGradient>
 
-          <!-- Wood Grain Drumstick Gradient -->
           <linearGradient id="stickGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#fdf4e3"/>
             <stop offset="50%" stop-color="#deb887"/>
@@ -179,7 +207,6 @@
           </linearGradient>
         </defs>
 
-        <!-- 1. CROSSED DRUMSTICKS (UNDER CHIN) -->
         <g stroke="#000000" stroke-width="2.5" stroke-linejoin="round">
           <ellipse cx="62" cy="188" rx="6" ry="4" transform="rotate(-32 62 188)" fill="#fdf4e3"/>
           <polygon points="66,190 258,252 254,258 64,194" fill="url(#stickGrad)"/>
@@ -192,8 +219,6 @@
           <ellipse cx="64" cy="255" rx="4.5" ry="6" transform="rotate(32 64 255)" fill="#deb887"/>
         </g>
 
-        <!-- 2. ROCK HORNS HANDS (\m/) -->
-        <!-- Left Horns Hand -->
         <g transform="translate(18, 90) rotate(-18)" stroke="#000000" stroke-width="3" stroke-linejoin="round">
           <rect x="12" y="32" width="28" height="34" rx="8" fill="#ffffff"/>
           <rect x="12" y="2" width="7" height="34" rx="3.5" fill="#ffffff"/>
@@ -206,7 +231,6 @@
           <circle cx="36" cy="68" r="2.5" fill="#39ff14"/>
         </g>
 
-        <!-- Right Horns Hand -->
         <g transform="translate(262, 75) rotate(18)" stroke="#000000" stroke-width="3" stroke-linejoin="round">
           <rect x="12" y="32" width="28" height="34" rx="8" fill="#ffffff"/>
           <rect x="12" y="2" width="7" height="34" rx="3.5" fill="#ffffff"/>
@@ -219,38 +243,32 @@
           <circle cx="36" cy="68" r="2.5" fill="#39ff14"/>
         </g>
 
-        <!-- 3. MOHAWK SPIKES -->
         <polygon points="160,4 145,48 175,48" fill="#ff0044" stroke="#000000" stroke-width="3"/>
         <polygon points="136,16 128,58 154,54" fill="#39ff14" stroke="#000000" stroke-width="3"/>
         <polygon points="184,16 166,54 192,58" fill="#39ff14" stroke="#000000" stroke-width="3"/>
         <polygon points="116,34 112,74 136,68" fill="#ff0044" stroke="#000000" stroke-width="3"/>
         <polygon points="204,34 184,68 208,74" fill="#ff0044" stroke="#000000" stroke-width="3"/>
 
-        <!-- 4. SKULL CRANIUM -->
         <path d="M 100,110 C 90,60 230,60 220,110 C 220,140 205,150 200,180 L 120,180 C 115,150 100,140 100,110 Z" 
               fill="url(#skullGrad)" stroke="#000000" stroke-width="6" stroke-linejoin="round"/>
 
-        <!-- 5. EYE SOCKETS & NOSE -->
         <ellipse cx="128" cy="116" rx="18" ry="22" fill="#000000"/>
         <ellipse cx="192" cy="116" rx="18" ry="22" fill="#000000"/>
         <circle id="eye-glow-left" cx="128" cy="116" r="6" fill="#39ff14"/>
         <circle id="eye-glow-right" cx="192" cy="116" r="6" fill="#39ff14"/>
         <polygon points="160,136 152,154 168,154" fill="#000000"/>
 
-        <!-- 6. TEETH / JAW -->
         <rect x="128" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
         <rect x="144" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
         <rect x="160" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
         <rect x="176" y="174" width="12" height="18" fill="#ffffff" stroke="#000000" stroke-width="2.5" rx="2"/>
 
-        <!-- 7. SAFETY PIN PIERCE -->
         <path d="M 92,145 Q 80,165 102,175 L 122,155" fill="none" stroke="#e0e0e0" stroke-width="4.5" stroke-linecap="round"/>
         <circle cx="92" cy="145" r="5" fill="#aaaaaa" stroke="#000000" stroke-width="1.5"/>
       </svg>
     </div>
   </div>
 
-  <!-- Bottom HUD: Return to NOMAD Dashboard -->
   <div class="bottom-hud-container">
     <button class="btn-back-nomad" onclick="returnToDashboard()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -262,34 +280,35 @@
 
   <script>
     const canvas = document.getElementById('slamdance-canvas');
-    // Disable alpha compositing buffer for pitch-black performance
     const ctx = canvas.getContext('2d', { alpha: false });
     const punkMascot = document.getElementById('punk-mascot');
     const eyeGlowLeft = document.getElementById('eye-glow-left');
     const eyeGlowRight = document.getElementById('eye-glow-right');
+    const modeBtn = document.getElementById('mode-btn');
 
     let width, height, centerX, centerY;
     let time = 0;
 
-    // Audio Reactive State
     let audioCtx = null;
     let analyser = null;
     let streamReference = null;
-    let dataArray = null;
-    let bufferLength = 0;
+    let dataArray = new Uint8Array(128);
+    let bufferLength = 128;
     let isMicActive = false;
-    let isRunning = false;
+    let isRunning = true;
     let wakeLock = null;
+
+    let currentSpeedMPH = 50;
+    let cadencePhase = 0;
+    let watchId = null;
 
     let bassRatio = 0;
     let midRatio = 0;
     let trebleRatio = 0;
 
-    // Mosh Spark Particles Pool
     let sparks = [];
     const sparkCount = 45;
 
-    // Instrument Emojis Emitter Pool
     const musicGlyphs = ['🎸', '🥁', '🎷', '🎺', '🪕', '⚡', '💥', '🤘', '🎵', '🎶', '🔊', '🎙️'];
     let instrumentParticles = [];
 
@@ -319,6 +338,20 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    function initGPS() {
+      if ('geolocation' in navigator) {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
+              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+            }
+          },
+          (err) => console.log('GPS velocity fallback:', err),
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+      }
+    }
+
     function spawnInstrument(speedMult = 1.0, count = 1) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -339,38 +372,61 @@
       }
     }
 
-    async function startAudioEngine() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        streamReference = stream;
+    async function toggleInputMode() {
+      if (!isMicActive) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            },
+            video: false
+          });
+          streamReference = stream;
 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.72;
+
+          bufferLength = analyser.frequencyBinCount;
+          dataArray = new Uint8Array(bufferLength);
+
+          const source = audioCtx.createMediaStreamSource(stream);
+          source.connect(analyser);
+
+          isMicActive = true;
+          modeBtn.innerHTML = '🎙️ CABIN MIC';
+          modeBtn.classList.add('mic-active');
+        } catch (err) {
+          console.warn("Microphone access denied:", err);
+          isMicActive = false;
+          modeBtn.innerHTML = '💥 KINETIC CADENCE';
+          modeBtn.classList.remove('mic-active');
         }
-
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.72;
-
-        bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-
-        const source = audioCtx.createMediaStreamSource(stream);
-        source.connect(analyser);
-
-        isMicActive = true;
-        isRunning = true;
-        renderLoop();
-      } catch (err) {
-        console.warn("Microphone auto-start ambient fallback active:", err);
+      } else {
+        stopMicStream();
         isMicActive = false;
-        isRunning = true;
-        renderLoop();
+        modeBtn.innerHTML = '💥 KINETIC CADENCE';
+        modeBtn.classList.remove('mic-active');
       }
     }
 
-    // Persistent Screen WakeLock
+    function stopMicStream() {
+      if (streamReference) {
+        streamReference.getTracks().forEach(track => track.stop());
+        streamReference = null;
+      }
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close();
+        audioCtx = null;
+      }
+      analyser = null;
+    }
+
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator && document.visibilityState === 'visible') {
@@ -380,8 +436,9 @@
     }
 
     window.addEventListener('load', () => {
-      startAudioEngine();
+      initGPS();
       requestWakeLock();
+      renderLoop();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -390,11 +447,6 @@
     window.addEventListener('focus', requestWakeLock);
     window.addEventListener('touchstart', requestWakeLock, { passive: true });
     setInterval(requestWakeLock, 15000);
-
-    window.addEventListener('pointerdown', () => {
-      if (!isMicActive && !audioCtx) startAudioEngine();
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true });
 
     function renderLoop() {
       if (!isRunning) return;
@@ -405,17 +457,14 @@
       if (isMicActive && analyser) {
         analyser.getByteFrequencyData(dataArray);
 
-        // Lows / Bass Kick (Bins 0 to 6)
         let bassSum = 0;
         for (let i = 0; i < 6; i++) bassSum += dataArray[i];
         bassRatio = bassSum / 6 / 255;
 
-        // Mids / Guitars (Bins 8 to 28)
         let midSum = 0;
         for (let i = 8; i < 28; i++) midSum += dataArray[i];
         midRatio = midSum / 20 / 255;
 
-        // Highs / Cymbals (Bins 30 to 65)
         let trebleSum = 0;
         for (let i = 30; i < 65; i++) trebleSum += dataArray[i];
         trebleRatio = trebleSum / 35 / 255;
@@ -426,13 +475,26 @@
           spawnInstrument(1.0, 1);
         }
       } else {
-        bassRatio = 0.35 + Math.sin(time * 6) * 0.25;
-        midRatio = 0.25 + Math.cos(time * 4) * 0.2;
-        trebleRatio = 0.2 + Math.sin(time * 8) * 0.15;
-        if (Math.random() < 0.08) spawnInstrument(1.0, 1);
+        // Kinetic Cadence Synthesizer
+        const cadenceSpeed = 100 + Math.min(80, currentSpeedMPH);
+        cadencePhase += (cadenceSpeed / 60) * 0.04;
+
+        const slamHit = Math.pow(Math.max(0, Math.sin(cadencePhase * Math.PI * 2)), 6);
+        bassRatio = 0.3 + slamHit * 0.65;
+        midRatio = 0.25 + Math.cos(cadencePhase * 2.8) * 0.2;
+        trebleRatio = 0.2 + Math.sin(cadencePhase * 4.2) * 0.18;
+
+        for (let i = 0; i < bufferLength; i++) {
+          dataArray[i] = Math.floor((slamHit * 0.7 + Math.sin(time * 6 + i) * 0.3) * 230);
+        }
+
+        if (slamHit > 0.7 && Math.random() < 0.8) {
+          spawnInstrument(1.8, Math.floor(slamHit * 3) + 1);
+        } else if (Math.random() < 0.07) {
+          spawnInstrument(1.0, 1);
+        }
       }
 
-      // 1. Dynamic Headbanging Mascot & Eye Glow
       const headbangScale = 1.0 + bassRatio * 0.45;
       const headbangTilt = (Math.sin(time * 8) * 6) * (0.4 + bassRatio);
       punkMascot.style.transform = `scale(${headbangScale}) rotate(${headbangTilt}deg)`;
@@ -443,16 +505,14 @@
         eyeGlowRight.setAttribute('fill', eyeColor);
       }
 
-      // 2. High-Contrast Jet Black Clear with Reset Shadow State
       ctx.shadowBlur = 0;
       ctx.shadowColor = 'transparent';
       ctx.globalAlpha = 1.0;
 
-      // Dark background trail without gray build-up
       ctx.fillStyle = bassRatio > 0.82 ? 'rgba(25, 0, 6, 0.25)' : 'rgba(0, 0, 0, 0.18)';
       ctx.fillRect(0, 0, width, height);
 
-      // 3. Audio-Reactive Electric Oscilloscope Ring
+      // Oscilloscope Ring
       ctx.save();
       ctx.translate(centerX, centerY);
 
@@ -463,7 +523,7 @@
       for (let i = 0; i <= numPoints; i++) {
         const angle = (i / numPoints) * Math.PI * 2;
         const freqIdx = Math.floor((i / numPoints) * (bufferLength || 32));
-        const amp = isMicActive ? (dataArray[freqIdx] / 255) : Math.sin(time * 5 + i);
+        const amp = (dataArray[freqIdx] / 255);
         const dist = baseRadius + (amp * 65 * (1 + bassRatio * 0.8));
 
         const x = Math.cos(angle) * dist;
@@ -479,7 +539,7 @@
       ctx.shadowColor = ctx.strokeStyle;
       ctx.stroke();
 
-      // 4. Jagged Lightning Flashes
+      // Jagged Lightning Flashes
       if (bassRatio > 0.65) {
         const numBolts = Math.floor(bassRatio * 4) + 1;
         for (let b = 0; b < numBolts; b++) {
@@ -507,7 +567,7 @@
       }
       ctx.restore();
 
-      // 5. Mosh Sparks & Shards
+      // Mosh Sparks
       for (let i = 0; i < sparks.length; i++) {
         const p = sparks[i];
         p.x += p.vx * (1 + bassRatio * 3);
@@ -526,7 +586,7 @@
         ctx.fill();
       }
 
-      // 6. Emanating 360° Musical Instrument Emojis
+      // Emojis Emitter
       for (let i = instrumentParticles.length - 1; i >= 0; i--) {
         const p = instrumentParticles[i];
         p.x += p.vx;
@@ -555,12 +615,8 @@
 
     function returnToDashboard() {
       isRunning = false;
-      if (streamReference) {
-        streamReference.getTracks().forEach(track => track.stop());
-      }
-      if (audioCtx && audioCtx.state !== 'closed') {
-        audioCtx.close();
-      }
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      stopMicStream();
       window.location.href = 'index.html';
     }
   </script>

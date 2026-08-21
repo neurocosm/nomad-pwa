@@ -56,24 +56,24 @@
       transition: all 0.3s ease;
     }
 
-    /* STANDARD AVIATION BLUE FRAMED COCKPIT CARDS */
-    .card {
-      background-color: #16161e;
-      border-radius: 12px;
-      border: 1.5px solid #007aff;
-      box-shadow: 0 0 10px rgba(0, 122, 255, 0.25);
-      padding: 4px 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      height: 100%;
-      min-height: 0;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+    /* DEEP CHARCOAL STEALTH COCKPIT CARDS */
+.card {
+  background-color: #16161e;
+  border-radius: 12px;
+  border: 1.5px solid #282830;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
 
     /* GALAGA EASTER EGG THEME OVERRIDES */
     .dashboard.galaga-theme .card {
@@ -991,8 +991,10 @@
     let lastGeocodeTime = 0;
     let wakeLock = null;
 
-    // Active Highway State for Auto-Zoom
+    // Active Highway State for Auto-Zoom & Black Box Logger
     let currentInterstateShield = null;
+    let currentRouteShield = null;
+    let lastLoggedRouteSignature = null;
     let targetMapZoom = 16.0;
     let lastUserMapInteractionTime = 0;
 
@@ -1106,6 +1108,23 @@
     }
 
     window.addEventListener('resize', autoShrinkStreetName);
+
+    /* BLACK BOX FLIGHT RECORDER ENGINE */
+    function recordBlackBoxEntry(entry) {
+      try {
+        const raw = localStorage.getItem('nomad_blackbox_log');
+        let logs = raw ? JSON.parse(raw) : [];
+
+        logs.push(entry);
+        if (logs.length > 5) {
+          logs = logs.slice(logs.length - 5);
+        }
+
+        localStorage.setItem('nomad_blackbox_log', JSON.stringify(logs));
+      } catch (err) {
+        console.warn("Black box storage error:", err);
+      }
+    }
 
     /* WEB AUDIO API ENGINE */
     function getAudioContext() {
@@ -2089,6 +2108,7 @@
           }
 
           currentInterstateShield = interstateNum;
+          currentRouteShield = routeNum;
 
           const interstateContainer = document.getElementById('interstate-badge-container');
           if (interstateNum) {
@@ -2148,6 +2168,29 @@
 
           document.getElementById('city-state').innerText = `${city}${city && stateCode ? ', ' : ''}${stateCode}`;
           document.getElementById('county-zip').innerText = `${county} ${postcode}`.trim();
+
+          // --- 3. BLACK BOX RECORDER COMMIT TRIGGER ---
+          if (interstateNum || routeNum) {
+            const routeSig = `${interstateNum || ''}_${routeNum || ''}_${displayRoadName}`;
+            if (routeSig !== lastLoggedRouteSignature) {
+              lastLoggedRouteSignature = routeSig;
+              const liveMph = (rawSpeedMps !== null && !isNaN(rawSpeedMps)) ? Math.round(rawSpeedMps * 2.23694) : 0;
+              const headingLabel = (currentHeading !== null && !isNaN(currentHeading)) 
+                ? `${Math.round(currentHeading)}° ${getCardinalDirection(currentHeading)}` 
+                : '--';
+
+              recordBlackBoxEntry({
+                timestamp: new Date().toISOString(),
+                lat: Number(lat.toFixed(5)),
+                lon: Number(lon.toFixed(5)),
+                roadName: fullStreetAddress,
+                interstateShield: interstateNum || null,
+                routeShield: routeNum || null,
+                speedMph: liveMph,
+                heading: headingLabel
+              });
+            }
+          }
         }
       } catch (err) {
         console.error("Reverse geocoding error:", err);
