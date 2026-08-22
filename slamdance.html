@@ -74,6 +74,7 @@
       letter-spacing: 1px;
       box-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
       transition: transform 0.15s ease, background 0.15s ease;
+      cursor: pointer;
     }
 
     .nav-btn-hub:active {
@@ -185,7 +186,7 @@
   <canvas id="slamdance-canvas"></canvas>
 
   <div class="top-hud-bar">
-    <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <a href="visualizer.html" class="nav-btn-hub" onclick="window.location.replace('visualizer.html'); return false;">&lt; VISUALIZERS</a>
     <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">💥 KINETIC CADENCE</button>
     <div class="hud-title-badge">THE SLAM DANCE</div>
   </div>
@@ -617,7 +618,7 @@
       isRunning = false;
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       stopMicStream();
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     }
   </script>
 </body>

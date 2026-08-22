@@ -74,6 +74,7 @@
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
       transition: transform 0.15s ease, background 0.15s ease;
       white-space: nowrap;
+      cursor: pointer;
     }
 
     .nav-btn-hub:active {
@@ -223,7 +224,7 @@
   <canvas id="seasons-canvas"></canvas>
 
   <div class="top-hud-bar">
-    <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <a href="visualizer.html" class="nav-btn-hub" onclick="window.location.replace('visualizer.html'); return false;">&lt; VISUALIZERS</a>
 
     <div class="controls-strip">
       <div class="season-picker-strip">
@@ -747,7 +748,7 @@
       isRunning = false;
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       stopMicStream();
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     }
   </script>
 </body>

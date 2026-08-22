@@ -80,6 +80,7 @@
       align-items: center;
       gap: 6px;
       transition: background 0.15s ease, transform 0.1s ease;
+      cursor: pointer;
     }
 
     .btn-back:active {
@@ -101,6 +102,7 @@
       gap: 6px;
       font-family: "Courier New", Courier, monospace;
       transition: background 0.15s ease, transform 0.1s ease;
+      cursor: pointer;
     }
 
     .btn-terminal-header:active {
@@ -143,6 +145,7 @@
       white-space: nowrap;
       letter-spacing: 0.5px;
       transition: background 0.15s ease, transform 0.1s ease;
+      cursor: pointer;
     }
 
     .btn-gps-guide:active {
@@ -326,6 +329,7 @@
       text-decoration: none;
       margin-top: 12px;
       transition: transform 0.1s ease, background 0.15s ease;
+      cursor: pointer;
     }
 
     .btn-card-action:active {
@@ -372,8 +376,8 @@
         <div class="header-tagline">Telemetry &amp; Navigation HUD</div>
       </div>
       <div class="header-nav-btns">
-        <a href="geek-stats.html" class="btn-terminal-header">&gt;_ VT220</a>
-        <a href="index.html" class="btn-back">
+        <a href="geek-stats.html" class="btn-terminal-header" onclick="window.location.replace('geek-stats.html'); return false;">&gt;_ VT220</a>
+        <a href="index.html" class="btn-back" onclick="window.location.replace('index.html'); return false;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -388,7 +392,7 @@
         <span>🛰️</span>
         <span>Need help locking GPS on iOS or Android?</span>
       </div>
-      <a href="gps-setup.html" class="btn-gps-guide">GPS GUIDE &rarr;</a>
+      <a href="gps-setup.html" class="btn-gps-guide" onclick="window.location.replace('gps-setup.html'); return false;">GPS GUIDE &rarr;</a>
     </div>
 
     <!-- 1. CORE TELEMETRY & DISPLAY MODES -->
@@ -404,7 +408,7 @@
           <span class="feature-action-pill">Auto-Shrink</span>
         </div>
         <div class="feature-desc">
-          Instant reverse-geocoding displays full street numbers, abbreviations (St., Ave., Rd.), town, state code, and county zip[cite: 2]. Dynamic font sizing prevents long street names from overflowing[cite: 2].
+          Instant reverse-geocoding displays full street numbers, abbreviations (St., Ave., Rd.), town, state code, and county zip[cite: 4]. Dynamic font sizing prevents long street names from overflowing[cite: 4].
         </div>
       </div>
 
@@ -414,7 +418,7 @@
           <span class="feature-action-pill">Single Tap</span>
         </div>
         <div class="feature-desc">
-          Tap the top Location Card to copy a direct Google Maps GPS coordinate link to your clipboard with an instant confirmation badge[cite: 2].
+          Tap the top Location Card to copy a direct Google Maps GPS coordinate link to your clipboard with an instant confirmation badge[cite: 4].
         </div>
       </div>
 
@@ -424,7 +428,7 @@
           <span class="feature-action-pill">Hold Location (600ms)</span>
         </div>
         <div class="feature-desc">
-          Long-press the top Location Card to open the main system modal, granting instant access to the Visualizer Arcade, VT220 Terminal, and Developer Links[cite: 1, 2].
+          Long-press the top Location Card to open the main system modal, granting instant access to the Visualizer Arcade, VT220 Terminal, and Developer Links[cite: 4].
         </div>
       </div>
 
@@ -434,7 +438,7 @@
           <span class="feature-action-pill">Tap Badge</span>
         </div>
         <div class="feature-desc">
-          Cycles between <strong>Heading &amp; Bearing</strong> (e.g. 270° W), <strong>GPS Altitude</strong> in feet, and real-time <strong>GPS Accuracy Margin</strong> (±ft)[cite: 2].
+          Cycles between <strong>Heading &amp; Bearing</strong> (e.g. 270° W), <strong>GPS Altitude</strong> in feet, and real-time <strong>GPS Accuracy Margin</strong> (±ft)[cite: 4].
         </div>
       </div>
 
@@ -444,7 +448,7 @@
           <span class="feature-action-pill">Tap Compass</span>
         </div>
         <div class="feature-desc">
-          Toggle between active forward-driving orientation with needle tracking (lower third camera sightline) and locked True-North perspective[cite: 2].
+          Toggle between active forward-driving orientation with needle tracking (lower third camera sightline) and locked True-North perspective[cite: 4].
         </div>
       </div>
 
@@ -454,7 +458,7 @@
           <span class="feature-action-pill">Automatic</span>
         </div>
         <div class="feature-desc">
-          Intelligently renders simultaneous Federal Interstate shields and State Route badges (e.g., I-95 &amp; Route 128 / I-93 &amp; Route 3) while snapping directional headers to your line of travel[cite: 2].
+          Intelligently renders simultaneous Federal Interstate shields and State Route badges (e.g., I-95 &amp; Route 128 / I-93 &amp; Route 3) while snapping directional headers to your line of travel[cite: 4].
         </div>
       </div>
 
@@ -464,7 +468,7 @@
           <span class="feature-action-pill">Automatic</span>
         </div>
         <div class="feature-desc">
-          Camera automatically pulls out to higher cruising altitudes on interstate freeways (&gt;55 MPH, zoom 13.8) and zooms in tightly for surface turns (&lt;35 MPH, zoom 16.0)[cite: 1].
+          Camera automatically pulls out to higher cruising altitudes on interstate freeways (&gt;55 MPH, zoom 13.8) and zooms in tightly for surface turns (&lt;35 MPH, zoom 16.0)[cite: 4].
         </div>
       </div>
     </div>
@@ -482,7 +486,7 @@
           <span class="feature-action-pill">Tap Speed</span>
         </div>
         <div class="feature-desc">
-          Authentic highway regulatory sign styling[cite: 2]. Tap to instantly toggle between <strong>MPH</strong> and <strong>KM/H</strong>[cite: 2].
+          Authentic highway regulatory sign styling[cite: 4]. Tap to instantly toggle between <strong>MPH</strong> and <strong>KM/H</strong>[cite: 4].
         </div>
       </div>
 
@@ -492,7 +496,7 @@
           <span class="feature-action-pill">Tap Vehicle</span>
         </div>
         <div class="feature-desc">
-          Tap the vehicle marker to alternate between CARTO Dark Matter (night mode) and Positron (high-visibility neutral day mode)[cite: 2].
+          Tap the vehicle marker to alternate between CARTO Dark Matter (night mode) and Positron (high-visibility neutral day mode)[cite: 4].
         </div>
       </div>
 
@@ -502,7 +506,7 @@
           <span class="feature-action-pill">Tap Temp</span>
         </div>
         <div class="feature-desc">
-          Real-time conditions from Open-Meteo including dynamic weather icons, relative humidity percentage, and color-graded UV index warnings[cite: 2]. Tap temperature to toggle between <strong>°F</strong> and <strong>°C</strong>[cite: 2].
+          Real-time conditions from Open-Meteo including dynamic weather icons, relative humidity percentage, and color-graded UV index warnings[cite: 4]. Tap temperature to toggle between <strong>°F</strong> and <strong>°C</strong>[cite: 4].
         </div>
       </div>
 
@@ -512,7 +516,7 @@
           <span class="feature-action-pill">Hold Temp (500ms)</span>
         </div>
         <div class="feature-desc">
-          Long-press temperature to set your custom update polling: Time intervals (10m, 20m, 30m, 60m) or Distance triggers (15mi, 30mi, 50mi, or Off)[cite: 2].
+          Long-press temperature to set your custom update polling: Time intervals (10m, 20m, 30m, 60m) or Distance triggers (15mi, 30mi, 50mi, or Off)[cite: 4].
         </div>
       </div>
 
@@ -522,7 +526,7 @@
           <span class="feature-action-pill">Tap Top Icon</span>
         </div>
         <div class="feature-desc">
-          Locks your phone display awake during long road trips and triggers native borderless immersive fullscreen navigation[cite: 2].
+          Locks your phone display awake during long road trips and triggers native borderless immersive fullscreen navigation[cite: 4].
         </div>
       </div>
     </div>
@@ -534,7 +538,7 @@
         Visualizer Arcade Suite
       </div>
       <div class="feature-desc" style="color: #cccccc;">
-        Full-screen, audio-reactive visualizers that use your device microphone to generate synchronized cockpit FX with standard HUD scaffolding and persistent screen wake locks[cite: 1, 2].
+        Full-screen, audio-reactive visualizers that use your device microphone to generate synchronized cockpit FX with standard HUD scaffolding and persistent screen wake locks[cite: 4].
       </div>
 
       <div class="vis-guide-grid">
@@ -544,7 +548,7 @@
             <span>🤩</span> Panic: Disco
           </div>
           <div class="vis-guide-desc">
-            Neon spectrum tunnel with audio-reactive radial light beams, dual EQ towers, and star-eyed mascot[cite: 1].
+            Neon spectrum tunnel with audio-reactive radial light beams, dual EQ towers, and star-eyed mascot[cite: 4].
           </div>
         </div>
 
@@ -554,7 +558,7 @@
             <span>🍄</span> Festival of Joy
           </div>
           <div class="vis-guide-desc">
-            360° kaleidoscope sacred geometry, shades-wearing mushroom mascot, and exploding musical notes[cite: 1].
+            360° kaleidoscope sacred geometry, shades-wearing mushroom mascot, and exploding musical notes[cite: 4].
           </div>
         </div>
 
@@ -564,7 +568,7 @@
             <span>🤘</span> The Slam Dance
           </div>
           <div class="vis-guide-desc">
-            Headbanging punk skull with hot mohawk spikes, rock horns, crossed sticks, lightning bolts, and flying instrument emojis on pitch-black void[cite: 1, 2].
+            Headbanging punk skull with hot mohawk spikes, rock horns, crossed sticks, lightning bolts, and flying instrument emojis on pitch-black void[cite: 4].
           </div>
         </div>
 
@@ -574,12 +578,12 @@
             <span>☀️</span> Seasons
           </div>
           <div class="vis-guide-desc">
-            Auto-detects Spring, Summer, Autumn, or Winter calendar dates with custom dynamic horizons, seasonal mascots, and manual override pills[cite: 1].
+            Auto-detects Spring, Summer, Autumn, or Winter calendar dates with custom dynamic horizons, seasonal mascots, and manual override pills[cite: 4].
           </div>
         </div>
       </div>
 
-      <a href="visualizer.html" class="btn-card-action btn-vis-hub">
+      <a href="visualizer.html" class="btn-card-action btn-vis-hub" onclick="window.location.replace('visualizer.html'); return false;">
         OPEN VISUALIZER ARCADE &rarr;
       </a>
     </div>
@@ -591,7 +595,7 @@
         VT220 Amber Phosphor Terminal
       </div>
       <div class="feature-desc" style="color: #cccccc;">
-        A DEC VT220-inspired retro CRT terminal running live GPS telemetry, coordinate stream logging, and diagnostic vehicle stats[cite: 1].
+        A DEC VT220-inspired retro CRT terminal running live GPS telemetry, coordinate stream logging, and diagnostic vehicle stats[cite: 4].
       </div>
 
       <div class="feature-row" style="margin-top: 10px;">
@@ -600,7 +604,7 @@
           <span class="feature-action-pill amber">VT220 Scanlines</span>
         </div>
         <div class="feature-desc">
-          Monospace typography with hardware CRT scanline overlays and amber phosphor persistent illumination[cite: 1].
+          Monospace typography with hardware CRT scanline overlays and amber phosphor persistent illumination[cite: 4].
         </div>
       </div>
 
@@ -610,11 +614,11 @@
           <span class="feature-action-pill amber">Real-Time</span>
         </div>
         <div class="feature-desc">
-          Live streaming logs for GPS Fix, Velocity Vectors, True Bearing, Barometric/GPS Altitude, Sat Accuracy, and Trip Odometer[cite: 1].
+          Live streaming logs for GPS Fix, Velocity Vectors, True Bearing, Barometric/GPS Altitude, Sat Accuracy, and Trip Odometer[cite: 4].
         </div>
       </div>
 
-      <a href="geek-stats.html" class="btn-card-action btn-term-hub">
+      <a href="geek-stats.html" class="btn-card-action btn-term-hub" onclick="window.location.replace('geek-stats.html'); return false;">
         &gt; LAUNCH GEEK-STATS.HTML _
       </a>
     </div>
@@ -630,8 +634,8 @@
       <div class="secret-box">
         <div class="secret-title">🎺 General Lee "Dixie" Air Horn &amp; Octagon 01</div>
         <div class="secret-desc">
-          <strong>Trigger:</strong> Press and hold the <strong>Vehicle Arrow</strong> for 500ms in normal cruise mode[cite: 1, 2].<br />
-          <strong>Effect:</strong> Synthesizes the authentic 12-note <em>Dixie</em> phrase via dual harmonic oscillators while the car swells to <strong>2× size with a pulsing orange glow</strong> and the telemetry badge flashes the official <strong>"01"</strong> insignia[cite: 1, 2].
+          <strong>Trigger:</strong> Press and hold the <strong>Vehicle Arrow</strong> for 500ms in normal cruise mode[cite: 4].<br />
+          <strong>Effect:</strong> Synthesizes the authentic 12-note <em>Dixie</em> phrase via dual harmonic oscillators while the car swells to <strong>2× size with a pulsing orange glow</strong> and the telemetry badge flashes the official <strong>"01"</strong> insignia[cite: 4].
         </div>
       </div>
 
@@ -639,24 +643,15 @@
       <div class="secret-box">
         <div class="secret-title">👾 8-Bit Galaga Mode &amp; Triple Blaster Lasers</div>
         <div class="secret-desc">
-          <strong>Trigger:</strong> Press and hold the <strong>SPEED Sign</strong> for 600ms[cite: 1, 2].<br />
-          <strong>Effect:</strong> Morphs the dashboard into an OutRun neon arcade cockpit (magenta/cyan glow), turns the speed sign into an arcade cabinet, and swaps your car for an 8-bit Galaga Fighter craft[cite: 1, 2]. Long-press the Galaga ship to fire <strong>three dual-laser salvos (pew-pew ... pew-pew ... pew-pew!)</strong> with 2× recoil pulsing[cite: 1, 2].
-        </div>
-      </div>
-
-      <!-- Secret 3: Panic Disco Warp -->
-      <div class="secret-box">
-        <div class="secret-title">🕺 2-Finger Visualizer Warp Gesture</div>
-        <div class="secret-desc">
-          <strong>Trigger:</strong> Swipe <strong>two fingers down</strong> anywhere on the Map canvas[cite: 1, 2].<br />
-          <strong>Effect:</strong> Sounds the classic racetrack <strong>"First Call" (Call to the Post) Bugle Fanfare</strong>, flashes <code>PANIC!</code> on the HUD, and immediately launches into the Visualizer Suite[cite: 1, 2].
+          <strong>Trigger:</strong> Press and hold the <strong>SPEED Sign</strong> for 600ms[cite: 4].<br />
+          <strong>Effect:</strong> Morphs the dashboard into an OutRun neon arcade cockpit (magenta/cyan glow), turns the speed sign into an arcade cabinet, and swaps your car for an 8-bit Galaga Fighter craft[cite: 4]. Long-press the Galaga ship to fire <strong>three dual-laser salvos (pew-pew ... pew-pew ... pew-pew!)</strong> with 2× recoil pulsing[cite: 4].
         </div>
       </div>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      NOMAD: RoadTrip Navigation Dashboard &bull; Crafted by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a>[cite: 2]
+      NOMAD: RoadTrip Navigation Dashboard &bull; Crafted by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a>
     </div>
   </div>
 

@@ -57,23 +57,23 @@
     }
 
     /* DEEP CHARCOAL STEALTH COCKPIT CARDS */
-.card {
-  background-color: #16161e;
-  border-radius: 12px;
-  border: 1.5px solid #282830;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
-  padding: 4px 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  height: 100%;
-  min-height: 0;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
+    .card {
+      background-color: #16161e;
+      border-radius: 12px;
+      border: 1.5px solid #282830;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      min-height: 0;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
 
     /* GALAGA EASTER EGG THEME OVERRIDES */
     .dashboard.galaga-theme .card {
@@ -307,7 +307,7 @@
       display: none;
     }
 
-    /* Top-Center Overlay: Fullscreen Toggle Button */
+    /* Top-Center Overlay: Fullscreen Toggle Button + TOTAL RECALL STYLING */
     .map-overlay-fullscreen {
       position: absolute;
       top: 8px;
@@ -325,10 +325,13 @@
       justify-content: center;
       cursor: pointer;
       user-select: none;
-      transition: transform 0.15s ease, border-color 0.2s;
+      touch-action: none;
+      transition: transform 0.15s ease, border-color 0.2s, box-shadow 0.2s;
     }
 
-    .map-overlay-fullscreen:active {
+    .map-overlay-fullscreen.recall-holding {
+      border-color: #ff004f !important;
+      box-shadow: 0 0 16px rgba(255, 0, 79, 0.8), inset 0 0 8px rgba(255, 0, 79, 0.6) !important;
       transform: translateX(-50%) scale(0.92);
     }
 
@@ -686,30 +689,21 @@
       font-weight: 600;
     }
 
+    .modal-author a {
+      color: #007aff;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .modal-author a:active {
+      opacity: 0.7;
+    }
+
     .modal-body {
       font-size: 0.95rem;
       color: #cccccc;
       line-height: 1.4;
       margin-bottom: 14px;
-    }
-
-    /* Modal Navigation Buttons */
-    .modal-link-btn {
-      display: inline-block;
-      width: 100%;
-      padding: 11px;
-      background-color: #007aff;
-      color: #ffffff;
-      text-decoration: none;
-      border-radius: 10px;
-      font-size: 1.0rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      transition: background-color 0.15s ease;
-    }
-
-    .modal-link-btn:active {
-      background-color: #0056b3;
     }
 
     /* Visualizer Arcade Hub Button */
@@ -747,7 +741,7 @@
       border-radius: 10px;
       font-size: 0.95rem;
       font-weight: 900;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       box-shadow: 0 0 10px rgba(255, 176, 0, 0.25);
       transition: background-color 0.15s ease, transform 0.1s ease;
       font-family: "Courier New", Courier, monospace;
@@ -832,8 +826,8 @@
       <!-- Top-Left Overlay: Telemetry Multi-Badge -->
       <div class="map-overlay-heading" id="heading-text" onclick="toggleTelemetryMode(event)">0° N</div>
 
-      <!-- Top-Center Overlay: Fullscreen Toggle Button -->
-      <div class="map-overlay-fullscreen" id="fullscreen-btn" onclick="toggleFullScreen(event)">
+      <!-- Top-Center Overlay: Fullscreen Toggle Button + TOTAL RECALL Trigger -->
+      <div class="map-overlay-fullscreen" id="fullscreen-btn">
         <svg id="fullscreen-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
         </svg>
@@ -922,22 +916,21 @@
   <!-- BRANDING ABOUT MODAL OVERLAY -->
   <div class="modal-overlay" id="about-modal" onclick="closeAboutModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <a href="features.html" class="modal-title-link" title="View Features & Guide">
+      <a href="features.html" class="modal-title-link" onclick="window.location.replace('features.html'); return false;" title="View Features & Guide">
         <div class="modal-title">NOMAD: RoadTrip ↗</div>
         <div class="modal-features-hint">Features &amp; User Guide</div>
       </a>
-      <div class="modal-author">by BostonyFX</div>
+      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a></div>
       <div class="modal-body">
         Real-time telemetry, GPS tracking, and heads-up navigation dashboard.
       </div>
       
       <!-- VISUALIZER ARCADE LINK -->
-      <a href="visualizer.html" class="modal-vis-btn">✨ VISUALIZER ARCADE ↗</a>
+      <a href="visualizer.html" class="modal-vis-btn" onclick="window.location.replace('visualizer.html'); return false;">✨ VISUALIZER ARCADE ↗</a>
 
       <!-- GEEK STATS TERMINAL LINK -->
-      <a href="geek-stats.html" class="modal-stats-btn">&gt; GEEK STATS (VT220) _</a>
+      <a href="geek-stats.html" class="modal-stats-btn" onclick="window.location.replace('geek-stats.html'); return false;">&gt; GEEK STATS (VT220) _</a>
 
-      <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer" class="modal-link-btn">Visit Website</a>
       <div>
         <button class="modal-close-btn" onclick="closeAboutModal()">Close</button>
       </div>
@@ -1306,62 +1299,6 @@
       } catch (e) {}
     }
 
-    function playFirstCallFanfare(onComplete) {
-      try {
-        const ctx = getAudioContext();
-        const now = ctx.currentTime;
-
-        const bugleNotes = [
-          [392.00, 0.09], [523.25, 0.09], [659.25, 0.09], [783.99, 0.22],
-          [659.25, 0.09], [783.99, 0.09], [659.25, 0.09], [783.99, 0.22],
-          [659.25, 0.09], [523.25, 0.09], [659.25, 0.09], [523.25, 0.22],
-          [392.00, 0.38]
-        ];
-
-        let offset = 0;
-        bugleNotes.forEach(([freq, dur]) => {
-          const osc1 = ctx.createOscillator();
-          const osc2 = ctx.createOscillator();
-          const gain = ctx.createGain();
-
-          osc1.type = 'sawtooth';
-          osc2.type = 'square';
-
-          osc1.frequency.setValueAtTime(freq, now + offset);
-          osc2.frequency.setValueAtTime(freq * 1.002, now + offset);
-
-          gain.gain.setValueAtTime(0.2, now + offset);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + offset + dur);
-
-          osc1.connect(gain);
-          osc2.connect(gain);
-          gain.connect(ctx.destination);
-
-          osc1.start(now + offset);
-          osc2.start(now + offset);
-          osc1.stop(now + offset + dur);
-          osc2.stop(now + offset + dur);
-
-          offset += dur * 0.92;
-        });
-
-        const badgeEl = document.getElementById('heading-text');
-        if (badgeEl) {
-          clearTimeout(hudBannerTimeout);
-          badgeEl.innerText = 'PANIC!';
-          badgeEl.style.borderColor = '#ff007f';
-          badgeEl.style.color = '#ff007f';
-          badgeEl.style.boxShadow = '0 0 16px rgba(255, 0, 127, 0.9)';
-        }
-
-        setTimeout(() => {
-          if (onComplete) onComplete();
-        }, (offset + 0.08) * 1000);
-      } catch (e) {
-        if (onComplete) onComplete();
-      }
-    }
-
     function toggleGalagaMode() {
       isGalagaMode = !isGalagaMode;
       const dashboard = document.getElementById('main-dashboard');
@@ -1519,6 +1456,57 @@
       }
     }
 
+    /* FULLSCREEN & TOTAL RECALL ENGINE */
+    async function executeTotalRecall() {
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100, 50, 300]);
+      }
+
+      const toast = document.createElement('div');
+      toast.style.position = 'fixed';
+      toast.style.top = '24px';
+      toast.style.left = '50%';
+      toast.style.transform = 'translateX(-50%)';
+      toast.style.background = '#ff004f';
+      toast.style.color = '#ffffff';
+      toast.style.padding = '12px 20px';
+      toast.style.borderRadius = '24px';
+      toast.style.fontFamily = 'monospace';
+      toast.style.fontWeight = '900';
+      toast.style.fontSize = '13px';
+      toast.style.letterSpacing = '0.5px';
+      toast.style.zIndex = '99999';
+      toast.style.boxShadow = '0 0 24px rgba(255, 0, 79, 0.9)';
+      toast.style.textAlign = 'center';
+      toast.style.whiteSpace = 'nowrap';
+      toast.innerText = '[ TOTAL RECALL: PURGING SERVICE WORKERS & CACHE ]';
+      document.body.appendChild(toast);
+
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (let reg of registrations) {
+            await reg.unregister();
+          }
+        }
+
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(key => caches.delete(key)));
+        }
+
+        localStorage.clear();
+        sessionStorage.clear();
+
+        setTimeout(() => {
+          window.location.href = window.location.pathname + '?recall=' + Date.now();
+        }, 700);
+      } catch (err) {
+        console.error('Total Recall Error:', err);
+        window.location.reload(true);
+      }
+    }
+
     function toggleFullScreen(event) {
       if (event) event.stopPropagation();
 
@@ -1632,8 +1620,53 @@
       renderWeatherModalPills();
     }
 
-    /* LONG-PRESS, TAP & MULTI-TOUCH DISAMBIGUATION HANDLERS */
+    /* LONG-PRESS, TAP & TOUCH DISAMBIGUATION HANDLERS */
     function setupInteractions() {
+      const fsBtn = document.getElementById('fullscreen-btn');
+      let recallTimer = null;
+      let tickTimer1 = null;
+      let tickTimer2 = null;
+      let isLongPressRecall = false;
+
+      fsBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      const startRecallHold = (e) => {
+        if (e) e.stopPropagation();
+        isLongPressRecall = false;
+        fsBtn.classList.add('recall-holding');
+
+        tickTimer1 = setTimeout(() => {
+          if (navigator.vibrate) navigator.vibrate(30);
+        }, 1000);
+
+        tickTimer2 = setTimeout(() => {
+          if (navigator.vibrate) navigator.vibrate(50);
+        }, 2000);
+
+        recallTimer = setTimeout(() => {
+          isLongPressRecall = true;
+          fsBtn.classList.remove('recall-holding');
+          executeTotalRecall();
+        }, 3000);
+      };
+
+      const cancelRecallHold = () => {
+        clearTimeout(recallTimer);
+        clearTimeout(tickTimer1);
+        clearTimeout(tickTimer2);
+        fsBtn.classList.remove('recall-holding');
+      };
+
+      fsBtn.addEventListener('pointerdown', startRecallHold);
+      fsBtn.addEventListener('pointerup', (e) => {
+        cancelRecallHold();
+        if (!isLongPressRecall) {
+          toggleFullScreen(e);
+        }
+      });
+      fsBtn.addEventListener('pointercancel', cancelRecallHold);
+      fsBtn.addEventListener('pointerleave', cancelRecallHold);
+
       const locationCard = document.getElementById('location-card');
       let locPressTimer;
 
@@ -1806,37 +1839,6 @@
         clearTimeout(vehiclePressTimer);
         if (!isVehicleLongPress) {
           toggleMapStyle(e);
-        }
-      });
-
-      const mapCard = document.getElementById('map-card');
-      let twoFingerStartY = 0;
-      let twoFingerStartTime = 0;
-      let isTwoFingerGesture = false;
-
-      mapCard.addEventListener('touchstart', (e) => {
-        lastUserMapInteractionTime = Date.now();
-        if (e.touches.length === 2) {
-          isTwoFingerGesture = true;
-          twoFingerStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-          twoFingerStartTime = Date.now();
-        } else {
-          isTwoFingerGesture = false;
-        }
-      }, { passive: true });
-
-      mapCard.addEventListener('touchend', (e) => {
-        if (isTwoFingerGesture) {
-          const elapsed = Date.now() - twoFingerStartTime;
-          const touch = e.changedTouches[0];
-          const deltaY = touch.clientY - twoFingerStartY;
-
-          if (elapsed <= 450 && deltaY >= 70) {
-            playFirstCallFanfare(() => {
-              window.location.href = 'visualizer.html';
-            });
-          }
-          isTwoFingerGesture = false;
         }
       });
     }

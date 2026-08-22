@@ -73,6 +73,7 @@
       letter-spacing: 0.5px;
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
       transition: transform 0.15s ease, background 0.15s ease;
+      cursor: pointer;
     }
 
     .nav-btn-hub:active {
@@ -184,7 +185,7 @@
   <canvas id="kaleidoscope-canvas"></canvas>
 
   <div class="top-hud-bar">
-    <a href="visualizer.html" class="nav-btn-hub">&lt; VISUALIZERS</a>
+    <a href="visualizer.html" class="nav-btn-hub" onclick="window.location.replace('visualizer.html'); return false;">&lt; VISUALIZERS</a>
     <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">🌌 SPEED HARMONICS</button>
     <div class="hud-title-badge">FESTIVAL OF JOY</div>
   </div>
@@ -582,7 +583,7 @@
     function returnToDashboard() {
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       stopMicStream();
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     }
   </script>
 </body>
