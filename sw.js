@@ -1,39 +1,36 @@
-const CACHE_NAME = 'nomad-roadtrip-v3';
+const CACHE_NAME = 'nomad-v2.2';
 
-const ASSETS_TO_CACHE = [
+const STATIC_ASSETS = [
   './',
   './index.html',
+  './features.html',
   './visualizer.html',
-  './disco.html',
-  './festival.html',
-  './slamdance.html',
-  './seasons.html',
   './geek-stats.html',
   './manifest.json',
-  './icons/apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
   'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css',
   'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'
 ];
 
-// Install Event: Cache Core App Shell & Visualizer Assets
+// Install Event: Pre-cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(STATIC_ASSETS);
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event: Cleanup Stale Caches
+// Activate Event: Purge older caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
           }
         })
       );
@@ -41,36 +38,34 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Network-First for APIs / Cache-First for App Shell
+// Fetch Event: Network-first for dynamic tile/weather/geocode APIs, Stale-While-Revalidate for app core
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Network-First for Live Weather and Reverse Geocoding
-  if (url.hostname.includes('open-meteo.com') || url.hostname.includes('openstreetmap.org')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(event.request);
-      })
-    );
+  // Bypass caching for dynamic APIs (Nominatim, Open-Meteo, Vector Tiles)
+  if (
+    url.hostname.includes('nominatim.openstreetmap.org') ||
+    url.hostname.includes('api.open-meteo.com') ||
+    url.hostname.includes('cartocdn.com')
+  ) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  // Cache-First for App Shell & Assets
+  // Stale-While-Revalidate for local assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
-      });
+      }).catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
