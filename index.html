@@ -682,7 +682,7 @@
       color: #ffffff;
     }
 
-    /* MODAL OVERLAYS */
+    /* DYNAMIC ELASTIC MODAL OVERLAYS */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -710,13 +710,17 @@
       background: #1e1e1e;
       border: 1px solid #444444;
       border-radius: 16px;
-      padding: 22px 20px;
+      padding: 20px 18px;
       width: 88%;
-      max-width: 360px;
+      max-width: 380px;
+      max-height: 85dvh;
+      max-height: 85vh;
+      overflow-y: auto;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
       transform: scale(0.9);
       transition: transform 0.25s ease;
+      -webkit-overflow-scrolling: touch;
     }
 
     .modal-overlay.active .modal-box {
@@ -758,7 +762,7 @@
       font-size: 0.95rem;
       color: #007aff;
       margin-top: 4px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       font-weight: 600;
     }
 
@@ -776,7 +780,7 @@
       font-size: 0.95rem;
       color: #cccccc;
       line-height: 1.4;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .modal-vis-btn {
@@ -829,15 +833,15 @@
       display: inline-block;
       width: 100%;
       padding: 10px;
-      background: rgba(255, 0, 79, 0.12);
+      background: rgba(255, 0, 79, 0.14);
       border: 1.5px solid #ff004f;
       color: #ff004f;
       border-radius: 10px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 900;
       font-family: "Courier New", Courier, monospace;
       letter-spacing: 0.5px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       box-shadow: 0 0 10px rgba(255, 0, 79, 0.25);
       cursor: pointer;
       transition: background-color 0.15s ease, transform 0.1s ease;
@@ -1023,16 +1027,16 @@
     </div>
   </div>
 
-  <!-- BRANDING ABOUT MODAL OVERLAY -->
+  <!-- BRANDING ABOUT MODAL OVERLAY (Dynamic Expander) -->
   <div class="modal-overlay" id="about-modal" onclick="closeAboutModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <a href="features.html" class="modal-title-link" onclick="window.location.replace('features.html'); return false;" title="View Features & Guide">
         <div class="modal-title">NOMAD: RoadTrip ↗</div>
         <div class="modal-features-hint">Features &amp; User Guide</div>
       </a>
-      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a>[cite: 1]</div>
+      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a></div>
       <div class="modal-body">
-        Real-time telemetry, GPS tracking, and heads-up navigation dashboard.[cite: 1]
+        Real-time telemetry, GPS tracking, and heads-up navigation dashboard.
       </div>
       
       <a href="visualizer.html" class="modal-vis-btn" onclick="window.location.replace('visualizer.html'); return false;">✨ VISUALIZER ARCADE ↗</a>
@@ -1041,7 +1045,7 @@
       <!-- DEDICATED TOTAL RECALL PURGE BUTTON -->
       <button class="modal-purge-btn" onclick="executeTotalRecall()">⚠️ PURGE CACHE &amp; HARD RELOAD</button>
 
-      <div>
+      <div style="margin-top: 4px;">
         <button class="modal-close-btn" onclick="closeAboutModal()">Close</button>
       </div>
     </div>
@@ -1052,7 +1056,7 @@
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-title">Weather Updates</div>
       <div class="modal-body" style="margin-bottom: 12px;">
-        Select how frequently weather refreshes during your drive.[cite: 1]
+        Select how frequently weather refreshes during your drive.
       </div>
 
       <div class="config-section-label">Time Interval</div>
@@ -1778,7 +1782,8 @@
     function openWeatherModal() {
       renderWeatherModalPills();
       const modal = document.getElementById('weather-modal');
-      if (modal) modal.classList.add('active');
+      if (!modal) return;
+      modal.classList.add('active');
     }
 
     function closeWeatherModal(event) {
@@ -2088,7 +2093,7 @@
 
     function getWeatherInfo(code) {
       const icons = {
-        sun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="12" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+        sun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
         cloudSun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.94 11.23a5 5 0 0 0-8.92 2.12 3.5 3.5 0 0 0 .98 6.65h8a4 4 0 0 0 .94-7.77z" stroke="#a0a0a0"/></svg>`,
         cloud: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8.5a7 7 0 0 1-1.2-13.8 8 8 0 0 1 14.8 2.3 4.5 4.5 0 0 1-.6 11.5Z"/></svg>`,
         rain: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"/><path d="M8 13v8"/><path d="M12 15v8"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" stroke="#a0a0a0"/></svg>`,
