@@ -122,32 +122,6 @@
       transform: scale(1.1);
     }
 
-    .mode-toggle-btn {
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      border: 1.5px solid #ffbb00;
-      color: #ffbb00;
-      font-size: 0.75rem;
-      font-weight: 900;
-      padding: 5px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(255, 187, 0, 0.4);
-      white-space: nowrap;
-      transition: all 0.2s ease;
-    }
-
-    .mode-toggle-btn:active {
-      transform: scale(0.92);
-    }
-
-    .mode-toggle-btn.mic-active {
-      border-color: #ff80bf;
-      color: #ff80bf;
-      box-shadow: 0 0 12px rgba(255, 128, 191, 0.6);
-    }
-
     .hud-title-badge {
       pointer-events: auto;
       background: rgba(0, 0, 0, 0.75);
@@ -233,7 +207,6 @@
         <button class="season-pill-btn" id="btn-autumn" onclick="applySeason(2)" title="Autumn">🎃</button>
         <button class="season-pill-btn" id="btn-winter" onclick="applySeason(3)" title="Winter">❄️</button>
       </div>
-      <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">🍃 TELEMETRY</button>
     </div>
 
     <div class="hud-title-badge" id="season-badge">SEASON: DETECTING...</div>
@@ -257,21 +230,15 @@
     const ctx = canvas.getContext('2d');
     const mascotEl = document.getElementById('season-mascot');
     const badgeEl = document.getElementById('season-badge');
-    const modeBtn = document.getElementById('mode-btn');
 
     let width, height, centerX, centerY;
     let time = 0;
-
-    let audioCtx = null;
-    let analyser = null;
-    let streamReference = null;
-    let dataArray = new Uint8Array(128);
-    let bufferLength = 128;
-    let isMicActive = false;
     let isRunning = true;
     let wakeLock = null;
 
     let currentSpeedMPH = 45;
+    let currentHeading = 0;
+    let gyroTilt = 0;
     let watchId = null;
 
     let bassRatio = 0;
@@ -414,6 +381,7 @@
     ];
 
     let currentSeasonIndex = 0;
+    let floatingElements = [];
 
     function getAutomaticSeasonIndex() {
       const now = new Date();
@@ -449,8 +417,6 @@
       floatingElements = [];
     }
 
-    let floatingElements = [];
-
     function resizeCanvas() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
@@ -466,13 +432,24 @@
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
             if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
-              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+              currentSpeedMPH = Math.max(0, Math.round(pos.coords.speed * 2.23694));
+            }
+            if (pos.coords.heading !== null && !isNaN(pos.coords.heading)) {
+              currentHeading = pos.coords.heading;
             }
           },
-          (err) => console.log('GPS velocity fallback:', err),
+          (err) => {},
           { enableHighAccuracy: true, maximumAge: 1000 }
         );
       }
+    }
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (e.gamma !== null) {
+          gyroTilt = Math.max(-25, Math.min(25, e.gamma));
+        }
+      });
     }
 
     function spawnSeasonalParticle(speedMult = 1.0, count = 1) {
@@ -494,61 +471,6 @@
           rotSpeed: (Math.random() - 0.5) * 0.09
         });
       }
-    }
-
-    async function toggleInputMode() {
-      if (!isMicActive) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false
-            },
-            video: false
-          });
-          streamReference = stream;
-
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          if (audioCtx.state === 'suspended') await audioCtx.resume();
-
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.75;
-
-          bufferLength = analyser.frequencyBinCount;
-          dataArray = new Uint8Array(bufferLength);
-
-          const source = audioCtx.createMediaStreamSource(stream);
-          source.connect(analyser);
-
-          isMicActive = true;
-          modeBtn.innerHTML = '🎙️ CABIN MIC';
-          modeBtn.classList.add('mic-active');
-        } catch (err) {
-          console.warn("Microphone access denied:", err);
-          isMicActive = false;
-          modeBtn.innerHTML = '🍃 TELEMETRY';
-          modeBtn.classList.remove('mic-active');
-        }
-      } else {
-        stopMicStream();
-        isMicActive = false;
-        modeBtn.innerHTML = '🍃 TELEMETRY';
-        modeBtn.classList.remove('mic-active');
-      }
-    }
-
-    function stopMicStream() {
-      if (streamReference) {
-        streamReference.getTracks().forEach(track => track.stop());
-        streamReference = null;
-      }
-      if (audioCtx && audioCtx.state !== 'closed') {
-        audioCtx.close();
-        audioCtx = null;
-      }
-      analyser = null;
     }
 
     async function requestWakeLock() {
@@ -577,38 +499,15 @@
       if (!isRunning) return;
       requestAnimationFrame(renderLoop);
 
-      time += 0.03;
+      const speedScale = Math.min(1.85, Math.max(0.6, currentSpeedMPH / 45));
+      time += 0.03 * speedScale;
       const profile = SEASON_PROFILES[currentSeasonIndex];
 
-      if (isMicActive && analyser) {
-        analyser.getByteFrequencyData(dataArray);
+      bassRatio = 0.22 + Math.sin(time * 2.5) * 0.18;
+      midRatio = 0.18 + Math.cos(time * 2.0) * 0.14;
+      trebleRatio = 0.16 + Math.sin(time * 3.5) * 0.12;
 
-        let bassSum = 0;
-        for (let i = 0; i < 6; i++) bassSum += dataArray[i];
-        bassRatio = bassSum / 6 / 255;
-
-        let midSum = 0;
-        for (let i = 8; i < 28; i++) midSum += dataArray[i];
-        midRatio = midSum / 20 / 255;
-
-        let trebleSum = 0;
-        for (let i = 30; i < 65; i++) trebleSum += dataArray[i];
-        trebleRatio = trebleSum / 35 / 255;
-
-        if (trebleRatio > 0.30 && Math.random() < 0.88) {
-          spawnSeasonalParticle(1.6, Math.floor(trebleRatio * 3) + 1);
-        } else if (Math.random() < 0.14) {
-          spawnSeasonalParticle(1.0, 1);
-        }
-      } else {
-        // Telemetry Drive Kinetic Synthesis
-        const speedScale = Math.min(1.75, Math.max(0.6, currentSpeedMPH / 45));
-        bassRatio = 0.22 + Math.sin(time * 2.5 * speedScale) * 0.18;
-        midRatio = 0.18 + Math.cos(time * 2.0 * speedScale) * 0.14;
-        trebleRatio = 0.16 + Math.sin(time * 3.5 * speedScale) * 0.12;
-
-        if (Math.random() < 0.14 * speedScale) spawnSeasonalParticle(1.0 * speedScale, 1);
-      }
+      if (Math.random() < 0.14 * speedScale) spawnSeasonalParticle(1.0 * speedScale, 1);
 
       ctx.shadowBlur = 0;
       ctx.shadowColor = 'transparent';
@@ -677,9 +576,9 @@
       ctx.lineWidth = 3.5;
       ctx.stroke();
 
-      // 3. Mascot Scaling
+      // 3. Mascot Scaling & Gyro/Heading Banking
       const mascotScale = 1.0 + bassRatio * 0.42;
-      const mascotTilt = Math.sin(time * 2.2) * (2.0 + bassRatio * 4);
+      const mascotTilt = Math.sin(time * 2.2) * 2.5 + (gyroTilt * 0.8) + (Math.sin(currentHeading * Math.PI / 180) * 4);
       mascotEl.style.transform = `scale(${mascotScale}) rotate(${mascotTilt}deg)`;
 
       // 4. Blooming Seasonal Mandala Rings
@@ -697,8 +596,7 @@
         ctx.beginPath();
         for (let i = 0; i <= numPoints; i++) {
           const angle = (i / numPoints) * Math.PI * 2 + (time * (r % 2 === 0 ? 0.05 : -0.05));
-          const freqIdx = Math.floor((i / numPoints) * (bufferLength || 32));
-          const amp = isMicActive ? (dataArray[freqIdx] / 255) : Math.sin(time * 3 + i);
+          const amp = Math.sin(time * 3 + i);
           const dist = ringRadius + (amp * 28 * (1 + midRatio));
 
           const x = Math.cos(angle) * dist;
@@ -747,7 +645,6 @@
     function returnToDashboard() {
       isRunning = false;
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      stopMicStream();
       window.location.replace('index.html');
     }
   </script>

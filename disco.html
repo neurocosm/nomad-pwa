@@ -41,7 +41,6 @@
       z-index: 1;
     }
 
-    /* Top Navigation / HUD Bar */
     .top-hud-bar {
       position: absolute;
       top: max(12px, env(safe-area-inset-top));
@@ -77,36 +76,6 @@
       background: rgba(0, 240, 255, 0.25);
     }
 
-    /* Interactive Telemetry / Mic Toggle Pill */
-    .mode-toggle-btn {
-      pointer-events: auto;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1.5px solid #00f0ff;
-      color: #00f0ff;
-      font-size: 0.75rem;
-      font-weight: 900;
-      padding: 6px 14px;
-      border-radius: 20px;
-      letter-spacing: 1px;
-      cursor: pointer;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .mode-toggle-btn:active {
-      transform: scale(0.92);
-    }
-
-    .mode-toggle-btn.mic-active {
-      border-color: #ff007f;
-      color: #ff007f;
-      box-shadow: 0 0 14px rgba(255, 0, 127, 0.6);
-    }
-
     .hud-title-badge {
       background: rgba(0, 0, 0, 0.75);
       border: 1.5px solid #ff007f;
@@ -119,7 +88,6 @@
       box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
     }
 
-    /* Bottom HUD Container */
     .bottom-hud-container {
       position: absolute;
       bottom: max(16px, env(safe-area-inset-bottom));
@@ -159,14 +127,11 @@
 
   <canvas id="visualizer-canvas"></canvas>
 
-  <!-- Top HUD: Left = Visualizers Hub | Center = Engine Mode | Right = Name -->
   <div class="top-hud-bar">
     <a href="visualizer.html" class="nav-btn-hub" onclick="window.location.replace('visualizer.html'); return false;">&lt; VISUALIZERS</a>
-    <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">⚡ VELOCITY SYNTH</button>
-    <div class="hud-title-badge">PANIC: DISCO</div>
+    <div class="hud-title-badge" id="telemetry-badge">DISCO // 0 MPH</div>
   </div>
 
-  <!-- Bottom HUD: Return to NOMAD Dashboard -->
   <div class="bottom-hud-container">
     <button class="btn-back-nomad" onclick="returnToDashboard()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cd964" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -177,33 +142,22 @@
   </div>
 
   <script>
-    let audioContext = null;
-    let analyser = null;
-    let sourceNode = null;
-    let streamReference = null;
-    let dataArray = new Uint8Array(128);
-    let bufferLength = 128;
     let isRunning = true;
-    let isMicActive = false;
     let wakeLock = null;
 
-    // GPS Telemetry Engine State
-    let currentSpeedMPH = 45;
+    let currentSpeedMPH = 0;
+    let currentHeading = 0;
+    let gyroTilt = 0;
     let kineticPhase = 0;
     let watchId = null;
 
     const canvas = document.getElementById('visualizer-canvas');
     const ctx = canvas.getContext('2d');
-    const modeBtn = document.getElementById('mode-btn');
+    const badgeEl = document.getElementById('telemetry-badge');
 
     let rotationAngle = 0;
     let particles = [];
-
-    // Star-Eyed Emoji State
     let emojiAngle = 0;
-    let emojiSpinSpeed = 0.025;
-    let emojiTargetSpinSpeed = 0.025;
-    let lastFlipTime = 0;
 
     function resizeCanvas() {
       canvas.width = window.innerWidth * window.devicePixelRatio;
@@ -229,77 +183,32 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Start Live GPS Telemetry Watch
     function initGPS() {
       if ('geolocation' in navigator) {
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
             if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
-              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+              currentSpeedMPH = Math.max(0, Math.round(pos.coords.speed * 2.23694));
             }
+            if (pos.coords.heading !== null && !isNaN(pos.coords.heading)) {
+              currentHeading = pos.coords.heading;
+            }
+            badgeEl.innerText = `DISCO // ${currentSpeedMPH} MPH`;
           },
-          (err) => console.log('GPS velocity fallback:', err),
+          (err) => {},
           { enableHighAccuracy: true, maximumAge: 1000 }
         );
       }
     }
 
-    // Toggle between Kinetic Engine & Live Mic
-    async function toggleInputMode() {
-      if (!isMicActive) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false
-            },
-            video: false
-          });
-          streamReference = stream;
-
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          if (audioContext.state === 'suspended') await audioContext.resume();
-
-          analyser = audioContext.createAnalyser();
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.78;
-          bufferLength = analyser.frequencyBinCount;
-          dataArray = new Uint8Array(bufferLength);
-
-          sourceNode = audioContext.createMediaStreamSource(stream);
-          sourceNode.connect(analyser);
-
-          isMicActive = true;
-          modeBtn.innerHTML = '🎙️ CABIN MIC';
-          modeBtn.classList.add('mic-active');
-        } catch (err) {
-          console.warn('Microphone access denied:', err);
-          isMicActive = false;
-          modeBtn.innerHTML = '⚡ VELOCITY SYNTH';
-          modeBtn.classList.remove('mic-active');
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (e.gamma !== null) {
+          gyroTilt = Math.max(-25, Math.min(25, e.gamma));
         }
-      } else {
-        stopMicStream();
-        isMicActive = false;
-        modeBtn.innerHTML = '⚡ VELOCITY SYNTH';
-        modeBtn.classList.remove('mic-active');
-      }
+      });
     }
 
-    function stopMicStream() {
-      if (streamReference) {
-        streamReference.getTracks().forEach(t => t.stop());
-        streamReference = null;
-      }
-      if (audioContext && audioContext.state !== 'closed') {
-        audioContext.close();
-        audioContext = null;
-      }
-      analyser = null;
-    }
-
-    // Screen WakeLock to prevent dimming
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator && document.visibilityState === 'visible' && (wakeLock === null || wakeLock.released)) {
@@ -330,32 +239,15 @@
       const centerX = width / 2;
       const centerY = height / 2;
 
-      let bassRatio = 0;
+      const bpm = 85 + Math.min(85, currentSpeedMPH * 1.2);
+      kineticPhase += (bpm / 60) * 0.04;
 
-      if (isMicActive && analyser) {
-        analyser.getByteFrequencyData(dataArray);
-        let bassSum = 0;
-        for (let i = 0; i < 8; i++) bassSum += dataArray[i];
-        bassRatio = (bassSum / 8) / 255;
-      } else {
-        // Generative Kinetic Telemetry Engine (Procedural FFT)
-        const bpm = 90 + Math.min(65, currentSpeedMPH * 0.85);
-        kineticPhase += (bpm / 60) * 0.04;
+      const kick = Math.pow(Math.max(0, Math.sin(kineticPhase * Math.PI * 2)), 4);
+      const bassRatio = 0.2 + kick * 0.6;
 
-        const kick = Math.pow(Math.max(0, Math.sin(kineticPhase * Math.PI * 2)), 4);
-        bassRatio = 0.25 + kick * 0.55;
-
-        for (let i = 0; i < bufferLength; i++) {
-          const wave = Math.sin(kineticPhase * 3 + (i * 0.15)) * 0.5 + 0.5;
-          dataArray[i] = Math.floor((kick * 0.6 + wave * 0.4) * 220);
-        }
-      }
-
-      // Motion trails
       ctx.fillStyle = `rgba(5, 0, 12, ${0.2 + (1 - bassRatio) * 0.12})`;
       ctx.fillRect(0, 0, width, height);
 
-      // 1. Floating Sparkles
       particles.forEach(p => {
         p.y -= p.speed * (1 + bassRatio * 3.5);
         if (p.y < 0) {
@@ -370,15 +262,14 @@
         ctx.fill();
       });
 
-      // 2. Dual Side EQ Towers
       const numBars = 24;
       const barHeight = (height * 0.6) / numBars;
       const barStartY = height * 0.2;
       const maxBarWidth = width * 0.18;
 
       for (let i = 0; i < numBars; i++) {
-        const freqVal = dataArray[Math.floor((i / numBars) * (bufferLength * 0.65))] / 255;
-        const currentBarWidth = Math.max(4, freqVal * maxBarWidth);
+        const freqVal = Math.sin(kineticPhase * 2.5 + i * 0.3) * 0.5 + 0.5;
+        const currentBarWidth = Math.max(4, freqVal * maxBarWidth * (0.4 + bassRatio * 0.6));
         const y = barStartY + i * barHeight;
         const barColor = i < 8 ? '#00f0ff' : i < 16 ? '#ffe600' : '#ff0055';
 
@@ -389,20 +280,19 @@
         ctx.fillRect(width - 8 - currentBarWidth, y + 2, currentBarWidth, barHeight - 4);
       }
 
-      // 3. Radial Disco Beams & Wave Rings
-      rotationAngle += 0.008 + bassRatio * 0.02;
+      rotationAngle += 0.008 + (currentSpeedMPH / 120) * 0.04;
       const pulseScale = 0.85 + bassRatio * 0.4;
       const radiusBase = Math.min(width, height) * 0.22 * pulseScale;
 
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(rotationAngle);
+      ctx.rotate(rotationAngle + (currentHeading * Math.PI / 180) * 0.2);
 
       const maxAllowedBeam = Math.min(width, height) * 0.38;
       const numBeams = 16;
       for (let b = 0; b < numBeams; b++) {
         const beamAngle = (b / numBeams) * Math.PI * 2;
-        const freqVal = dataArray[b * 3] / 255;
+        const freqVal = Math.cos(kineticPhase * 3 + b) * 0.5 + 0.5;
         const beamLength = Math.min(maxAllowedBeam, (radiusBase * 0.6) + (maxAllowedBeam * freqVal));
 
         const x1 = Math.cos(beamAngle) * radiusBase;
@@ -419,57 +309,15 @@
         ctx.shadowColor = ctx.strokeStyle;
         ctx.stroke();
       }
-
-      const numPoints = 48;
-      for (let ring = 1; ring <= 2; ring++) {
-        ctx.beginPath();
-        const ringRadius = radiusBase * (ring * 0.7);
-
-        for (let i = 0; i < numPoints; i++) {
-          const angle = (i / numPoints) * Math.PI * 2;
-          const freqIndex = Math.floor((i / numPoints) * (bufferLength / 2));
-          const amplitude = (dataArray[freqIndex] / 255) * (25 * ring * pulseScale);
-
-          const r = ringRadius + amplitude;
-          const x = Math.cos(angle) * r;
-          const y = Math.sin(angle) * r;
-
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = ring === 1 ? '#ffe600' : '#ff007f';
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 14;
-        ctx.shadowColor = ctx.strokeStyle;
-        ctx.stroke();
-      }
-
       ctx.restore();
 
-      // 4. Center Star-Eyed Emoji
-      const now = Date.now();
-      if (bassRatio > 0.68 && (now - lastFlipTime > 650)) {
-        const direction = Math.random() > 0.5 ? 1 : -1;
-        const momentum = 0.06 + Math.random() * 0.08;
-        emojiTargetSpinSpeed = direction * momentum;
-        lastFlipTime = now;
-      }
-
-      emojiSpinSpeed += (emojiTargetSpinSpeed - emojiSpinSpeed) * 0.08;
-      emojiTargetSpinSpeed *= 0.985;
-      if (Math.abs(emojiTargetSpinSpeed) < 0.02) {
-        emojiTargetSpinSpeed = (emojiTargetSpinSpeed >= 0 ? 1 : -1) * 0.022;
-      }
-
-      emojiAngle += emojiSpinSpeed;
-
+      emojiAngle += (0.01 + (currentSpeedMPH / 100) * 0.03);
       const baseFontSize = Math.min(width, height) * 0.18;
-      const emojiScale = 1.0 + (bassRatio * 0.55);
+      const emojiScale = 1.0 + (bassRatio * 0.45);
 
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(emojiAngle);
+      ctx.rotate(emojiAngle + (gyroTilt * Math.PI / 180));
       ctx.scale(emojiScale, emojiScale);
 
       ctx.shadowColor = bassRatio > 0.55 ? '#ffe600' : '#ff007f';
@@ -478,14 +326,12 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('🤩', 0, 0);
-
       ctx.restore();
     }
 
     function returnToDashboard() {
       isRunning = false;
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      stopMicStream();
       window.location.replace('index.html');
     }
   </script>

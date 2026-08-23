@@ -45,7 +45,6 @@
       z-index: 1;
     }
 
-    /* Standardized Top HUD Bar */
     .top-hud-bar {
       position: absolute;
       top: max(12px, env(safe-area-inset-top));
@@ -81,35 +80,6 @@
       background: rgba(0, 240, 255, 0.25);
     }
 
-    .mode-toggle-btn {
-      pointer-events: auto;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1.5px solid #00f0ff;
-      color: #00f0ff;
-      font-size: 0.75rem;
-      font-weight: 900;
-      padding: 6px 14px;
-      border-radius: 20px;
-      letter-spacing: 1px;
-      cursor: pointer;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .mode-toggle-btn:active {
-      transform: scale(0.92);
-    }
-
-    .mode-toggle-btn.mic-active {
-      border-color: #ff007f;
-      color: #ff007f;
-      box-shadow: 0 0 14px rgba(255, 0, 127, 0.6);
-    }
-
     .hud-title-badge {
       background: rgba(0, 0, 0, 0.75);
       border: 1.5px solid #ff007f;
@@ -122,7 +92,6 @@
       box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
     }
 
-    /* Center Visual Stage */
     .stage-container {
       position: relative;
       z-index: 10;
@@ -144,7 +113,6 @@
       height: auto;
     }
 
-    /* Standardized Bottom HUD Container */
     .bottom-hud-container {
       position: absolute;
       bottom: max(16px, env(safe-area-inset-bottom));
@@ -186,8 +154,7 @@
 
   <div class="top-hud-bar">
     <a href="visualizer.html" class="nav-btn-hub" onclick="window.location.replace('visualizer.html'); return false;">&lt; VISUALIZERS</a>
-    <button class="mode-toggle-btn" id="mode-btn" onclick="toggleInputMode()">🌌 SPEED HARMONICS</button>
-    <div class="hud-title-badge">FESTIVAL OF JOY</div>
+    <div class="hud-title-badge" id="telemetry-badge">JOY // 0 MPH</div>
   </div>
 
   <div class="stage-container">
@@ -208,21 +175,15 @@
           </radialGradient>
         </defs>
 
-        <path d="M 82,120 C 78,160 84,200 120,200 C 156,200 162,160 158,120 Z" 
-              fill="#f7ecd5" stroke="#4a3525" stroke-width="5" stroke-linejoin="round" />
-
-        <path d="M 104,168 Q 120,184 136,168" 
-              fill="none" stroke="#4a3525" stroke-width="4.5" stroke-linecap="round" />
-
+        <path d="M 82,120 C 78,160 84,200 120,200 C 156,200 162,160 158,120 Z" fill="#f7ecd5" stroke="#4a3525" stroke-width="5" stroke-linejoin="round" />
+        <path d="M 104,168 Q 120,184 136,168" fill="none" stroke="#4a3525" stroke-width="4.5" stroke-linecap="round" />
         <rect x="114" y="141" width="12" height="4" fill="#000000" rx="2" />
         <polygon id="sunglass-left" points="90,136 114,136 110,154 94,154" fill="url(#sunglassesGrad)" stroke="#000000" stroke-width="4" stroke-linejoin="round" />
         <polygon id="sunglass-right" points="126,136 150,136 146,154 130,154" fill="url(#sunglassesGrad)" stroke="#000000" stroke-width="4" stroke-linejoin="round" />
         <polygon points="93,138 99,138 96,150 92,150" fill="rgba(255, 255, 255, 0.75)" />
         <polygon points="129,138 135,138 132,150 128,150" fill="rgba(255, 255, 255, 0.75)" />
 
-        <path d="M 22,125 C 20,45 220,45 218,125 C 200,135 40,135 22,125 Z" 
-              fill="url(#capGrad)" stroke="#300004" stroke-width="5.5" stroke-linejoin="round" />
-
+        <path d="M 22,125 C 20,45 220,45 218,125 C 200,135 40,135 22,125 Z" fill="url(#capGrad)" stroke="#300004" stroke-width="5.5" stroke-linejoin="round" />
         <ellipse cx="120" cy="72" rx="16" ry="15" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
         <ellipse cx="64" cy="94" rx="14" ry="13" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
         <ellipse cx="176" cy="94" rx="14" ry="13" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5" />
@@ -247,39 +208,25 @@
     const canvas = document.getElementById('kaleidoscope-canvas');
     const ctx = canvas.getContext('2d');
     const mushroomHero = document.getElementById('mushroom-hero');
-    const sunglassLeft = document.getElementById('sunglass-left');
-    const sunglassRight = document.getElementById('sunglass-right');
-    const modeBtn = document.getElementById('mode-btn');
+    const badgeEl = document.getElementById('telemetry-badge');
 
     let width, height, centerX, centerY;
     let baseHue = 0;
     let symmetry = 8;
     let time = 0;
 
-    const symmetryModes = [8, 12, 16, 6, 10];
-    let modeIndex = 0;
-    let lastSymmetryShiftTime = 0;
+    let currentSpeedMPH = 0;
+    let currentHeading = 0;
+    let gyroTilt = 0;
+    let watchId = null;
+    let isRunning = true;
+    let wakeLock = null;
 
     const noteGlyphs = ['♪', '♫', '♬', '♩', '♭', '♯'];
     let notes = [];
 
     const cosmicEmojis = ['🍄', '✨', '🌈', '🛸', '☮️', '🌻', '🪐', '💫', '💖'];
     let orbiters = [];
-
-    // Audio & Telemetry State
-    let audioCtx = null;
-    let analyser = null;
-    let streamReference = null;
-    let dataArray = null;
-    let isMicActive = false;
-    let wakeLock = null;
-
-    let currentSpeedMPH = 45;
-    let watchId = null;
-
-    let bassEnergy = 0;
-    let midEnergy = 0;
-    let trebleEnergy = 0;
 
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -316,20 +263,31 @@
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
             if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
-              currentSpeedMPH = Math.max(5, pos.coords.speed * 2.23694);
+              currentSpeedMPH = Math.max(0, Math.round(pos.coords.speed * 2.23694));
             }
+            if (pos.coords.heading !== null && !isNaN(pos.coords.heading)) {
+              currentHeading = pos.coords.heading;
+            }
+            badgeEl.innerText = `JOY // ${currentSpeedMPH} MPH`;
           },
-          (err) => console.log('GPS velocity fallback:', err),
+          (err) => {},
           { enableHighAccuracy: true, maximumAge: 1000 }
         );
       }
+    }
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (e.gamma !== null) {
+          gyroTilt = Math.max(-25, Math.min(25, e.gamma));
+        }
+      });
     }
 
     function spawnNote(speedMult = 1.0, count = 1) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = (1.5 + Math.random() * 3.5) * speedMult;
-        
         const isNote = Math.random() < 0.8;
         const glyph = isNote 
           ? noteGlyphs[Math.floor(Math.random() * noteGlyphs.length)]
@@ -341,66 +299,13 @@
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           glyph: glyph,
-          size: isNote ? (18 + Math.random() * 18 * (speedMult > 1.2 ? 1.3 : 1.0)) : 14,
+          size: isNote ? (18 + Math.random() * 18) : 14,
           hue: (baseHue + Math.random() * 140) % 360,
           alpha: 1.0,
           rotation: (Math.random() - 0.5) * 0.6,
           rotSpeed: (Math.random() - 0.5) * 0.06
         });
       }
-    }
-
-    async function toggleInputMode() {
-      if (!isMicActive) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false
-            },
-            video: false
-          });
-          streamReference = stream;
-
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          if (audioCtx.state === 'suspended') await audioCtx.resume();
-
-          const source = audioCtx.createMediaStreamSource(stream);
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.75;
-
-          source.connect(analyser);
-          dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-          isMicActive = true;
-          modeBtn.innerHTML = '🎙️ CABIN MIC';
-          modeBtn.classList.add('mic-active');
-        } catch (err) {
-          console.warn("Microphone access denied:", err);
-          isMicActive = false;
-          modeBtn.innerHTML = '🌌 SPEED HARMONICS';
-          modeBtn.classList.remove('mic-active');
-        }
-      } else {
-        stopMicStream();
-        isMicActive = false;
-        modeBtn.innerHTML = '🌌 SPEED HARMONICS';
-        modeBtn.classList.remove('mic-active');
-      }
-    }
-
-    function stopMicStream() {
-      if (streamReference) {
-        streamReference.getTracks().forEach(track => track.stop());
-        streamReference = null;
-      }
-      if (audioCtx && audioCtx.state !== 'closed') {
-        audioCtx.close();
-        audioCtx = null;
-      }
-      analyser = null;
     }
 
     async function requestWakeLock() {
@@ -425,82 +330,42 @@
     setInterval(requestWakeLock, 15000);
 
     function render() {
-      const now = performance.now();
-      
-      if (now - lastSymmetryShiftTime > 14000) {
-        lastSymmetryShiftTime = now;
-        modeIndex = (modeIndex + 1) % symmetryModes.length;
-        symmetry = symmetryModes[modeIndex];
-      }
+      if (!isRunning) return;
 
-      if (isMicActive && analyser) {
-        analyser.getByteFrequencyData(dataArray);
+      const speedScale = Math.min(2.0, Math.max(0.6, currentSpeedMPH / 45));
+      time += 0.035 * speedScale;
 
-        let bassSum = 0;
-        for (let i = 0; i < 6; i++) bassSum += dataArray[i];
-        bassEnergy = bassSum / 6 / 255;
+      const bassEnergy = 0.22 + Math.sin(time * 2.2) * 0.18;
+      const midEnergy = 0.18 + Math.cos(time * 3.1) * 0.14;
 
-        let midSum = 0;
-        for (let i = 8; i < 24; i++) midSum += dataArray[i];
-        midEnergy = midSum / 16 / 255;
+      if (Math.random() < 0.12 * speedScale) spawnNote(1.0 * speedScale, 1);
 
-        let trebleSum = 0;
-        for (let i = 28; i < 65; i++) trebleSum += dataArray[i];
-        trebleEnergy = trebleSum / 37 / 255;
-
-        if (trebleEnergy > 0.35 && Math.random() < 0.7) {
-          spawnNote(1.5, Math.floor(trebleEnergy * 3) + 1);
-        } else if (Math.random() < 0.08) {
-          spawnNote(1.0, 1);
-        }
-      } else {
-        // Speed Harmonics Kinetic Generator
-        const speedScale = Math.min(1.8, Math.max(0.6, currentSpeedMPH / 45));
-        time += 0.035 * speedScale;
-
-        bassEnergy = 0.22 + Math.sin(time * 2.2) * 0.18;
-        midEnergy = 0.18 + Math.cos(time * 3.1) * 0.14;
-        trebleEnergy = 0.15 + Math.sin(time * 4.5) * 0.12;
-
-        if (Math.random() < 0.12 * speedScale) spawnNote(1.0 * speedScale, 1);
-      }
-
-      const spinSpeed = 0.012 + bassEnergy * 0.035;
-      baseHue = (baseHue + 0.35 + midEnergy * 0.8) % 360;
+      baseHue = (baseHue + 0.35 + (currentSpeedMPH / 60)) % 360;
 
       const mushroomScale = 1.0 + bassEnergy * 0.38;
-      const mushroomTilt = Math.sin(time * 2.4) * (2.5 + bassEnergy * 4);
+      const mushroomTilt = Math.sin(time * 2.4) * 3 + (gyroTilt * 0.8) + (Math.sin(currentHeading * Math.PI / 180) * 4);
       mushroomHero.style.transform = `scale(${mushroomScale}) rotate(${mushroomTilt}deg)`;
-
-      if (sunglassLeft && sunglassRight) {
-        const glowColor = `hsla(${baseHue}, 100%, 65%, ${0.2 + midEnergy * 0.8})`;
-        sunglassLeft.style.filter = `drop-shadow(0 0 ${midEnergy * 14}px ${glowColor})`;
-        sunglassRight.style.filter = `drop-shadow(0 0 ${midEnergy * 14}px ${glowColor})`;
-      }
 
       ctx.fillStyle = 'rgba(5, 0, 10, 0.22)';
       ctx.fillRect(0, 0, width, height);
 
-      // Kaleidoscope Mandala
       ctx.save();
       ctx.translate(centerX, centerY);
 
       const angleStep = (Math.PI * 2) / symmetry;
-
       for (let s = 0; s < symmetry; s++) {
         ctx.save();
-        ctx.rotate(s * angleStep + time * 0.09);
+        ctx.rotate(s * angleStep + time * 0.09 + (currentHeading * Math.PI / 180) * 0.05);
 
-        const numRings = 9;
+        const numRings = 8;
         for (let r = 1; r <= numRings; r++) {
-          const bassExpansion = bassEnergy * 42 * (r / numRings);
-          const dist = r * (Math.min(width, height) * 0.062) + Math.sin(time * 2 + r) * 14 + bassExpansion;
+          const dist = r * (Math.min(width, height) * 0.065) + Math.sin(time * 2 + r) * 14;
           const hue = (baseHue + r * 30 + s * 15) % 360;
           const size = 10 + Math.cos(time * 3 + r) * 8 + r * 3 + bassEnergy * 14;
 
           ctx.strokeStyle = `hsla(${hue}, 95%, 60%, ${0.5 + bassEnergy * 0.45})`;
-          ctx.fillStyle = `hsla(${(hue + 60) % 360}, 100%, 50%, ${0.12 + midEnergy * 0.22})`;
-          ctx.lineWidth = 2.0 + bassEnergy * 2.2 + midEnergy * 1.5;
+          ctx.fillStyle = `hsla(${(hue + 60) % 360}, 100%, 50%, 0.15)`;
+          ctx.lineWidth = 2.0 + bassEnergy * 2.2;
 
           ctx.beginPath();
           ctx.moveTo(dist, 0);
@@ -510,21 +375,11 @@
           ctx.closePath();
           ctx.stroke();
           ctx.fill();
-
-          if (r % 2 === 0) {
-            ctx.beginPath();
-            ctx.arc(dist + size, 0, size * (0.35 + trebleEnergy * 0.25), 0, Math.PI * 2);
-            ctx.fillStyle = `hsla(${hue}, 100%, 75%, ${0.7 + trebleEnergy * 0.3})`;
-            ctx.fill();
-          }
         }
-
         ctx.restore();
       }
-
       ctx.restore();
 
-      // Orbiting Icons
       for (let i = 0; i < orbiters.length; i++) {
         const orb = orbiters[i];
         orb.x += orb.speedX * (1.0 + bassEnergy * 0.8);
@@ -534,55 +389,40 @@
         if (orb.x > width + 30) orb.x = -30;
 
         const currentY = orb.baseY + Math.sin(time * 2 + orb.bobOffset) * 16;
-        const pulseScale = 1.0 + (midEnergy + trebleEnergy) * 0.35;
-        const glimmerAlpha = 0.55 + Math.sin(time * 3 + orb.bobOffset) * 0.25 + trebleEnergy * 0.2;
-
         ctx.save();
         ctx.translate(orb.x, currentY);
         ctx.rotate(orb.rot);
-        ctx.scale(pulseScale, pulseScale);
-        ctx.font = `${orb.size}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
-        ctx.shadowColor = `hsla(${(baseHue + orb.glimmerHue) % 360}, 100%, 65%, 0.8)`;
-        ctx.shadowBlur = 8 + trebleEnergy * 10;
-        ctx.globalAlpha = glimmerAlpha;
+        ctx.font = `${orb.size}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(orb.glyph, 0, 0);
         ctx.restore();
       }
 
-      // Emojis Emitter
       for (let i = notes.length - 1; i >= 0; i--) {
         const n = notes[i];
         n.x += n.vx;
         n.y += n.vy;
-        n.rotation += n.rotSpeed;
         n.alpha *= 0.985;
-        n.size += 0.14;
 
         ctx.save();
         ctx.translate(n.x, n.y);
-        ctx.rotate(n.rotation);
-        ctx.font = `900 ${n.size}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
+        ctx.font = `900 ${n.size}px sans-serif`;
         ctx.fillStyle = `hsla(${n.hue}, 100%, 65%, ${n.alpha})`;
-        ctx.shadowColor = `hsla(${n.hue}, 100%, 60%, ${n.alpha})`;
-        ctx.shadowBlur = 14;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(n.glyph, 0, 0);
         ctx.restore();
 
-        if (n.alpha < 0.02 || n.x < -60 || n.x > width + 60 || n.y < -60 || n.y > height + 60) {
-          notes.splice(i, 1);
-        }
+        if (n.alpha < 0.02) notes.splice(i, 1);
       }
 
       requestAnimationFrame(render);
     }
 
     function returnToDashboard() {
+      isRunning = false;
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      stopMicStream();
       window.location.replace('index.html');
     }
   </script>
