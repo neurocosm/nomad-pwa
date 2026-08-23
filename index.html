@@ -383,14 +383,12 @@
       justify-content: center;
       cursor: pointer;
       user-select: none;
-      touch-action: none;
       transition: transform 0.15s ease, border-color 0.2s, box-shadow 0.2s;
     }
 
-    .map-overlay-fullscreen.recall-holding {
-      border-color: #ff004f !important;
-      box-shadow: 0 0 16px rgba(255, 0, 79, 0.8), inset 0 0 8px rgba(255, 0, 79, 0.6) !important;
+    .map-overlay-fullscreen:active {
       transform: translateX(-50%) scale(0.92);
+      border-color: #007aff;
     }
 
     /* Floating Multi-Stage Total Recall Banner */
@@ -814,7 +812,7 @@
       border-radius: 10px;
       font-size: 0.95rem;
       font-weight: 900;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       box-shadow: 0 0 10px rgba(255, 176, 0, 0.25);
       transition: background-color 0.15s ease, transform 0.1s ease;
       font-family: "Courier New", Courier, monospace;
@@ -822,6 +820,31 @@
 
     .modal-stats-btn:active {
       background-color: #ffb000;
+      color: #000000;
+      transform: scale(0.97);
+    }
+
+    /* DEDICATED TOTAL RECALL PURGE BUTTON */
+    .modal-purge-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 10px;
+      background: rgba(255, 0, 79, 0.12);
+      border: 1.5px solid #ff004f;
+      color: #ff004f;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      font-family: "Courier New", Courier, monospace;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 10px rgba(255, 0, 79, 0.25);
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .modal-purge-btn:active {
+      background-color: #ff004f;
       color: #000000;
       transform: scale(0.97);
     }
@@ -901,7 +924,7 @@
         <div class="telemetry-circle-label">N</div>
       </div>
 
-      <!-- Top-Center Overlay: Fullscreen Toggle Button + TOTAL RECALL Trigger -->
+      <!-- Top-Center Overlay: Fullscreen Toggle Button -->
       <div class="map-overlay-fullscreen" id="fullscreen-btn">
         <svg id="fullscreen-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
@@ -1007,13 +1030,16 @@
         <div class="modal-title">NOMAD: RoadTrip ↗</div>
         <div class="modal-features-hint">Features &amp; User Guide</div>
       </a>
-      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a>[cite: 3]</div>
+      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a>[cite: 1]</div>
       <div class="modal-body">
-        Real-time telemetry, GPS tracking, and heads-up navigation dashboard.[cite: 3]
+        Real-time telemetry, GPS tracking, and heads-up navigation dashboard.[cite: 1]
       </div>
       
       <a href="visualizer.html" class="modal-vis-btn" onclick="window.location.replace('visualizer.html'); return false;">✨ VISUALIZER ARCADE ↗</a>
       <a href="geek-stats.html" class="modal-stats-btn" onclick="window.location.replace('geek-stats.html'); return false;">&gt; GEEK STATS (VT220) _</a>
+
+      <!-- DEDICATED TOTAL RECALL PURGE BUTTON -->
+      <button class="modal-purge-btn" onclick="executeTotalRecall()">⚠️ PURGE CACHE &amp; HARD RELOAD</button>
 
       <div>
         <button class="modal-close-btn" onclick="closeAboutModal()">Close</button>
@@ -1026,7 +1052,7 @@
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-title">Weather Updates</div>
       <div class="modal-body" style="margin-bottom: 12px;">
-        Select how frequently weather refreshes during your drive.[cite: 3]
+        Select how frequently weather refreshes during your drive.[cite: 1]
       </div>
 
       <div class="config-section-label">Time Interval</div>
@@ -1643,15 +1669,15 @@
       activeRecallToast.innerText = text;
     }
 
-    function removeRecallToast() {
-      if (activeRecallToast) {
-        activeRecallToast.remove();
-        activeRecallToast = null;
-      }
-    }
-
     async function executeTotalRecall() {
-      if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]);
+      const purgeBtn = document.querySelector('.modal-purge-btn');
+      if (purgeBtn) {
+        purgeBtn.style.background = '#ff004f';
+        purgeBtn.style.color = '#000000';
+        purgeBtn.innerText = 'PURGING CACHES & WORKERS...';
+      }
+
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 250]);
       updateRecallToast('[ TOTAL RECALL: PURGING ALL CACHES & RELOADING ]');
 
       try {
@@ -1668,36 +1694,44 @@
 
         setTimeout(() => {
           window.location.href = window.location.pathname + '?recall=' + Date.now();
-        }, 650);
+        }, 600);
       } catch (err) {
         window.location.reload(true);
       }
     }
 
     function toggleFullScreen(event) {
-      if (event) event.stopPropagation();
-      const doc = document.documentElement;
-      const icon = document.getElementById('fullscreen-icon');
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
 
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (doc.requestFullscreen) doc.requestFullscreen();
-        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-        if (icon) icon.innerHTML = '<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />';
+      if (!isFull) {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+        else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
       } else {
-        if (document.exitFullscreen) doc.exitFullscreen();
-        else if (document.webkitExitFullscreen) doc.webkitExitFullscreen();
-        if (icon) icon.innerHTML = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />';
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       }
       requestWakeLock();
     }
 
-    document.addEventListener('fullscreenchange', () => {
+    function syncFullscreenIcon() {
       const icon = document.getElementById('fullscreen-icon');
-      if (!document.fullscreenElement && icon) {
+      if (!icon) return;
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (isFull) {
+        icon.innerHTML = '<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />';
+      } else {
         icon.innerHTML = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />';
       }
       requestWakeLock();
-    });
+    }
+
+    document.addEventListener('fullscreenchange', syncFullscreenIcon);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenIcon);
 
     function copyLocationLink(event) {
       if (event) event.stopPropagation();
@@ -1774,50 +1808,10 @@
     }
 
     function setupInteractions() {
+      // Fullscreen Button Hook
       const fsBtn = document.getElementById('fullscreen-btn');
-      let recallTimer = null, tickTimer1 = null, tickTimer2 = null;
-      let isLongPressRecall = false;
-
       fsBtn.addEventListener('contextmenu', (e) => e.preventDefault());
-
-      const startRecallHold = (e) => {
-        if (e) e.stopPropagation();
-        isLongPressRecall = false;
-        fsBtn.classList.add('recall-holding');
-        updateRecallToast('[ TOTAL RECALL: HOLD 3s TO PURGE ]');
-
-        tickTimer1 = setTimeout(() => {
-          if (navigator.vibrate) navigator.vibrate(35);
-          updateRecallToast('[ STAGE 1: PURGING SERVICE WORKERS (2s) ]');
-        }, 1000);
-
-        tickTimer2 = setTimeout(() => {
-          if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
-          updateRecallToast('[ STAGE 2: PURGING CACHES & STORAGE (1s) ]');
-        }, 2000);
-
-        recallTimer = setTimeout(() => {
-          isLongPressRecall = true;
-          fsBtn.classList.remove('recall-holding');
-          executeTotalRecall();
-        }, 3000);
-      };
-
-      const cancelRecallHold = () => {
-        clearTimeout(recallTimer);
-        clearTimeout(tickTimer1);
-        clearTimeout(tickTimer2);
-        fsBtn.classList.remove('recall-holding');
-        removeRecallToast();
-      };
-
-      fsBtn.addEventListener('pointerdown', startRecallHold);
-      fsBtn.addEventListener('pointerup', (e) => {
-        cancelRecallHold();
-        if (!isLongPressRecall) toggleFullScreen(e);
-      });
-      fsBtn.addEventListener('pointercancel', cancelRecallHold);
-      fsBtn.addEventListener('pointerleave', cancelRecallHold);
+      fsBtn.addEventListener('click', toggleFullScreen);
 
       // Compass: Tap = Heading Toggle | Long Press = Pitch / Take-Off POV Toggle
       const compassBtn = document.getElementById('compass-btn');
@@ -2094,7 +2088,7 @@
 
     function getWeatherInfo(code) {
       const icons = {
-        sun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+        sun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="12" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
         cloudSun: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.94 11.23a5 5 0 0 0-8.92 2.12 3.5 3.5 0 0 0 .98 6.65h8a4 4 0 0 0 .94-7.77z" stroke="#a0a0a0"/></svg>`,
         cloud: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8.5a7 7 0 0 1-1.2-13.8 8 8 0 0 1 14.8 2.3 4.5 4.5 0 0 1-.6 11.5Z"/></svg>`,
         rain: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v8"/><path d="M8 13v8"/><path d="M12 15v8"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" stroke="#a0a0a0"/></svg>`,
