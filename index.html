@@ -15,7 +15,6 @@
   <meta name="apple-mobile-web-app-title" content="NOMAD" />
   <meta name="theme-color" content="#000000" />
   
-  <!-- Standalone Manifest & Apple Touch Icon Links -->
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
 
@@ -33,7 +32,7 @@
 
     html, body {
       width: 100%;
-      height: 100vh;
+      height: 100%;
       height: 100dvh;
       background-color: #000000;
       color: #ffffff;
@@ -41,19 +40,20 @@
       overflow: hidden;
     }
 
-    /* Grid Proportions: Squarish Map (44fr) with Enlarged Top/Bottom Cards (28fr each) */
+    /* Calibrated Grid Layout to prevent bottom card cutoff */
     .dashboard {
       display: grid;
-      grid-template-rows: 28fr 44fr 28fr;
+      grid-template-rows: 27fr 45fr 28fr;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
-      height: 100vh;
+      height: 100%;
       height: 100dvh;
       padding: 6px;
-      padding-top: max(4px, env(safe-area-inset-top));
-      padding-bottom: max(4px, env(safe-area-inset-bottom));
+      padding-top: max(6px, env(safe-area-inset-top));
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
       background-color: #000000;
       transition: all 0.3s ease;
+      box-sizing: border-box;
     }
 
     /* DEEP CHARCOAL STEALTH COCKPIT CARDS */
@@ -112,7 +112,7 @@
       box-shadow: 0 0 10px rgba(0, 212, 255, 0.45);
     }
 
-    /* Top Location Card - Spans full width */
+    /* Top Location Card */
     #location-card {
       grid-row: 1;
       grid-column: 1 / span 2;
@@ -125,7 +125,6 @@
       background-color: #222230;
     }
 
-    /* Copy Confirmation Toast inside Location Card */
     .copy-toast-badge {
       position: absolute;
       top: 6px;
@@ -166,33 +165,84 @@
       border-radius: 11px;
     }
 
-    /* MAP OVERLAYS */
+    /* CENTER SWAP CANVAS OVERLAYS */
+    .center-swap-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 11px;
+      z-index: 3;
+      display: none;
+    }
+
+    .gyro-reticle-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 130px;
+      height: 38px;
+      pointer-events: none;
+      z-index: 4;
+      display: none;
+    }
+
+    /* SUBDUED TACTICAL MODE PILL (Bottom-Center of #map-card) */
+    .center-mode-pill {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      background: rgba(18, 18, 24, 0.85);
+      border: 1px solid #444450;
+      color: #8e8e9a;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+      transition: transform 0.12s ease, border-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .center-mode-pill:active {
+      transform: translateX(-50%) scale(0.92);
+      border-color: #888899;
+      color: #ffffff;
+    }
+
+    /* MATCHING 64PX CIRCULAR TELEMETRY GAUGE (Top-Left) */
     .map-overlay-heading {
       position: absolute;
       top: 8px;
       left: 8px;
       z-index: 10;
-      background: rgba(0, 0, 0, 0.88);
-      color: #ffffff;
-      border: 2px solid #555555;
-      padding: 6px 10px;
-      border-radius: 10px;
-      font-size: clamp(1.05rem, 3.8vw, 1.35rem);
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #000000;
+      border: 2.5px solid #cccccc;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 85px;
-      max-width: clamp(95px, 30vw, 125px);
-      min-height: 42px;
       cursor: pointer;
       user-select: none;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: transform 0.15s ease, border-color 0.2s, background-color 0.25s ease, color 0.2s;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.05;
+      text-align: center;
+      padding: 0;
+      transition: transform 0.15s ease, border-color 0.2s, background-color 0.2s;
     }
 
     .map-overlay-heading:active {
@@ -200,15 +250,26 @@
       border-color: #007aff;
     }
 
-    /* General Lee 01 Badge Mode */
+    .telemetry-circle-val {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #000000;
+    }
+
+    .telemetry-circle-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #666666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .map-overlay-heading.general-lee-active {
       background: #ff5500 !important;
       border-color: #ffffff !important;
       box-shadow: 0 0 14px rgba(255, 85, 0, 0.85), inset 0 0 6px rgba(0,0,0,0.4) !important;
-      padding: 2px 8px !important;
     }
 
-    /* Synchronized Red Laser "FIRE!" Strobe Animation */
     @keyframes galagaFireStrobe {
       0%, 15%    { color: #ff0044; border-color: #ff0044; box-shadow: 0 0 20px #ff0044; transform: scale(1.06); }
       22%        { color: #ffffff; border-color: #ffffff; box-shadow: 0 0 6px #ffffff; transform: scale(1.0); }
@@ -220,11 +281,11 @@
 
     .map-overlay-heading.galaga-fire-active {
       font-weight: 900 !important;
-      letter-spacing: 2px !important;
+      letter-spacing: 1px !important;
       animation: galagaFireStrobe 0.8s ease-in-out forwards !important;
     }
 
-    /* Compass Overlay (64px x 64px) */
+    /* Compass Overlay (Top-Right) */
     .map-overlay-compass {
       position: absolute;
       top: 8px;
@@ -276,7 +337,6 @@
       transform-origin: center center;
     }
 
-    /* Lower-Left: Interstate Shield Container */
     .map-overlay-interstate {
       position: absolute;
       bottom: 2%;
@@ -289,7 +349,6 @@
       border: none;
     }
 
-    /* Lower-Right: Classic Route Shield Container */
     .map-overlay-route {
       position: absolute;
       bottom: 2%;
@@ -307,7 +366,6 @@
       display: none;
     }
 
-    /* Top-Center Overlay: Fullscreen Toggle Button + TOTAL RECALL STYLING */
     .map-overlay-fullscreen {
       position: absolute;
       top: 8px;
@@ -333,6 +391,28 @@
       border-color: #ff004f !important;
       box-shadow: 0 0 16px rgba(255, 0, 79, 0.8), inset 0 0 8px rgba(255, 0, 79, 0.6) !important;
       transform: translateX(-50%) scale(0.92);
+    }
+
+    /* Floating Multi-Stage Total Recall Banner */
+    .recall-stage-banner {
+      position: fixed;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111118;
+      border: 2px solid #ff004f;
+      color: #ff004f;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      z-index: 99999;
+      box-shadow: 0 0 20px rgba(255, 0, 79, 0.7);
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
     }
 
     /* INDEPENDENT OVERLAY VEHICLE MARKER */
@@ -372,7 +452,6 @@
       transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.2s ease, width 0.2s ease, height 0.2s ease;
     }
 
-    /* GALAXIAN FIGHTER SCALING (48px) */
     .dashboard.galaga-theme .vehicle-overlay-marker {
       width: 52px;
       height: 52px;
@@ -385,7 +464,6 @@
       height: 48px;
     }
 
-    /* DYNAMIC PULSATING ENGINES */
     @keyframes vehicleHornPulse {
       0%   { transform: scale(1.85); }
       50%  { transform: scale(2.2); }
@@ -426,7 +504,6 @@
       min-height: 0;
     }
 
-    /* High-Visibility Location Card Typography */
     .street-value {
       font-size: 2.7rem;
       font-weight: bold;
@@ -452,7 +529,6 @@
       margin-top: 2px;
     }
 
-    /* Enlarged Badge Container (46px) */
     .highway-shield-badge {
       display: inline-flex;
       align-items: center;
@@ -538,7 +614,6 @@
       opacity: 0.85;
     }
 
-    /* Balanced Centered Speed Sign with Measured 6px Spacing */
     .speed-sign {
       background-color: #ffffff;
       color: #000000;
@@ -706,7 +781,6 @@
       margin-bottom: 14px;
     }
 
-    /* Visualizer Arcade Hub Button */
     .modal-vis-btn {
       display: inline-block;
       width: 100%;
@@ -729,7 +803,6 @@
       background: rgba(255, 0, 127, 0.4);
     }
 
-    /* Terminal GEEK STATS Button */
     .modal-stats-btn {
       display: inline-block;
       width: 100%;
@@ -763,7 +836,6 @@
       cursor: pointer;
     }
 
-    /* Weather Config Pill Groups */
     .config-section-label {
       font-size: 0.85rem;
       font-weight: 700;
@@ -823,8 +895,11 @@
 
     <!-- Center Row: Live Map with Overlays -->
     <div class="card" id="map-card">
-      <!-- Top-Left Overlay: Telemetry Multi-Badge -->
-      <div class="map-overlay-heading" id="heading-text" onclick="toggleTelemetryMode(event)">0° N</div>
+      <!-- 64px Circular Telemetry Gauge (Top-Left) -->
+      <div class="map-overlay-heading" id="heading-text" onclick="toggleTelemetryMode(event)">
+        <div class="telemetry-circle-val">0°</div>
+        <div class="telemetry-circle-label">N</div>
+      </div>
 
       <!-- Top-Center Overlay: Fullscreen Toggle Button + TOTAL RECALL Trigger -->
       <div class="map-overlay-fullscreen" id="fullscreen-btn">
@@ -834,7 +909,7 @@
       </div>
 
       <!-- Top-Right Overlay: Scaled White Compass -->
-      <div class="map-overlay-compass active-heading-up" id="compass-btn" onclick="toggleMapMode(event)">
+      <div class="map-overlay-compass active-heading-up" id="compass-btn">
         <div class="compass-wrapper-overlay">
           <svg class="compass-rose-svg" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="46" fill="none" stroke="#ccc" stroke-width="2.5" />
@@ -854,10 +929,23 @@
         </div>
       </div>
 
-      <!-- Lower-Left Overlay: Interstate Badge -->
-      <div class="map-overlay-interstate" id="interstate-badge-container"></div>
+      <!-- Center Swap Canvas Overlays -->
+      <canvas id="gyro-canvas" class="center-swap-canvas"></canvas>
+      <svg id="gyro-reticle" class="gyro-reticle-overlay" viewBox="0 0 140 40">
+        <line x1="10" y1="20" x2="50" y2="20" stroke="#ffe600" stroke-width="3" stroke-linecap="round"/>
+        <line x1="90" y1="20" x2="130" y2="20" stroke="#ffe600" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="70" cy="20" r="4" fill="#ffe600" />
+        <polyline points="60,20 70,14 80,20" fill="none" stroke="#ffe600" stroke-width="2.5"/>
+      </svg>
+      <canvas id="radar-canvas" class="center-swap-canvas"></canvas>
 
-      <!-- Lower-Right Overlay: Classic Route Badge -->
+      <div class="map-overlay-interstate" id="interstate-badge-container"></div>
+      
+      <!-- SUBDUED TACTICAL MODE PILL -->
+      <button class="center-mode-pill" id="mode-pill-btn" onclick="toggleCenterMode(event)">
+        <span id="center-mode-label">MAP</span>
+      </button>
+
       <div class="map-overlay-route" id="route-badge-container"></div>
 
       <!-- Dedicated Independent Vehicle Overlay Marker -->
@@ -880,7 +968,6 @@
               <div class="weather-desc-container">Fetching weather...</div>
             </div>
           </div>
-          <!-- Clean Icon Badges Row -->
           <div class="weather-details-stacked" id="weather-extra">
             <div class="weather-stat-pill">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -903,7 +990,7 @@
       </div>
     </div>
 
-    <!-- Bottom-Right: Speed Sign Tile (Tap: Unit | Long Press: Galaga Easter Egg) -->
+    <!-- Bottom-Right: Speed Sign Tile -->
     <div class="card speed-sign-card" id="trip-card">
       <div class="speed-sign dark-mode-sign" id="speed-sign-box">
         <div class="speed-sign-title">SPEED</div>
@@ -920,15 +1007,12 @@
         <div class="modal-title">NOMAD: RoadTrip ↗</div>
         <div class="modal-features-hint">Features &amp; User Guide</div>
       </a>
-      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a></div>
+      <div class="modal-author">by <a href="https://www.instagram.com/tony_bostony/" target="_blank" rel="noopener noreferrer">BostonyFX</a>[cite: 3]</div>
       <div class="modal-body">
-        Real-time telemetry, GPS tracking, and heads-up navigation dashboard.
+        Real-time telemetry, GPS tracking, and heads-up navigation dashboard.[cite: 3]
       </div>
       
-      <!-- VISUALIZER ARCADE LINK -->
       <a href="visualizer.html" class="modal-vis-btn" onclick="window.location.replace('visualizer.html'); return false;">✨ VISUALIZER ARCADE ↗</a>
-
-      <!-- GEEK STATS TERMINAL LINK -->
       <a href="geek-stats.html" class="modal-stats-btn" onclick="window.location.replace('geek-stats.html'); return false;">&gt; GEEK STATS (VT220) _</a>
 
       <div>
@@ -942,7 +1026,7 @@
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-title">Weather Updates</div>
       <div class="modal-body" style="margin-bottom: 12px;">
-        Select how frequently weather refreshes during your drive.
+        Select how frequently weather refreshes during your drive.[cite: 3]
       </div>
 
       <div class="config-section-label">Time Interval</div>
@@ -984,14 +1068,12 @@
     let lastGeocodeTime = 0;
     let wakeLock = null;
 
-    // Active Highway State for Auto-Zoom & Black Box Logger
     let currentInterstateShield = null;
     let currentRouteShield = null;
     let lastLoggedRouteSignature = null;
     let targetMapZoom = 16.0;
     let lastUserMapInteractionTime = 0;
 
-    // Galaga Arcade Easter Egg State
     let isGalagaMode = false;
     let audioCtx = null;
     let dixieHornTimeout = null;
@@ -1000,32 +1082,27 @@
     let galagaPulseTimeout = null;
     let hudBannerTimeout = null;
 
-    // Weather Config State (Stored in localStorage)
     let weatherTimeIntervalMinutes = parseInt(localStorage.getItem('nomad_weather_interval_min') || '30', 10);
     let weatherDistanceIntervalMiles = parseInt(localStorage.getItem('nomad_weather_distance_mi') || '15', 10);
 
-    // Telemetry Badge Mode State (0 = Heading, 1 = Live GPS Altitude, 2 = GPS Accuracy)
     let telemetryMode = 0;
-
-    // Map Orientation Mode State
     let isHeadingUp = true;
+    let currentPitch = 58;
 
-    // 2-Theme Dedicated Palette (Dark Matter <-> Positron Neutral)
+    /* CENTER SWAP DRIVER MODES */
+    const CENTER_MODES = ['MAP', 'GYRO', 'RADAR'];
+    let centerModeIndex = 0;
+    let gyroAnimId = null;
+    let radarAnimId = null;
+    let rollAngle = 0, pitchAngle = 0;
+    let radarSweepAngle = 0;
+
     const mapThemes = [
-      {
-        name: 'Dark Matter (Night)',
-        url: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-        darkSign: true
-      },
-      {
-        name: 'Positron (Neutral Light)',
-        url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-        darkSign: false
-      }
+      { name: 'Dark Matter (Night)', url: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', darkSign: true },
+      { name: 'Positron (Neutral Light)', url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', darkSign: false }
     ];
     let currentThemeIndex = 0;
 
-    // Unit State Variables
     let rawTempF = null;
     let isFahrenheit = true;
     let rawSpeedMps = 0;
@@ -1044,7 +1121,6 @@
       "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
     };
 
-    /* Massachusetts Surface Road to Route Concurrency Mapping */
     const massachusettsRouteConcurrency = [
       { pattern: /Marrett Road/i, route: "2A" },
       { pattern: /Bedford (Road|Street)/i, route: "62" },
@@ -1091,7 +1167,6 @@
       const maxAllowedWidth = card.clientWidth - 16;
       let fontSize = 42;
       el.style.fontSize = `${fontSize}px`;
-
       const minFontSize = 22;
 
       while (el.scrollWidth > maxAllowedWidth && fontSize > minFontSize) {
@@ -1102,31 +1177,21 @@
 
     window.addEventListener('resize', autoShrinkStreetName);
 
-    /* BLACK BOX FLIGHT RECORDER ENGINE */
     function recordBlackBoxEntry(entry) {
       try {
         const raw = localStorage.getItem('nomad_blackbox_log');
         let logs = raw ? JSON.parse(raw) : [];
-
         logs.push(entry);
-        if (logs.length > 5) {
-          logs = logs.slice(logs.length - 5);
-        }
-
+        if (logs.length > 5) logs = logs.slice(logs.length - 5);
         localStorage.setItem('nomad_blackbox_log', JSON.stringify(logs));
-      } catch (err) {
-        console.warn("Black box storage error:", err);
-      }
+      } catch (err) {}
     }
 
-    /* WEB AUDIO API ENGINE */
     function getAudioContext() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       return audioCtx;
     }
 
@@ -1142,19 +1207,14 @@
         notes.forEach(([freq, dur]) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-
           osc.type = 'square';
           osc.frequency.setValueAtTime(freq, now + offset);
-
           gain.gain.setValueAtTime(0.12, now + offset);
           gain.gain.exponentialRampToValueAtTime(0.001, now + offset + dur);
-
           osc.connect(gain);
           gain.connect(ctx.destination);
-
           osc.start(now + offset);
           osc.stop(now + offset + dur);
-
           offset += dur * 0.9;
         });
       } catch (e) {}
@@ -1164,7 +1224,6 @@
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
-
         const dixieNotes = [
           [392.00, 0.16], [329.63, 0.16], [261.63, 0.22], [261.63, 0.12], 
           [261.63, 0.16], [293.66, 0.16], [329.63, 0.16], [349.23, 0.16], 
@@ -1181,10 +1240,8 @@
 
           osc1.type = 'sawtooth';
           osc2.type = 'square';
-
           osc1.frequency.setValueAtTime(freq, now + offset);
           osc2.frequency.setValueAtTime(freq * 1.004, now + offset);
-
           gain.gain.setValueAtTime(0.18, now + offset);
           gain.gain.exponentialRampToValueAtTime(0.001, now + offset + dur);
 
@@ -1197,21 +1254,16 @@
           osc1.stop(now + offset + dur);
           osc2.stop(now + offset + dur);
 
-          if (index === dixieNotes.length - 1) {
-            totalDuration = (offset + dur) * 1000;
-          }
-
+          if (index === dixieNotes.length - 1) totalDuration = (offset + dur) * 1000;
           offset += dur * 0.95;
         });
 
         const exactDuration = Math.max(totalDuration, 2820);
-
         const vehicleMarker = document.getElementById('vehicle-overlay');
         if (vehicleMarker) {
           clearTimeout(dixiePulseTimeout);
           vehicleMarker.classList.remove('vehicle-pulsing-laser');
           vehicleMarker.classList.add('vehicle-pulsing-horn');
-
           dixiePulseTimeout = setTimeout(() => {
             vehicleMarker.classList.remove('vehicle-pulsing-horn');
           }, exactDuration);
@@ -1222,16 +1274,12 @@
           clearTimeout(dixieHornTimeout);
           badgeEl.classList.remove('galaga-fire-active');
           badgeEl.classList.add('general-lee-active');
-          
           badgeEl.innerHTML = `
-            <svg width="68" height="30" viewBox="0 0 100 46" style="overflow: visible;">
-              <path d="M 12 0 L 34 0 L 46 12 L 46 34 L 34 46 L 12 46 L 0 34 L 0 12 Z M 16 12 L 16 34 L 30 34 L 30 12 Z" 
-                    fill="#000000" stroke="#ffffff" stroke-width="3" stroke-linejoin="miter" />
-              <path d="M 64 12 L 54 20 L 54 12 L 68 0 L 78 0 L 78 36 L 94 36 L 94 46 L 54 46 L 54 36 L 68 36 L 68 12 Z" 
-                    fill="#000000" stroke="#ffffff" stroke-width="3" stroke-linejoin="miter" />
+            <svg width="42" height="24" viewBox="0 0 100 46" style="overflow: visible;">
+              <path d="M 12 0 L 34 0 L 46 12 L 46 34 L 34 46 L 12 46 L 0 34 L 0 12 Z M 16 12 L 16 34 L 30 34 L 30 12 Z" fill="#000000" stroke="#ffffff" stroke-width="3" stroke-linejoin="miter" />
+              <path d="M 64 12 L 54 20 L 54 12 L 68 0 L 78 0 L 78 36 L 94 36 L 94 46 L 54 46 L 54 36 L 68 36 L 68 12 Z" fill="#000000" stroke="#ffffff" stroke-width="3" stroke-linejoin="miter" />
             </svg>
           `;
-
           dixieHornTimeout = setTimeout(() => {
             badgeEl.classList.remove('general-lee-active');
             renderTelemetryBadge();
@@ -1244,41 +1292,30 @@
       try {
         const ctx = getAudioContext();
         const now = ctx.currentTime;
-
-        const salvos = [
-          [0.00, 0.09],
-          [0.32, 0.41],
-          [0.64, 0.73]
-        ];
+        const salvos = [[0.00, 0.09], [0.32, 0.41], [0.64, 0.73]];
 
         salvos.forEach(([t1, t2]) => {
           [t1, t2].forEach((delay) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(1750, now + delay);
             osc.frequency.exponentialRampToValueAtTime(120, now + delay + 0.075);
-
             gain.gain.setValueAtTime(0.22, now + delay);
             gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.075);
-
             osc.connect(gain);
             gain.connect(ctx.destination);
-
             osc.start(now + delay);
             osc.stop(now + delay + 0.075);
           });
         });
 
         const exactLaserDuration = 805;
-
         const vehicleMarker = document.getElementById('vehicle-overlay');
         if (vehicleMarker) {
           clearTimeout(galagaPulseTimeout);
           vehicleMarker.classList.remove('vehicle-pulsing-horn');
           vehicleMarker.classList.add('vehicle-pulsing-laser');
-
           galagaPulseTimeout = setTimeout(() => {
             vehicleMarker.classList.remove('vehicle-pulsing-laser');
           }, exactLaserDuration);
@@ -1288,9 +1325,8 @@
         if (badgeEl) {
           clearTimeout(galagaLaserTimeout);
           badgeEl.classList.remove('general-lee-active');
-          badgeEl.innerText = 'FIRE!';
+          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#ff0044; font-size:0.9rem;">FIRE!</div>`;
           badgeEl.classList.add('galaga-fire-active');
-
           galagaLaserTimeout = setTimeout(() => {
             badgeEl.classList.remove('galaga-fire-active');
             renderTelemetryBadge();
@@ -1314,22 +1350,17 @@
         vehicleSvg.removeAttribute('stroke');
         vehicleSvg.style.filter = 'drop-shadow(0 0 10px #00d4ff)';
         vehicleSvg.innerHTML = `
-          <!-- Center Fuselage -->
           <polygon points="16,1 19,10 19,26 13,26 13,10" fill="#ffffff" stroke="#000000" stroke-width="0.8"/>
           <polygon points="16,1 18,8 14,8" fill="#ff0044"/>
-          <!-- Left Wing -->
           <polygon points="13,10 13,25 2,26 6,17" fill="#00d4ff"/>
           <polygon points="2,26 6,17 2,15" fill="#ff0044"/>
-          <!-- Right Wing -->
           <polygon points="19,10 19,25 30,26 26,17" fill="#00d4ff"/>
           <polygon points="30,26 26,17 30,15" fill="#ff0044"/>
-          <!-- Engine Flame Accent -->
           <rect x="14" y="26" width="4" height="4" fill="#ffcc00"/>
         `;
-
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
-          badgeEl.innerText = 'FIGHTER';
+          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#00d4ff; font-size:0.75rem;">FIGHTER</div>`;
           hudBannerTimeout = setTimeout(renderTelemetryBadge, 1500);
         }
       } else {
@@ -1342,16 +1373,14 @@
         vehicleSvg.setAttribute('stroke-linejoin', 'round');
         vehicleSvg.style.filter = 'drop-shadow(0px 2px 5px rgba(0,0,0,0.6))';
         vehicleSvg.innerHTML = `<polygon points="12 2 19 21 12 17 5 21 12 2"/>`;
-
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
-          badgeEl.innerText = 'CRUISE';
+          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#007aff; font-size:0.8rem;">CRUISE</div>`;
           hudBannerTimeout = setTimeout(renderTelemetryBadge, 1300);
         }
       }
     }
 
-    /* High-Readability Interstate Shield (46px) */
     function createInterstateSVG(num) {
       return `
         <div class="highway-shield-badge">
@@ -1365,7 +1394,6 @@
       `;
     }
 
-    /* High-Readability Classic Highway Route Shield (46px) */
     function createRouteSVG(num) {
       return `
         <div class="highway-shield-badge">
@@ -1389,48 +1417,31 @@
 
     function getHighwayDirection(routeNumber, heading) {
       if (heading === null || isNaN(heading)) return '';
-
       const cleanNum = routeNumber.toUpperCase().trim();
-
       const axisOverrides = {
-        "128": "NS",
-        "225": "EW",
-        "2":   "EW",
-        "2A":  "EW",
-        "4":   "NS",
-        "3":   "NS",
-        "3A":  "NS",
-        "62":  "EW",
-        "95":  "NS",
-        "93":  "NS",
-        "495": "NS",
-        "90":  "EW"
+        "128": "NS", "225": "EW", "2": "EW", "2A": "EW", "4": "NS", "3": "NS", "3A": "NS",
+        "62": "EW", "95": "NS", "93": "NS", "495": "NS", "90": "EW"
       };
-
       let axis = axisOverrides[cleanNum];
       if (!axis) {
         const numericPart = parseInt(cleanNum.replace(/\D/g, ''), 10);
         axis = (numericPart % 2 !== 0) ? 'NS' : 'EW';
       }
-
-      if (axis === 'NS') {
-        return (heading >= 270 || heading < 90) ? 'North' : 'South';
-      } else {
-        return (heading >= 0 && heading < 180) ? 'East' : 'West';
-      }
+      return (axis === 'NS') 
+        ? ((heading >= 270 || heading < 90) ? 'North' : 'South')
+        : ((heading >= 0 && heading < 180) ? 'East' : 'West');
     }
 
-    /* TELEMETRY BADGE FUNCTIONS */
     function toggleTelemetryMode(event) {
       if (event) event.stopPropagation();
       telemetryMode = (telemetryMode + 1) % 3;
       renderTelemetryBadge();
     }
 
+    /* Renders Circular 64px Telemetry Modes */
     function renderTelemetryBadge() {
       const badgeEl = document.getElementById('heading-text');
       if (!badgeEl) return;
-
       badgeEl.classList.remove('general-lee-active', 'galaga-fire-active');
       badgeEl.style.borderColor = '';
       badgeEl.style.color = '';
@@ -1438,99 +1449,244 @@
 
       if (telemetryMode === 0) {
         const cardinal = getCardinalDirection(currentHeading);
-        badgeEl.innerText = `${Math.round(currentHeading)}° ${cardinal}`;
+        badgeEl.innerHTML = `
+          <div class="telemetry-circle-val">${Math.round(currentHeading)}°</div>
+          <div class="telemetry-circle-label">${cardinal}</div>
+        `;
       } else if (telemetryMode === 1) {
         if (rawAltitudeMeters !== null && !isNaN(rawAltitudeMeters)) {
           const feet = Math.round(rawAltitudeMeters * 3.28084);
-          badgeEl.innerText = `Alt: ${feet.toLocaleString()} ft`;
+          badgeEl.innerHTML = `
+            <div class="telemetry-circle-val">${feet.toLocaleString()}</div>
+            <div class="telemetry-circle-label">FT ALT</div>
+          `;
         } else {
-          badgeEl.innerText = `Alt: -- ft`;
+          badgeEl.innerHTML = `
+            <div class="telemetry-circle-val">--</div>
+            <div class="telemetry-circle-label">FT ALT</div>
+          `;
         }
       } else if (telemetryMode === 2) {
         if (rawAccuracyMeters !== null && !isNaN(rawAccuracyMeters)) {
           const accFeet = Math.round(rawAccuracyMeters * 3.28084);
-          badgeEl.innerText = `GPS: ±${accFeet} ft`;
+          badgeEl.innerHTML = `
+            <div class="telemetry-circle-val">±${accFeet}</div>
+            <div class="telemetry-circle-label">FT GPS</div>
+          `;
         } else {
-          badgeEl.innerText = `GPS: ±-- ft`;
+          badgeEl.innerHTML = `
+            <div class="telemetry-circle-val">±--</div>
+            <div class="telemetry-circle-label">FT GPS</div>
+          `;
         }
       }
     }
 
-    /* FULLSCREEN & TOTAL RECALL ENGINE */
-    async function executeTotalRecall() {
-      if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100, 50, 300]);
-      }
+    /* CENTER SWAP DRIVER STATE CONTROLLER */
+    function toggleCenterMode(event) {
+      if (event) event.stopPropagation();
+      centerModeIndex = (centerModeIndex + 1) % CENTER_MODES.length;
+      const currentMode = CENTER_MODES[centerModeIndex];
 
-      const toast = document.createElement('div');
-      toast.style.position = 'fixed';
-      toast.style.top = '24px';
-      toast.style.left = '50%';
-      toast.style.transform = 'translateX(-50%)';
-      toast.style.background = '#ff004f';
-      toast.style.color = '#ffffff';
-      toast.style.padding = '12px 20px';
-      toast.style.borderRadius = '24px';
-      toast.style.fontFamily = 'monospace';
-      toast.style.fontWeight = '900';
-      toast.style.fontSize = '13px';
-      toast.style.letterSpacing = '0.5px';
-      toast.style.zIndex = '99999';
-      toast.style.boxShadow = '0 0 24px rgba(255, 0, 79, 0.9)';
-      toast.style.textAlign = 'center';
-      toast.style.whiteSpace = 'nowrap';
-      toast.innerText = '[ TOTAL RECALL: PURGING SERVICE WORKERS & CACHE ]';
-      document.body.appendChild(toast);
+      const pillLabel = document.getElementById('center-mode-label');
+      if (pillLabel) pillLabel.innerText = currentMode;
+
+      const mapEl = document.getElementById('map');
+      const vehicleMarker = document.getElementById('vehicle-overlay');
+      const gyroCanvas = document.getElementById('gyro-canvas');
+      const gyroReticle = document.getElementById('gyro-reticle');
+      const radarCanvas = document.getElementById('radar-canvas');
+
+      if (gyroAnimId) { cancelAnimationFrame(gyroAnimId); gyroAnimId = null; }
+      if (radarAnimId) { cancelAnimationFrame(radarAnimId); radarAnimId = null; }
+
+      if (currentMode === 'MAP') {
+        mapEl.style.display = 'block';
+        if (vehicleMarker) vehicleMarker.style.display = 'flex';
+        gyroCanvas.style.display = 'none';
+        gyroReticle.style.display = 'none';
+        radarCanvas.style.display = 'none';
+      } else if (currentMode === 'GYRO') {
+        mapEl.style.display = 'none';
+        if (vehicleMarker) vehicleMarker.style.display = 'none';
+        gyroCanvas.style.display = 'block';
+        gyroReticle.style.display = 'block';
+        radarCanvas.style.display = 'none';
+        startGyroLoop();
+      } else if (currentMode === 'RADAR') {
+        mapEl.style.display = 'none';
+        if (vehicleMarker) vehicleMarker.style.display = 'none';
+        gyroCanvas.style.display = 'none';
+        gyroReticle.style.display = 'none';
+        radarCanvas.style.display = 'block';
+        startRadarLoop();
+      }
+    }
+
+    function startGyroLoop() {
+      const canvas = document.getElementById('gyro-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function draw() {
+        if (CENTER_MODES[centerModeIndex] !== 'GYRO') return;
+        const w = canvas.width = canvas.clientWidth;
+        const h = canvas.height = canvas.clientHeight;
+        const cx = w / 2;
+        const cy = h / 2;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate((rollAngle * Math.PI) / 180);
+
+        const pitchOffsetY = (pitchAngle / 30) * (h * 0.4);
+
+        // Sky Top (Muted Navy)
+        ctx.fillStyle = '#0f2438';
+        ctx.fillRect(-w, -h * 2 + pitchOffsetY, w * 2, h * 2);
+
+        // Ground Bottom (Subdued Slate-Black)
+        ctx.fillStyle = '#14181a';
+        ctx.fillRect(-w, pitchOffsetY, w * 2, h * 2);
+
+        // Horizon Line
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-w, pitchOffsetY);
+        ctx.lineTo(w, pitchOffsetY);
+        ctx.stroke();
+
+        // Pitch Ladder Marks
+        for (let p = -20; p <= 20; p += 10) {
+          if (p === 0) continue;
+          const ladderY = pitchOffsetY - (p / 30) * (h * 0.4);
+          const ladderW = Math.abs(p) === 10 ? 36 : 54;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-ladderW / 2, ladderY);
+          ctx.lineTo(ladderW / 2, ladderY);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+        gyroAnimId = requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function startRadarLoop() {
+      const canvas = document.getElementById('radar-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function draw() {
+        if (CENTER_MODES[centerModeIndex] !== 'RADAR') return;
+        const w = canvas.width = canvas.clientWidth;
+        const h = canvas.height = canvas.clientHeight;
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(w, h) * 0.44;
+
+        const liveMph = (rawSpeedMps !== null && !isNaN(rawSpeedMps)) ? (rawSpeedMps * 2.23694) : 0;
+        radarSweepAngle += 0.03 + Math.min(0.06, (liveMph / 80) * 0.04);
+
+        ctx.fillStyle = 'rgba(2, 11, 8, 0.22)';
+        ctx.fillRect(0, 0, w, h);
+
+        // Range Rings
+        ctx.strokeStyle = '#0a3d24';
+        ctx.lineWidth = 1.5;
+        for (let r = 1; r <= 3; r++) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, (radius / 3) * r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Crosshairs
+        ctx.beginPath();
+        ctx.moveTo(cx - radius, cy);
+        ctx.lineTo(cx + radius, cy);
+        ctx.moveTo(cx, cy - radius);
+        ctx.lineTo(cx, cy + radius);
+        ctx.stroke();
+
+        // Sweep Line
+        const sweepX = cx + Math.cos(radarSweepAngle) * radius;
+        const sweepY = cy + Math.sin(radarSweepAngle) * radius;
+
+        ctx.strokeStyle = '#00ff66';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(sweepX, sweepY);
+        ctx.stroke();
+
+        // Center Marker
+        ctx.fillStyle = '#00ff66';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        radarAnimId = requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    /* Floating Multi-Stage Total Recall Toast Engine */
+    let activeRecallToast = null;
+    function updateRecallToast(text) {
+      if (!activeRecallToast) {
+        activeRecallToast = document.createElement('div');
+        activeRecallToast.className = 'recall-stage-banner';
+        document.body.appendChild(activeRecallToast);
+      }
+      activeRecallToast.innerText = text;
+    }
+
+    function removeRecallToast() {
+      if (activeRecallToast) {
+        activeRecallToast.remove();
+        activeRecallToast = null;
+      }
+    }
+
+    async function executeTotalRecall() {
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]);
+      updateRecallToast('[ TOTAL RECALL: PURGING ALL CACHES & RELOADING ]');
 
       try {
         if ('serviceWorker' in navigator) {
           const registrations = await navigator.serviceWorker.getRegistrations();
-          for (let reg of registrations) {
-            await reg.unregister();
-          }
+          for (let reg of registrations) await reg.unregister();
         }
-
         if ('caches' in window) {
           const keys = await caches.keys();
           await Promise.all(keys.map(key => caches.delete(key)));
         }
-
         localStorage.clear();
         sessionStorage.clear();
 
         setTimeout(() => {
           window.location.href = window.location.pathname + '?recall=' + Date.now();
-        }, 700);
+        }, 650);
       } catch (err) {
-        console.error('Total Recall Error:', err);
         window.location.reload(true);
       }
     }
 
     function toggleFullScreen(event) {
       if (event) event.stopPropagation();
-
       const doc = document.documentElement;
       const icon = document.getElementById('fullscreen-icon');
 
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (doc.requestFullscreen) {
-          doc.requestFullscreen();
-        } else if (doc.webkitRequestFullscreen) {
-          doc.webkitRequestFullscreen();
-        }
-        if (icon) {
-          icon.innerHTML = '<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />';
-        }
+        if (doc.requestFullscreen) doc.requestFullscreen();
+        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+        if (icon) icon.innerHTML = '<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />';
       } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-        if (icon) {
-          icon.innerHTML = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />';
-        }
+        if (document.exitFullscreen) doc.exitFullscreen();
+        else if (document.webkitExitFullscreen) doc.webkitExitFullscreen();
+        if (icon) icon.innerHTML = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />';
       }
       requestWakeLock();
     }
@@ -1545,28 +1701,20 @@
 
     function copyLocationLink(event) {
       if (event) event.stopPropagation();
-
       if (lastLat === null || lastLon === null) {
         alert("GPS location not available yet.");
         return;
       }
-
       const mapsUrl = `https://www.google.com/maps?q=${lastLat},${lastLon}`;
       const toastEl = document.getElementById('copy-toast');
-
       navigator.clipboard.writeText(mapsUrl).then(() => {
         if (toastEl) {
           toastEl.classList.add('show');
-          setTimeout(() => {
-            toastEl.classList.remove('show');
-          }, 1800);
+          setTimeout(() => { toastEl.classList.remove('show'); }, 1800);
         }
-      }).catch((err) => {
-        console.error("Clipboard copy error:", err);
       });
     }
 
-    /* ABOUT MODAL */
     function openAboutModal() {
       const modal = document.getElementById('about-modal');
       if (modal) modal.classList.add('active');
@@ -1578,17 +1726,14 @@
       if (modal) modal.classList.remove('active');
     }
 
-    /* WEATHER INTERVAL CONFIG MODAL */
     function renderWeatherModalPills() {
       const modal = document.getElementById('weather-modal');
       if (!modal) return;
-
       const timeBtns = modal.querySelectorAll('#time-pill-grid .config-pill-btn');
       timeBtns.forEach(btn => {
         const val = parseInt(btn.innerText, 10);
         btn.classList.toggle('active', val === weatherTimeIntervalMinutes);
       });
-
       const distBtns = modal.querySelectorAll('#distance-pill-grid .config-pill-btn');
       distBtns.forEach(btn => {
         const val = btn.innerText === 'Off' ? 0 : parseInt(btn.innerText, 10);
@@ -1620,12 +1765,17 @@
       renderWeatherModalPills();
     }
 
-    /* LONG-PRESS, TAP & TOUCH DISAMBIGUATION HANDLERS */
+    /* PITCH / TAKE-OFF POV TOGGLE (58 deg <-> 0 deg) */
+    function togglePitchMode() {
+      currentPitch = (currentPitch === 0) ? 58 : 0;
+      if (map) {
+        map.easeTo({ pitch: currentPitch, duration: 600 });
+      }
+    }
+
     function setupInteractions() {
       const fsBtn = document.getElementById('fullscreen-btn');
-      let recallTimer = null;
-      let tickTimer1 = null;
-      let tickTimer2 = null;
+      let recallTimer = null, tickTimer1 = null, tickTimer2 = null;
       let isLongPressRecall = false;
 
       fsBtn.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -1634,13 +1784,16 @@
         if (e) e.stopPropagation();
         isLongPressRecall = false;
         fsBtn.classList.add('recall-holding');
+        updateRecallToast('[ TOTAL RECALL: HOLD 3s TO PURGE ]');
 
         tickTimer1 = setTimeout(() => {
-          if (navigator.vibrate) navigator.vibrate(30);
+          if (navigator.vibrate) navigator.vibrate(35);
+          updateRecallToast('[ STAGE 1: PURGING SERVICE WORKERS (2s) ]');
         }, 1000);
 
         tickTimer2 = setTimeout(() => {
-          if (navigator.vibrate) navigator.vibrate(50);
+          if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
+          updateRecallToast('[ STAGE 2: PURGING CACHES & STORAGE (1s) ]');
         }, 2000);
 
         recallTimer = setTimeout(() => {
@@ -1655,29 +1808,61 @@
         clearTimeout(tickTimer1);
         clearTimeout(tickTimer2);
         fsBtn.classList.remove('recall-holding');
+        removeRecallToast();
       };
 
       fsBtn.addEventListener('pointerdown', startRecallHold);
       fsBtn.addEventListener('pointerup', (e) => {
         cancelRecallHold();
-        if (!isLongPressRecall) {
-          toggleFullScreen(e);
-        }
+        if (!isLongPressRecall) toggleFullScreen(e);
       });
       fsBtn.addEventListener('pointercancel', cancelRecallHold);
       fsBtn.addEventListener('pointerleave', cancelRecallHold);
 
+      // Compass: Tap = Heading Toggle | Long Press = Pitch / Take-Off POV Toggle
+      const compassBtn = document.getElementById('compass-btn');
+      let compassPressTimer;
+      let isCompassLongPress = false;
+      let isCompassTouchHandled = false;
+
+      compassBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      compassBtn.addEventListener('touchstart', (e) => {
+        isCompassTouchHandled = true;
+        isCompassLongPress = false;
+        compassPressTimer = setTimeout(() => {
+          isCompassLongPress = true;
+          if (navigator.vibrate) navigator.vibrate(40);
+          togglePitchMode();
+        }, 500);
+      }, { passive: true });
+
+      compassBtn.addEventListener('touchmove', () => clearTimeout(compassPressTimer));
+      compassBtn.addEventListener('touchend', (e) => {
+        clearTimeout(compassPressTimer);
+        if (!isCompassLongPress) toggleMapMode(e);
+        setTimeout(() => { isCompassTouchHandled = false; }, 350);
+      });
+
+      compassBtn.addEventListener('mousedown', () => {
+        if (isCompassTouchHandled) return;
+        isCompassLongPress = false;
+        compassPressTimer = setTimeout(() => {
+          isCompassLongPress = true;
+          togglePitchMode();
+        }, 500);
+      });
+      compassBtn.addEventListener('mouseleave', () => clearTimeout(compassPressTimer));
+      compassBtn.addEventListener('mouseup', (e) => {
+        if (isCompassTouchHandled) return;
+        clearTimeout(compassPressTimer);
+        if (!isCompassLongPress) toggleMapMode(e);
+      });
+
       const locationCard = document.getElementById('location-card');
       let locPressTimer;
-
       locationCard.addEventListener('contextmenu', (e) => e.preventDefault());
-
-      const startLocPress = () => {
-        locPressTimer = setTimeout(() => {
-          openAboutModal();
-        }, 600);
-      };
-
+      const startLocPress = () => { locPressTimer = setTimeout(openAboutModal, 600); };
       const cancelLocPress = () => clearTimeout(locPressTimer);
 
       locationCard.addEventListener('touchstart', startLocPress, { passive: true });
@@ -1688,13 +1873,10 @@
       locationCard.addEventListener('mouseleave', cancelLocPress);
 
       const tempTile = document.getElementById('current-temp');
-      let tempPressTimer;
-      let isTempLongPress = false;
-      let isTouchHandled = false;
-
+      let tempPressTimer, isTempLongPress = false, isTouchHandled = false;
       tempTile.addEventListener('contextmenu', (e) => e.preventDefault());
 
-      tempTile.addEventListener('touchstart', (e) => {
+      tempTile.addEventListener('touchstart', () => {
         isTouchHandled = true;
         isTempLongPress = false;
         tempPressTimer = setTimeout(() => {
@@ -1703,19 +1885,14 @@
         }, 500);
       }, { passive: true });
 
-      tempTile.addEventListener('touchmove', () => {
-        clearTimeout(tempPressTimer);
-      });
-
+      tempTile.addEventListener('touchmove', () => clearTimeout(tempPressTimer));
       tempTile.addEventListener('touchend', (e) => {
         clearTimeout(tempPressTimer);
-        if (!isTempLongPress) {
-          toggleTemperatureUnit(e);
-        }
+        if (!isTempLongPress) toggleTemperatureUnit(e);
         setTimeout(() => { isTouchHandled = false; }, 350);
       });
 
-      tempTile.addEventListener('mousedown', (e) => {
+      tempTile.addEventListener('mousedown', () => {
         if (isTouchHandled) return;
         isTempLongPress = false;
         tempPressTimer = setTimeout(() => {
@@ -1723,27 +1900,18 @@
           openWeatherModal();
         }, 500);
       });
-
-      tempTile.addEventListener('mouseleave', () => {
-        clearTimeout(tempPressTimer);
-      });
-
+      tempTile.addEventListener('mouseleave', () => clearTimeout(tempPressTimer));
       tempTile.addEventListener('mouseup', (e) => {
         if (isTouchHandled) return;
         clearTimeout(tempPressTimer);
-        if (!isTempLongPress) {
-          toggleTemperatureUnit(e);
-        }
+        if (!isTempLongPress) toggleTemperatureUnit(e);
       });
 
       const speedTile = document.getElementById('trip-card');
-      let speedPressTimer;
-      let isSpeedLongPress = false;
-      let isSpeedTouchHandled = false;
-
+      let speedPressTimer, isSpeedLongPress = false, isSpeedTouchHandled = false;
       speedTile.addEventListener('contextmenu', (e) => e.preventDefault());
 
-      speedTile.addEventListener('touchstart', (e) => {
+      speedTile.addEventListener('touchstart', () => {
         isSpeedTouchHandled = true;
         isSpeedLongPress = false;
         speedPressTimer = setTimeout(() => {
@@ -1752,19 +1920,14 @@
         }, 600);
       }, { passive: true });
 
-      speedTile.addEventListener('touchmove', () => {
-        clearTimeout(speedPressTimer);
-      });
-
+      speedTile.addEventListener('touchmove', () => clearTimeout(speedPressTimer));
       speedTile.addEventListener('touchend', (e) => {
         clearTimeout(speedPressTimer);
-        if (!isSpeedLongPress) {
-          toggleSpeedUnit(e);
-        }
+        if (!isSpeedLongPress) toggleSpeedUnit(e);
         setTimeout(() => { isSpeedTouchHandled = false; }, 350);
       });
 
-      speedTile.addEventListener('mousedown', (e) => {
+      speedTile.addEventListener('mousedown', () => {
         if (isSpeedTouchHandled) return;
         isSpeedLongPress = false;
         speedPressTimer = setTimeout(() => {
@@ -1772,111 +1935,71 @@
           toggleGalagaMode();
         }, 600);
       });
-
-      speedTile.addEventListener('mouseleave', () => {
-        clearTimeout(speedPressTimer);
-      });
-
+      speedTile.addEventListener('mouseleave', () => clearTimeout(speedPressTimer));
       speedTile.addEventListener('mouseup', (e) => {
         if (isSpeedTouchHandled) return;
         clearTimeout(speedPressTimer);
-        if (!isSpeedLongPress) {
-          toggleSpeedUnit(e);
-        }
+        if (!isSpeedLongPress) toggleSpeedUnit(e);
       });
 
       const vehicleMarker = document.getElementById('vehicle-overlay');
-      let vehiclePressTimer;
-      let isVehicleLongPress = false;
-      let isVehicleTouchHandled = false;
-
+      let vehiclePressTimer, isVehicleLongPress = false, isVehicleTouchHandled = false;
       vehicleMarker.addEventListener('contextmenu', (e) => e.preventDefault());
 
-      vehicleMarker.addEventListener('touchstart', (e) => {
+      vehicleMarker.addEventListener('touchstart', () => {
         isVehicleTouchHandled = true;
         isVehicleLongPress = false;
         vehiclePressTimer = setTimeout(() => {
           isVehicleLongPress = true;
-          if (isGalagaMode) {
-            playGalagaLaser();
-          } else {
-            playDixieHorn();
-          }
+          if (isGalagaMode) playGalagaLaser();
+          else playDixieHorn();
         }, 500);
       }, { passive: true });
 
-      vehicleMarker.addEventListener('touchmove', () => {
-        clearTimeout(vehiclePressTimer);
-      });
-
+      vehicleMarker.addEventListener('touchmove', () => clearTimeout(vehiclePressTimer));
       vehicleMarker.addEventListener('touchend', (e) => {
         clearTimeout(vehiclePressTimer);
-        if (!isVehicleLongPress) {
-          toggleMapStyle(e);
-        }
+        if (!isVehicleLongPress) toggleMapStyle(e);
         setTimeout(() => { isVehicleTouchHandled = false; }, 350);
       });
 
-      vehicleMarker.addEventListener('mousedown', (e) => {
+      vehicleMarker.addEventListener('mousedown', () => {
         if (isVehicleTouchHandled) return;
         isVehicleLongPress = false;
         vehiclePressTimer = setTimeout(() => {
           isVehicleLongPress = true;
-          if (isGalagaMode) {
-            playGalagaLaser();
-          } else {
-            playDixieHorn();
-          }
+          if (isGalagaMode) playGalagaLaser();
+          else playDixieHorn();
         }, 500);
       });
-
-      vehicleMarker.addEventListener('mouseleave', () => {
-        clearTimeout(vehiclePressTimer);
-      });
-
+      vehicleMarker.addEventListener('mouseleave', () => clearTimeout(vehiclePressTimer));
       vehicleMarker.addEventListener('mouseup', (e) => {
         if (isVehicleTouchHandled) return;
         clearTimeout(vehiclePressTimer);
-        if (!isVehicleLongPress) {
-          toggleMapStyle(e);
-        }
+        if (!isVehicleLongPress) toggleMapStyle(e);
       });
     }
 
-    /* 2-THEME CYCLING HANDLER */
     function toggleMapStyle(event) {
       if (event) event.stopPropagation();
-
       currentThemeIndex = (currentThemeIndex + 1) % mapThemes.length;
       const theme = mapThemes[currentThemeIndex];
-
-      if (map) {
-        map.setStyle(theme.url);
-      }
+      if (map) map.setStyle(theme.url);
 
       const speedSignBox = document.getElementById('speed-sign-box');
       if (speedSignBox && !isGalagaMode) {
-        if (theme.darkSign) {
-          speedSignBox.classList.add('dark-mode-sign');
-        } else {
-          speedSignBox.classList.remove('dark-mode-sign');
-        }
+        if (theme.darkSign) speedSignBox.classList.add('dark-mode-sign');
+        else speedSignBox.classList.remove('dark-mode-sign');
       }
     }
 
-    /* CAMERA PADDING & ROTATIONAL PIVOT ENGINE */
     function syncMapPadding() {
       if (!map) return;
       const mapContainer = document.getElementById('map-card');
       const containerHeight = mapContainer ? mapContainer.clientHeight : 300;
 
       if (isHeadingUp) {
-        map.setPadding({
-          top: Math.round(containerHeight * 0.44),
-          bottom: 0,
-          left: 0,
-          right: 0
-        });
+        map.setPadding({ top: Math.round(containerHeight * 0.44), bottom: 0, left: 0, right: 0 });
       } else {
         map.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
       }
@@ -1885,7 +2008,6 @@
     function toggleMapMode(event) {
       if (event) event.stopPropagation();
       isHeadingUp = !isHeadingUp;
-
       const compassBtn = document.getElementById('compass-btn');
       const vehicleOverlay = document.getElementById('vehicle-overlay');
 
@@ -1904,16 +2026,12 @@
       }
 
       syncMapPadding();
-
-      if (lastLat !== null && lastLon !== null) {
-        updateMapCamera([lastLon, lastLat]);
-      }
+      if (lastLat !== null && lastLon !== null) updateMapCamera([lastLon, lastLat]);
     }
 
     function toggleTemperatureUnit(event) {
       if (event) event.stopPropagation();
       if (rawTempF === null) return;
-
       isFahrenheit = !isFahrenheit;
       renderTemperature();
     }
@@ -1924,7 +2042,6 @@
         tempEl.innerText = '--°F';
         return;
       }
-
       if (isFahrenheit) {
         tempEl.innerText = `${Math.round(rawTempF)}°F`;
       } else {
@@ -1960,7 +2077,6 @@
       }
     }
 
-    /* SCREEN WAKE LOCK HEARTBEAT */
     async function requestWakeLock() {
       try {
         if (document.visibilityState === 'visible' && 'wakeLock' in navigator && (wakeLock === null || wakeLock.released)) {
@@ -1970,9 +2086,7 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        requestWakeLock();
-      }
+      if (document.visibilityState === 'visible') requestWakeLock();
     });
     window.addEventListener('focus', requestWakeLock);
     window.addEventListener('touchstart', requestWakeLock, { passive: true });
@@ -1987,7 +2101,6 @@
         thunder: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
         snow: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>`
       };
-
       const weatherMap = {
         0: { text: "Clear Sky", icon: icons.sun },
         1: { text: "Mainly Clear", icon: icons.cloudSun },
@@ -2001,7 +2114,6 @@
         80: { text: "Rain Showers", icon: icons.rain },
         95: { text: "Thunderstorm", icon: icons.thunder }
       };
-
       return weatherMap[code] || { text: "Fair", icon: icons.cloudSun };
     }
 
@@ -2012,20 +2124,13 @@
         center: [-71.2356, 42.3765],
         zoom: 16.0,
         bearing: 0,
-        pitch: 0,
+        pitch: currentPitch,
         attributionControl: false
       });
 
-      map.on('load', () => {
-        syncMapPadding();
-      });
-
-      map.on('dragstart', () => {
-        lastUserMapInteractionTime = Date.now();
-      });
-      map.on('zoomstart', (e) => {
-        if (e.originalEvent) lastUserMapInteractionTime = Date.now();
-      });
+      map.on('load', () => { syncMapPadding(); });
+      map.on('dragstart', () => { lastUserMapInteractionTime = Date.now(); });
+      map.on('zoomstart', (e) => { if (e.originalEvent) lastUserMapInteractionTime = Date.now(); });
     }
 
     function getCardinalDirection(angle) {
@@ -2035,23 +2140,14 @@
 
     async function fetchLocationDetails(lat, lon, speed) {
       document.getElementById('lat-lon').innerText = `Lat: ${lat.toFixed(5)} | Lon: ${lon.toFixed(5)}`;
-
       const now = Date.now();
 
       if (hasInitialGeocode) {
-        if (speed !== null && !isNaN(speed) && speed < 0.7) {
-          return;
-        }
-
-        if (now - lastGeocodeTime < 10000) {
-          return;
-        }
-
+        if (speed !== null && !isNaN(speed) && speed < 0.7) return;
+        if (now - lastGeocodeTime < 10000) return;
         if (lastGeocodedLat !== null && lastGeocodedLon !== null) {
           const distanceMoved = getDistanceFromLatLonInMeters(lastGeocodedLat, lastGeocodedLon, lat, lon);
-          if (distanceMoved < 30) {
-            return;
-          }
+          if (distanceMoved < 30) return;
         }
       }
 
@@ -2072,7 +2168,6 @@
           const rawHwy = addr.highway || "";
           const combinedSearch = [rawRoad, rawRef, rawHwy, addr.official_name, addr.name].filter(Boolean).join(' ');
 
-          // --- 1. HIGHWAY & SHIELD IDENTIFICATION ---
           let interstateNum = null;
           let routeNum = null;
 
@@ -2113,20 +2208,11 @@
           currentRouteShield = routeNum;
 
           const interstateContainer = document.getElementById('interstate-badge-container');
-          if (interstateNum) {
-            interstateContainer.innerHTML = createInterstateSVG(interstateNum);
-          } else {
-            interstateContainer.innerHTML = '';
-          }
+          interstateContainer.innerHTML = interstateNum ? createInterstateSVG(interstateNum) : '';
 
           const routeContainer = document.getElementById('route-badge-container');
-          if (routeNum) {
-            routeContainer.innerHTML = createRouteSVG(routeNum);
-          } else {
-            routeContainer.innerHTML = '';
-          }
+          routeContainer.innerHTML = routeNum ? createRouteSVG(routeNum) : '';
 
-          // --- 2. STREET NAME FORMATTING & LOCAL SURFACE DECOUPLING ---
           let displayRoadName = rawRoad;
           const isInterstateFreeway = interstateNum !== null || /^(I-\d+|Massachusetts Turnpike|Mass Pike)/i.test(displayRoadName);
 
@@ -2162,7 +2248,6 @@
           const stateFull = addr.state || "";
           const county = addr.county || "";
           const postcode = addr.postcode || "";
-
           const stateCode = stateAbbreviations[stateFull] || stateFull;
 
           document.getElementById('street-name').innerText = fullStreetAddress;
@@ -2171,7 +2256,6 @@
           document.getElementById('city-state').innerText = `${city}${city && stateCode ? ', ' : ''}${stateCode}`;
           document.getElementById('county-zip').innerText = `${county} ${postcode}`.trim();
 
-          // --- 3. BLACK BOX RECORDER COMMIT TRIGGER ---
           if (interstateNum || routeNum) {
             const routeSig = `${interstateNum || ''}_${routeNum || ''}_${displayRoadName}`;
             if (routeSig !== lastLoggedRouteSignature) {
@@ -2194,36 +2278,27 @@
             }
           }
         }
-      } catch (err) {
-        console.error("Reverse geocoding error:", err);
-      }
+      } catch (err) {}
     }
 
     async function fetchWeatherAndElevation(lat, lon) {
       const now = Date.now();
       const timeThresholdMs = weatherTimeIntervalMinutes * 60 * 1000;
-
       let shouldFetch = false;
 
       if (lastWeatherFetchTime === 0) {
         shouldFetch = true;
       } else {
         const timePassed = now - lastWeatherFetchTime;
-        if (timePassed >= timeThresholdMs) {
-          shouldFetch = true;
-        }
-
+        if (timePassed >= timeThresholdMs) shouldFetch = true;
         if (!shouldFetch && weatherDistanceIntervalMiles > 0 && lastWeatherLat !== null && lastWeatherLon !== null) {
           const metersMoved = getDistanceFromLatLonInMeters(lastWeatherLat, lastWeatherLon, lat, lon);
           const milesMoved = metersMoved * 0.000621371;
-          if (milesMoved >= weatherDistanceIntervalMiles) {
-            shouldFetch = true;
-          }
+          if (milesMoved >= weatherDistanceIntervalMiles) shouldFetch = true;
         }
       }
 
       if (!shouldFetch) return;
-
       lastWeatherFetchTime = now;
       lastWeatherLat = lat;
       lastWeatherLon = lon;
@@ -2269,10 +2344,7 @@
             document.getElementById('uv-val').innerHTML = `<span style="color: ${uvColor};">${uv}</span>`;
           }
         }
-
-      } catch (err) {
-        console.error("Weather API error:", err);
-      }
+      } catch (err) {}
     }
 
     function updateHeading(heading) {
@@ -2282,31 +2354,20 @@
 
         const vehicleSvg = document.getElementById('vehicle-overlay-svg');
         if (vehicleSvg) {
-          if (isHeadingUp) {
-            vehicleSvg.style.transform = 'rotate(0deg)';
-          } else {
-            vehicleSvg.style.transform = `rotate(${heading}deg)`;
-          }
+          vehicleSvg.style.transform = isHeadingUp ? 'rotate(0deg)' : `rotate(${heading}deg)`;
         }
 
-        if (lastLat !== null && lastLon !== null) {
-          updateMapCamera([lastLon, lastLat]);
-        }
+        if (lastLat !== null && lastLon !== null) updateMapCamera([lastLon, lastLat]);
         
         const needleEl = document.getElementById('needle-svg');
-        if (needleEl) {
-          needleEl.style.transform = `rotate(${heading}deg)`;
-        }
+        if (needleEl) needleEl.style.transform = `rotate(${heading}deg)`;
       }
     }
 
-    /* DYNAMIC HIGHWAY AUTO-ZOOM CAMERA ENGINE */
     function updateMapCamera(lngLat) {
       if (!map) return;
-
       const vehicleSvg = document.getElementById('vehicle-overlay-svg');
       const now = Date.now();
-
       const currentMph = (rawSpeedMps !== null && !isNaN(rawSpeedMps)) ? (rawSpeedMps * 2.23694) : 0;
 
       if (currentInterstateShield !== null || currentMph > 55) {
@@ -2320,6 +2381,7 @@
       const cameraOptions = {
         center: lngLat,
         bearing: isHeadingUp ? currentHeading : 0,
+        pitch: currentPitch,
         duration: 350,
         easing: (t) => t
       };
@@ -2333,7 +2395,6 @@
       }
 
       map.easeTo(cameraOptions);
-
       if (vehicleSvg) {
         vehicleSvg.style.transform = isHeadingUp ? 'rotate(0deg)' : `rotate(${currentHeading}deg)`;
       }
@@ -2344,42 +2405,29 @@
         navigator.geolocation.watchPosition(
           (position) => {
             const { latitude, longitude, heading, speed, altitude, accuracy } = position.coords;
-
             const lngLat = [longitude, latitude];
 
-            if (heading !== null && !isNaN(heading)) {
-              currentHeading = heading;
-            }
+            if (heading !== null && !isNaN(heading)) currentHeading = heading;
 
             rawAltitudeMeters = altitude;
             rawAccuracyMeters = accuracy;
-
             lastLat = latitude;
             lastLon = longitude;
 
             rawSpeedMps = speed;
             renderSpeed();
-
             updateMapCamera(lngLat);
 
-            if (heading !== null && !isNaN(heading)) {
-              updateHeading(heading);
-            } else {
-              renderTelemetryBadge();
-            }
+            if (heading !== null && !isNaN(heading)) updateHeading(heading);
+            else renderTelemetryBadge();
 
             fetchLocationDetails(latitude, longitude, speed);
             fetchWeatherAndElevation(latitude, longitude);
           },
           (error) => {
-            console.error("GPS Error:", error);
             document.getElementById('street-name').innerText = "GPS Access Denied";
           },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 1000,
-            timeout: 10000
-          }
+          { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
         );
       }
     }
@@ -2388,6 +2436,12 @@
       window.addEventListener('deviceorientation', (event) => {
         if (event.webkitCompassHeading) {
           updateHeading(event.webkitCompassHeading);
+        }
+        if (event.gamma !== null) {
+          rollAngle = Math.max(-45, Math.min(45, event.gamma));
+        }
+        if (event.beta !== null) {
+          pitchAngle = Math.max(-30, Math.min(30, event.beta - 45));
         }
       });
     }
@@ -2400,7 +2454,6 @@
     };
   </script>
 
-  <!-- PWA Service Worker Engine Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
