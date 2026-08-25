@@ -141,22 +141,34 @@
       text-shadow: 0 0 6px #ffb000;
     }
 
+    /* Scrollable Black Box Container for up to 100 Logs */
+    #blackbox-stream-container {
+      max-height: 280px;
+      overflow-y: auto;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 176, 0, 0.25);
+      padding: 2px;
+      background: rgba(10, 8, 4, 0.6);
+      -webkit-overflow-scrolling: touch;
+    }
+
     /* Black Box Ascii Table Formatting */
     .blackbox-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 4px;
       font-size: 11px;
-      overflow-x: auto;
-      display: block;
     }
 
     .blackbox-table th {
+      position: sticky;
+      top: 0;
+      background: #1c1305;
       border-bottom: 1px solid #ffb000;
       color: #ffffff;
       text-align: left;
       padding: 4px 6px;
       white-space: nowrap;
+      z-index: 2;
     }
 
     .blackbox-table td {
@@ -385,7 +397,7 @@
 
     <!-- 7. BLACK BOX FLIGHT RECORDER LOG -->
     <div class="term-box">
-      <div class="box-header">[07] BLACK BOX FLIGHT RECORDER (LAST 5 DETECTIONS)</div>
+      <div class="box-header">[07] BLACK BOX FLIGHT RECORDER (LAST 100 DETECTIONS)</div>
       <div id="blackbox-stream-container">
         <table class="blackbox-table">
           <thead>
