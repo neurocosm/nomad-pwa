@@ -166,27 +166,32 @@
       display: block !important;
     }
 
-    /* TACTICAL SQUIRCLE HUD PODS (MATCHING BEZELS) */
-    .map-overlay-heading {
+    /* UNIFIED 4-CORNER BOUNDING BOX FRAMEWORK */
+    .map-overlay-heading,
+    .map-overlay-compass,
+    .map-overlay-interstate,
+    .map-overlay-route {
       position: absolute;
-      top: 8px;
-      left: 8px;
       z-index: 10;
-      border-radius: 24px;
-      background: #ffffff;
-      color: #000000;
-      border: 3.5px solid #007aff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
       user-select: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+      transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .map-overlay-heading {
+      top: 8px;
+      left: 8px;
+      background: #ffffff;
+      color: #000000;
+      border: 3.5px solid #007aff;
+      cursor: pointer;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       text-align: center;
       padding: 2px;
-      transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
     .map-overlay-heading:active {
@@ -195,21 +200,12 @@
     }
 
     .map-overlay-compass {
-      position: absolute;
       top: 8px;
       right: 8px;
-      z-index: 10;
-      border-radius: 24px;
       background: #ffffff;
       border: 3.5px solid #007aff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.55);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       cursor: pointer;
-      user-select: none;
       padding: 2px;
-      transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
     .map-overlay-compass:active {
@@ -245,29 +241,19 @@
     }
 
     .map-overlay-interstate {
-      position: absolute;
       bottom: 8px;
       left: 8px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: transparent;
       border: none;
-      transition: all 0.25s ease;
+      box-shadow: none;
     }
 
     .map-overlay-route {
-      position: absolute;
       bottom: 8px;
       right: 8px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: transparent;
       border: none;
-      transition: all 0.25s ease;
+      box-shadow: none;
     }
 
     .map-overlay-interstate:empty,
@@ -276,106 +262,91 @@
     }
 
     /* ------------------------------------------------------------- */
-    /* DYNAMIC HUD GAUGE SCALING                                     */
+    /* DYNAMIC HUD GAUGE SCALING & PROPORTIONAL TYPOGRAPHY           */
     /* ------------------------------------------------------------- */
     
     /* TIER 1: SMALL */
-    #map-card.hud-scale-small .map-overlay-heading {
+    #map-card.hud-scale-small .map-overlay-heading,
+    #map-card.hud-scale-small .map-overlay-compass,
+    #map-card.hud-scale-small .map-overlay-interstate,
+    #map-card.hud-scale-small .map-overlay-route {
       width: 62px;
       height: 62px;
+    }
+    #map-card.hud-scale-small .map-overlay-heading {
       border-radius: 18px;
-    }
-    #map-card.hud-scale-small .telemetry-circle-val {
-      font-size: 1.55rem;
-      font-weight: 900;
-      line-height: 0.95;
-      color: #000000;
-      letter-spacing: -0.8px;
-    }
-    #map-card.hud-scale-small .telemetry-circle-label {
-      font-size: 0.72rem;
-      font-weight: 900;
-      color: #333333;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 1px;
+      font-size: 9px;
     }
     #map-card.hud-scale-small .map-overlay-compass {
-      width: 62px;
-      height: 62px;
       border-radius: 18px;
-    }
-    #map-card.hud-scale-small .highway-shield-badge {
-      height: 46px;
-      width: 46px;
     }
 
     /* TIER 2: MEDIUM (Default Balanced) */
-    #map-card.hud-scale-medium .map-overlay-heading {
+    #map-card.hud-scale-medium .map-overlay-heading,
+    #map-card.hud-scale-medium .map-overlay-compass,
+    #map-card.hud-scale-medium .map-overlay-interstate,
+    #map-card.hud-scale-medium .map-overlay-route {
       width: 86px;
       height: 86px;
+    }
+    #map-card.hud-scale-medium .map-overlay-heading {
       border-radius: 24px;
-    }
-    #map-card.hud-scale-medium .telemetry-circle-val {
-      font-weight: 900;
-      line-height: 0.92;
-      color: #000000;
-      letter-spacing: -1.2px;
-    }
-    #map-card.hud-scale-medium .telemetry-circle-label {
-      font-weight: 900;
-      color: #111111;
-      text-transform: uppercase;
-      line-height: 1;
-      margin-top: 3px;
+      font-size: 13px;
     }
     #map-card.hud-scale-medium .map-overlay-compass {
-      width: 86px;
-      height: 86px;
       border-radius: 24px;
-    }
-    #map-card.hud-scale-medium .highway-shield-badge {
-      height: 58px;
-      width: 58px;
     }
 
     /* TIER 3: LARGE (Full-Quadrant Dominance) */
-    #map-card.hud-scale-large .map-overlay-heading {
+    #map-card.hud-scale-large .map-overlay-heading,
+    #map-card.hud-scale-large .map-overlay-compass,
+    #map-card.hud-scale-large .map-overlay-interstate,
+    #map-card.hud-scale-large .map-overlay-route {
       width: clamp(114px, 35vw, 150px);
       height: clamp(114px, 35vw, 150px);
+    }
+    #map-card.hud-scale-large .map-overlay-heading {
+      border-radius: 32px;
+      border-width: 4.5px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
+      font-size: 21px;
+    }
+    #map-card.hud-scale-large .map-overlay-compass {
       border-radius: 32px;
       border-width: 4.5px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
     }
-    #map-card.hud-scale-large .telemetry-circle-val {
-      font-size: clamp(3.0rem, 9.2vw, 3.9rem);
-      font-weight: 900;
-      line-height: 0.88;
+
+    /* Proportional Typography Classes (Font Weight 700) */
+    .telemetry-circle-val {
+      font-size: 2.2em;
+      font-weight: 700;
+      line-height: 0.9;
       color: #000000;
-      letter-spacing: -2px;
+      letter-spacing: -1px;
     }
-    #map-card.hud-scale-large .telemetry-circle-label {
-      font-size: clamp(1.1rem, 3.5vw, 1.4rem);
-      font-weight: 900;
+
+    .telemetry-circle-label {
+      font-size: 0.85em;
+      font-weight: 700;
       color: #111111;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      margin-top: 3px;
+      line-height: 1;
+      transform: translateY(2.5px);
     }
-    #map-card.hud-scale-large .map-overlay-compass {
-      width: clamp(114px, 35vw, 150px);
-      height: clamp(114px, 35vw, 150px);
-      border-radius: 32px;
-      border-width: 4.5px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
-    }
-    #map-card.hud-scale-large .highway-shield-badge {
-      height: clamp(74px, 22vw, 92px);
-      width: clamp(74px, 22vw, 92px);
-    }
-    #map-card.hud-scale-large .highway-shield-badge svg {
+
+    .highway-shield-badge {
       width: 100%;
       height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .highway-shield-badge svg {
+      width: 88%;
+      height: 88%;
     }
 
     .map-overlay-heading.general-lee-active {
@@ -394,7 +365,7 @@
     }
 
     .map-overlay-heading.galaga-fire-active {
-      font-weight: 900 !important;
+      font-weight: 700 !important;
       letter-spacing: 1px !important;
       animation: galagaFireStrobe 0.8s ease-in-out forwards !important;
     }
@@ -948,8 +919,8 @@
     <div class="card hud-scale-medium" id="map-card">
       <!-- Scalable Harmonized Squircle Telemetry Gauge (Top-Left) -->
       <div class="map-overlay-heading" id="heading-text">
-        <div class="telemetry-circle-val" style="font-size: 2.40rem;">0°</div>
-        <div class="telemetry-circle-label" style="font-size: 0.85rem; letter-spacing: 2px;">NORTH</div>
+        <div class="telemetry-circle-val">0°</div>
+        <div class="telemetry-circle-label">NORTH</div>
       </div>
 
       <!-- Top-Center Overlay: Fullscreen Toggle Button -->
@@ -1153,12 +1124,16 @@
     let targetMapZoom = 16.0;
     let lastUserMapInteractionTime = 0;
 
-    // Dynamic Geocode & Corridor Lock States
-    let currentGeocodeZoom = 17;
-    let isOnFreeway = false;
-    let offFreewayStreak = 0;
-    let lastValidRoadTitle = "";
-    let lastRoadLockTimestamp = 0;
+    // Kinematic Latching & Inertial Highway State Machine
+    let isHighwayLocked = false;
+    let highwayLockSignature = null;
+    let consecutiveSurfaceReads = 0;
+    let headingHistory = []; // [{ time, heading }]
+    let lastSettledHeadingTimestamp = Date.now();
+    let lastValidDisplayTitle = "";
+    let lastValidFullAddress = "";
+    let lastValidInterstate = null;
+    let lastValidRouteShield = null;
 
     // HUD Gauge Sizing (small, medium, large)
     let hudScale = localStorage.getItem('nomad_hud_scale') || 'medium';
@@ -1253,7 +1228,7 @@
         const raw = localStorage.getItem('nomad_blackbox_log');
         let logs = raw ? JSON.parse(raw) : [];
         logs.push(entry);
-        if (logs.length > 5) logs = logs.slice(logs.length - 5);
+        if (logs.length > 100) logs = logs.slice(logs.length - 100);
         localStorage.setItem('nomad_blackbox_log', JSON.stringify(logs));
       } catch (err) {}
     }
@@ -1345,7 +1320,6 @@
           clearTimeout(dixieHornTimeout);
           badgeEl.classList.remove('galaga-fire-active');
           badgeEl.classList.add('general-lee-active');
-          // Scaled edge-to-edge 01 Graphic
           badgeEl.innerHTML = `
             <svg width="74" height="42" viewBox="0 0 100 46" style="overflow: visible; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
               <path d="M 12 0 L 34 0 L 46 12 L 46 34 L 34 46 L 12 46 L 0 34 L 0 12 Z M 16 12 L 16 34 L 30 34 L 30 12 Z" fill="#000000" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="miter" />
@@ -1397,7 +1371,7 @@
         if (badgeEl) {
           clearTimeout(galagaLaserTimeout);
           badgeEl.classList.remove('general-lee-active');
-          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#ff0044; font-size:clamp(1.4rem, 4vw, 1.8rem); font-weight:900;">FIRE!</div>`;
+          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#ff0044; font-size:1.4em; font-weight:700;">FIRE!</div>`;
           badgeEl.classList.add('galaga-fire-active');
           galagaLaserTimeout = setTimeout(() => {
             badgeEl.classList.remove('galaga-fire-active');
@@ -1432,7 +1406,7 @@
         `;
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
-          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#00d4ff; font-size:clamp(1.1rem, 3.5vw, 1.4rem); font-weight:900;">FIGHTER</div>`;
+          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#00d4ff; font-size:1.1em; font-weight:700;">FIGHTER</div>`;
           hudBannerTimeout = setTimeout(renderTelemetryBadge, 1500);
         }
       } else {
@@ -1447,7 +1421,7 @@
         vehicleSvg.innerHTML = `<polygon points="12 2 19 21 12 17 5 21 12 2"/>`;
         if (badgeEl) {
           clearTimeout(hudBannerTimeout);
-          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#007aff; font-size:clamp(1.1rem, 3.5vw, 1.4rem); font-weight:900;">CRUISE</div>`;
+          badgeEl.innerHTML = `<div class="telemetry-circle-val" style="color:#007aff; font-size:1.1em; font-weight:700;">CRUISE</div>`;
           hudBannerTimeout = setTimeout(renderTelemetryBadge, 1300);
         }
       }
@@ -1503,7 +1477,6 @@
       const norm = (Math.round(angle) % 360 + 360) % 360;
       const octant = Math.round(norm / 45) % 8;
       
-      // Spells out full word for single-character primaries to balance empty space
       switch (octant) {
         case 0: return "NORTH";
         case 1: return "NE";
@@ -1517,7 +1490,7 @@
       }
     }
 
-    /* Renders Harmonized Center-Balanced Telemetry Data */
+    /* Renders Harmonized Proportional Telemetry Data (Weight 700) */
     function renderTelemetryBadge() {
       const badgeEl = document.getElementById('heading-text');
       if (!badgeEl) return;
@@ -1531,43 +1504,36 @@
         const degStr = `${deg}°`;
         const label = getAdaptiveCardinalLabel(currentHeading);
 
-        // Harmonized Typography Engine
-        const valSize = degStr.length >= 4 ? '2.10rem' : '2.40rem';
-        const labelSize = label.length > 2 ? '0.85rem' : '1.05rem';
-        const letterSpacing = label.length > 2 ? '2px' : '1.5px';
-
         badgeEl.innerHTML = `
-          <div class="telemetry-circle-val" style="font-size: ${valSize};">${degStr}</div>
-          <div class="telemetry-circle-label" style="font-size: ${labelSize}; letter-spacing: ${letterSpacing};">${label}</div>
+          <div class="telemetry-circle-val">${degStr}</div>
+          <div class="telemetry-circle-label">${label}</div>
         `;
       } else if (telemetryMode === 1) {
         if (rawAltitudeMeters !== null && !isNaN(rawAltitudeMeters)) {
           const feet = Math.round(rawAltitudeMeters * 3.28084);
           const strVal = feet.toLocaleString();
-          const valSize = strVal.length >= 6 ? '1.45rem' : (strVal.length >= 5 ? '1.75rem' : '2.10rem');
           badgeEl.innerHTML = `
-            <div class="telemetry-circle-val" style="font-size: ${valSize};">${strVal}</div>
-            <div class="telemetry-circle-label" style="font-size: 0.85rem; letter-spacing: 1.2px;">FT ALT</div>
+            <div class="telemetry-circle-val" style="font-size: 1.8em;">${strVal}</div>
+            <div class="telemetry-circle-label">FT ALT</div>
           `;
         } else {
           badgeEl.innerHTML = `
-            <div class="telemetry-circle-val" style="font-size: 2.10rem;">--</div>
-            <div class="telemetry-circle-label" style="font-size: 0.85rem; letter-spacing: 1.2px;">FT ALT</div>
+            <div class="telemetry-circle-val">--</div>
+            <div class="telemetry-circle-label">FT ALT</div>
           `;
         }
       } else if (telemetryMode === 2) {
         if (rawAccuracyMeters !== null && !isNaN(rawAccuracyMeters)) {
           const accFeet = Math.round(rawAccuracyMeters * 3.28084);
           const strVal = `±${accFeet}`;
-          const valSize = strVal.length >= 5 ? '1.55rem' : (strVal.length === 4 ? '1.85rem' : '2.15rem');
           badgeEl.innerHTML = `
-            <div class="telemetry-circle-val" style="font-size: ${valSize};">${strVal}</div>
-            <div class="telemetry-circle-label" style="font-size: 0.85rem; letter-spacing: 1.2px;">FT GPS</div>
+            <div class="telemetry-circle-val" style="font-size: 1.8em;">${strVal}</div>
+            <div class="telemetry-circle-label">FT GPS</div>
           `;
         } else {
           badgeEl.innerHTML = `
-            <div class="telemetry-circle-val" style="font-size: 2.10rem;">±--</div>
-            <div class="telemetry-circle-label" style="font-size: 0.85rem; letter-spacing: 1.2px;">FT GPS</div>
+            <div class="telemetry-circle-val">±--</div>
+            <div class="telemetry-circle-label">FT GPS</div>
           `;
         }
       }
@@ -1630,29 +1596,29 @@
       const rawRef = extra.ref || extra.official_ref || addr.ref || namedetails.ref || "";
       const rawRoad = addr.road || addr.motorway || addr.trunk || addr.highway || "";
       const rawName = data.name || addr.name || addr.official_name || "";
+      const highwayType = addr.highway || extra.highway || "";
       
       const tokens = `${rawRef};${rawRoad};${rawName}`.split(/[;,/]+/).map(t => t.trim()).filter(Boolean);
 
       tokens.forEach(token => {
-        // Universal Interstate Match (e.g. "I 95", "I-95", "Interstate 95")
         const iMatch = token.match(/\b(?:I[- ]?|Interstate\s+|IS[- ]?)(\d{1,3})\b/i);
         if (iMatch && !interstate) interstate = iMatch[1];
 
-        // Universal US Highway Match (e.g. "US 3", "US-1", "US Route 20")
         const usMatch = token.match(/\b(?:US[- ]?|U\.S\.\s*Route\s*|US\s*Route\s*|US\s*Hwy\s*)(\d{1,3}[A-Z]?)\b/i);
         if (usMatch && !usRoute) usRoute = usMatch[1];
 
-        // Universal State Route Match (e.g. "MA 128", "CA 1", "Route 9", "SR 520", "State Hwy 6")
         const rMatch = token.match(/\b(?:[A-Z]{2}[- ]|Route\s?|Rt\.?\s?|State\s?Hwy\s?|State\s?Route\s?|SR[- ]?)(\d+[A-Z]?)\b/i);
         if (rMatch && !stateRoute && !interstate && !usRoute) stateRoute = rMatch[1];
 
-        // Numeric reference fallback directly from official ref tag
         if (!stateRoute && !interstate && !usRoute && /^\d+[A-Z]?$/i.test(token) && token === rawRef) {
           stateRoute = token;
         }
       });
 
-      return { interstate, usRoute, stateRoute, rawRoad, rawRef };
+      const isLink = /_link$/i.test(highwayType);
+      const isMotorway = /motorway|trunk/i.test(highwayType) || interstate !== null;
+
+      return { interstate, usRoute, stateRoute, rawRoad, rawRef, highwayType, isLink, isMotorway };
     }
 
     /* Floating Multi-Stage Total Recall Toast Engine */
@@ -1666,7 +1632,6 @@
       activeRecallToast.innerText = text;
     }
 
-    /* SCOPED TOTAL RECALL */
     async function executeTotalRecall() {
       const purgeBtn = document.querySelector('.modal-purge-btn');
       if (purgeBtn) {
@@ -1809,12 +1774,10 @@
       fsBtn.addEventListener('contextmenu', (e) => e.preventDefault());
       fsBtn.addEventListener('click', toggleFullScreen);
 
-      // Compass: Tap = Heading Toggle | Long Press = Pitch / Take-Off POV Toggle
       const compassBtn = document.getElementById('compass-btn');
       let compassPressTimer, isCompassLongPress = false, isCompassTouchHandled = false;
 
       compassBtn.addEventListener('contextmenu', (e) => e.preventDefault());
-
       compassBtn.addEventListener('touchstart', (e) => {
         isCompassTouchHandled = true;
         isCompassLongPress = false;
@@ -1847,12 +1810,10 @@
         if (!isCompassLongPress) toggleMapMode(e);
       });
 
-      // Telemetry Gauge: Tap = Cycle Data Modes | Long Press = Open HUD Scale Modal
       const telemetryBadge = document.getElementById('heading-text');
       let telemPressTimer, isTelemLongPress = false, isTelemTouchHandled = false;
 
       telemetryBadge.addEventListener('contextmenu', (e) => e.preventDefault());
-
       telemetryBadge.addEventListener('touchstart', (e) => {
         isTelemTouchHandled = true;
         isTelemLongPress = false;
@@ -2176,23 +2137,44 @@
       return directions[Math.round(angle / 45) % 8];
     }
 
+    function pushHeadingHistory(heading) {
+      const now = Date.now();
+      headingHistory.push({ time: now, heading });
+      headingHistory = headingHistory.filter(pt => (now - pt.time) <= 5000);
+
+      if (headingHistory.length >= 2) {
+        let maxDelta = 0;
+        for (let i = 1; i < headingHistory.length; i++) {
+          let d = Math.abs(headingHistory[i].heading - headingHistory[i - 1].heading);
+          if (d > 180) d = 360 - d;
+          if (d > maxDelta) maxDelta = d;
+        }
+        if (maxDelta < 4) {
+          lastSettledHeadingTimestamp = now;
+        }
+      }
+    }
+
+    function isVehicleHeadingSettled() {
+      return (Date.now() - lastSettledHeadingTimestamp) < 3000;
+    }
+
     async function fetchLocationDetails(lat, lon, speed) {
       document.getElementById('lat-lon').innerText = `Lat: ${lat.toFixed(5)} | Lon: ${lon.toFixed(5)}`;
       const now = Date.now();
       const speedMph = (speed !== null && !isNaN(speed)) ? (speed * 2.23694) : 0;
 
       if (hasInitialGeocode) {
-        if (speed !== null && !isNaN(speed) && speed < 0.7) return;
-        if (now - lastGeocodeTime < 4000) return;
+        if (speed !== null && !isNaN(speed) && speed < 0.7 && !isHighwayLocked) return;
+        if (now - lastGeocodeTime < 3500) return;
         if (lastGeocodedLat !== null && lastGeocodedLon !== null) {
           const distanceMoved = getDistanceFromLatLonInMeters(lastGeocodedLat, lastGeocodedLon, lat, lon);
-          if (distanceMoved < 25) return;
+          if (distanceMoved < 20) return;
         }
       }
 
       lastGeocodeTime = now;
-      // Strict > 40 MPH or freeway lock uses zoom=15 for wide right-of-way corridor; local roads use zoom=17
-      const targetZoom = (speedMph > 40 || isOnFreeway) ? 15 : 17;
+      const targetZoom = isHighwayLocked ? 15 : (speedMph > 40 ? 15 : 17);
 
       try {
         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=${targetZoom}&addressdetails=1&extratags=1&namedetails=1`;
@@ -2207,76 +2189,97 @@
           hasInitialGeocode = true;
 
           const addr = data.address;
-          const { interstate, usRoute, stateRoute, rawRoad, rawRef } = parseUniversalRoadSignage(data);
+          const { interstate, usRoute, stateRoute, rawRoad, isLink, isMotorway } = parseUniversalRoadSignage(data);
 
-          currentInterstateShield = interstate;
-          currentRouteShield = usRoute || stateRoute;
+          if (isMotorway || interstate !== null) {
+            isHighwayLocked = true;
+            highwayLockSignature = interstate || usRoute || rawRoad || "HIGHWAY";
+            consecutiveSurfaceReads = 0;
+          } else if (isHighwayLocked) {
+            if (isLink || !rawRoad || /^Unnamed/i.test(rawRoad)) {
+              // Retain highway lock
+            } else {
+              const isDecelerating = speedMph < 45;
+              const isSettled = isVehicleHeadingSettled();
 
-          // Track freeway status organically from OSM taxonomy
-          const isCorridor = interstate !== null || usRoute !== null || (addr.highway && /motorway|trunk/i.test(addr.highway));
-          if (isCorridor) {
-            isOnFreeway = true;
-            offFreewayStreak = 0;
-          } else {
-            offFreewayStreak++;
-            if (offFreewayStreak >= 2) isOnFreeway = false;
+              if (isDecelerating && isSettled) {
+                consecutiveSurfaceReads++;
+                if (consecutiveSurfaceReads >= 2) {
+                  isHighwayLocked = false;
+                  highwayLockSignature = null;
+                }
+              }
+            }
           }
 
-          // Render Dynamic Shields
-          const interstateContainer = document.getElementById('interstate-badge-container');
-          interstateContainer.innerHTML = interstate ? createInterstateSVG(interstate) : '';
-
-          const routeContainer = document.getElementById('route-badge-container');
-          const activeSecondaryShield = usRoute || stateRoute;
-          routeContainer.innerHTML = activeSecondaryShield ? createRouteSVG(activeSecondaryShield) : '';
-
-          // Determine Display Title (Prioritize universal route identifiers over arbitrary legal tags)
-          let displayRoadName = "";
-
-          if (interstate) {
-            displayRoadName = `I-${interstate}`;
-            if (usRoute) displayRoadName += ` / US-${usRoute}`;
-            else if (stateRoute) displayRoadName += ` / Route ${stateRoute}`;
-            if (currentHeading !== null && !isNaN(currentHeading)) {
-              displayRoadName = `${displayRoadName} ${getHighwayDirection(interstate, currentHeading)}`;
-            }
-          } else if (usRoute) {
-            displayRoadName = `US-${usRoute}`;
-            if (stateRoute) displayRoadName += ` / Route ${stateRoute}`;
-            if (currentHeading !== null && !isNaN(currentHeading)) {
-              displayRoadName = `${displayRoadName} ${getHighwayDirection(usRoute, currentHeading)}`;
+          let candidateRoadName = rawRoad;
+          if (isHighwayLocked) {
+            if (interstate) {
+              candidateRoadName = `I-${interstate}`;
+              if (usRoute) candidateRoadName += ` / US-${usRoute}`;
+              else if (stateRoute) candidateRoadName += ` / Route ${stateRoute}`;
+              if (currentHeading !== null && !isNaN(currentHeading)) {
+                candidateRoadName = `${candidateRoadName} ${getHighwayDirection(interstate, currentHeading)}`;
+              }
+            } else if (usRoute) {
+              candidateRoadName = `US-${usRoute}`;
+              if (stateRoute) candidateRoadName += ` / Route ${stateRoute}`;
+              if (currentHeading !== null && !isNaN(currentHeading)) {
+                candidateRoadName = `${candidateRoadName} ${getHighwayDirection(usRoute, currentHeading)}`;
+              }
+            } else {
+              candidateRoadName = rawRoad || lastValidDisplayTitle || "Highway";
             }
           } else if (stateRoute) {
-            displayRoadName = `Route ${stateRoute}`;
+            candidateRoadName = `Route ${stateRoute}`;
             if (currentHeading !== null && !isNaN(currentHeading)) {
-              displayRoadName = `${displayRoadName} ${getCardinalRoadDirection(currentHeading)}`;
+              candidateRoadName = `${candidateRoadName} ${getCardinalRoadDirection(currentHeading)}`;
+            }
+          } else if (usRoute) {
+            candidateRoadName = `US-${usRoute}`;
+            if (currentHeading !== null && !isNaN(currentHeading)) {
+              candidateRoadName = `${candidateRoadName} ${getHighwayDirection(usRoute, currentHeading)}`;
             }
           } else {
-            displayRoadName = rawRoad || "Unnamed Road";
-            const isExpressway = /\b(Turnpike|Tpk|Expressway|Parkway|Pkwy|Hwy|Highway)\b/i.test(displayRoadName);
+            candidateRoadName = rawRoad || "Unnamed Road";
+            const isExpressway = /\b(Turnpike|Tpk|Expressway|Parkway|Pkwy|Hwy|Highway)\b/i.test(candidateRoadName);
             if (isExpressway && currentHeading !== null && !isNaN(currentHeading)) {
-              displayRoadName = `${displayRoadName} ${getCardinalRoadDirection(currentHeading)}`;
+              candidateRoadName = `${candidateRoadName} ${getCardinalRoadDirection(currentHeading)}`;
             }
           }
 
-          // Universal Smoothing: Prevent flashing "Unnamed Rd." while traveling at highway speeds (> 40 MPH)
-          if ((!displayRoadName || /^Unnamed/i.test(displayRoadName)) && speedMph > 40) {
-            if (lastValidRoadTitle && (now - lastRoadLockTimestamp < 15000)) {
-              displayRoadName = lastValidRoadTitle;
-            }
-          } else if (displayRoadName && !/^Unnamed/i.test(displayRoadName)) {
-            lastValidRoadTitle = displayRoadName;
-            lastRoadLockTimestamp = now;
+          const isUnnamed = !candidateRoadName || /^Unnamed/i.test(candidateRoadName);
+          if (isUnnamed && speedMph > 12 && lastValidDisplayTitle) {
+            candidateRoadName = lastValidDisplayTitle;
+          } else if (!isUnnamed) {
+            lastValidDisplayTitle = candidateRoadName;
           }
 
-          // Format final output for UI
+          currentInterstateShield = isHighwayLocked ? (interstate || lastValidInterstate) : interstate;
+          currentRouteShield = isHighwayLocked ? (usRoute || stateRoute || lastValidRouteShield) : (usRoute || stateRoute);
+
+          if (currentInterstateShield) lastValidInterstate = currentInterstateShield;
+          if (currentRouteShield) lastValidRouteShield = currentRouteShield;
+
+          const interstateContainer = document.getElementById('interstate-badge-container');
+          interstateContainer.innerHTML = currentInterstateShield ? createInterstateSVG(currentInterstateShield) : '';
+
+          const routeContainer = document.getElementById('route-badge-container');
+          routeContainer.innerHTML = currentRouteShield ? createRouteSVG(currentRouteShield) : '';
+
           let fullStreetAddress = '';
-          if (interstate || usRoute || stateRoute || speedMph > 40) {
-            fullStreetAddress = displayRoadName;
+          if (isHighwayLocked || currentInterstateShield || currentRouteShield || speedMph > 40) {
+            fullStreetAddress = candidateRoadName;
           } else {
             const cleanHouseNum = addr.house_number ? addr.house_number.split(';')[0].trim() : '';
             const housePrefix = cleanHouseNum ? `${cleanHouseNum} ` : '';
-            fullStreetAddress = abbreviateStreetName(`${housePrefix}${displayRoadName}`);
+            fullStreetAddress = abbreviateStreetName(`${housePrefix}${candidateRoadName}`);
+          }
+
+          if (isUnnamed && speedMph > 12 && lastValidFullAddress) {
+            fullStreetAddress = lastValidFullAddress;
+          } else if (!isUnnamed) {
+            lastValidFullAddress = fullStreetAddress;
           }
 
           const city = addr.city || addr.town || addr.village || addr.municipality || "";
@@ -2291,8 +2294,8 @@
           document.getElementById('city-state').innerText = `${city}${city && stateCode ? ', ' : ''}${stateCode}`;
           document.getElementById('county-zip').innerText = `${county} ${postcode}`.trim();
 
-          if (interstate || currentRouteShield) {
-            const routeSig = `${interstate || ''}_${currentRouteShield || ''}_${displayRoadName}`;
+          if (currentInterstateShield || currentRouteShield) {
+            const routeSig = `${currentInterstateShield || ''}_${currentRouteShield || ''}_${candidateRoadName}`;
             if (routeSig !== lastLoggedRouteSignature) {
               lastLoggedRouteSignature = routeSig;
               const liveMph = (rawSpeedMps !== null && !isNaN(rawSpeedMps)) ? Math.round(rawSpeedMps * 2.23694) : 0;
@@ -2305,7 +2308,7 @@
                 lat: Number(lat.toFixed(5)),
                 lon: Number(lon.toFixed(5)),
                 roadName: fullStreetAddress,
-                interstateShield: interstate || null,
+                interstateShield: currentInterstateShield || null,
                 routeShield: currentRouteShield || null,
                 speedMph: liveMph,
                 heading: headingLabel
@@ -2387,6 +2390,7 @@
     function updateHeading(heading) {
       if (heading !== null && !isNaN(heading)) {
         currentHeading = heading;
+        pushHeadingHistory(heading);
         renderTelemetryBadge();
 
         const vehicleSvg = document.getElementById('vehicle-overlay-svg');
@@ -2407,7 +2411,7 @@
       const now = Date.now();
       const currentMph = (rawSpeedMps !== null && !isNaN(rawSpeedMps)) ? (rawSpeedMps * 2.23694) : 0;
 
-      if (currentInterstateShield !== null || currentMph > 55) {
+      if (currentInterstateShield !== null || currentMph > 55 || isHighwayLocked) {
         targetMapZoom = 13.8;
       } else if (currentMph > 35) {
         targetMapZoom = 15.0;
@@ -2444,7 +2448,10 @@
             const { latitude, longitude, heading, speed, altitude, accuracy } = position.coords;
             const lngLat = [longitude, latitude];
 
-            if (heading !== null && !isNaN(heading)) currentHeading = heading;
+            if (heading !== null && !isNaN(heading)) {
+              currentHeading = heading;
+              pushHeadingHistory(heading);
+            }
 
             rawAltitudeMeters = altitude;
             rawAccuracyMeters = accuracy;
