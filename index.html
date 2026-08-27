@@ -309,7 +309,7 @@
       border-radius: 32px;
       border-width: 4.5px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
-      font-size: 21px;
+      font-size: 26px; /* Bumped up base font size for the whole pod */
     }
     #map-card.hud-scale-large .map-overlay-compass {
       border-radius: 32px;
@@ -317,21 +317,27 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
     }
 
+    /* LARGE TIER OVERRIDES FOR TELEMETRY LABEL BALANCE */
+    #map-card.hud-scale-large .telemetry-circle-label {
+      font-size: 0.95em; /* Much larger than the old 0.7em */
+      letter-spacing: 1px;
+    }
+
     /* Proportional Typography Classes (Font Weight 700) */
     .telemetry-circle-val {
-      font-size: 2.2em;
+      font-size: 2.6em; /* Increased from 2.2em to fill the upper area */
       font-weight: 700;
-      line-height: 0.9;
+      line-height: 0.95;
       color: #000000;
-      letter-spacing: -1px;
+      letter-spacing: -1.5px;
     }
 
     .telemetry-circle-label {
-      font-size: 0.85em;
-      font-weight: 700;
+      font-size: 0.95em; /* Increased default label size */
+      font-weight: 800;
       color: #111111;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       line-height: 1;
       transform: translateY(2.5px);
     }
@@ -2191,24 +2197,31 @@
           const addr = data.address;
           const { interstate, usRoute, stateRoute, rawRoad, isLink, isMotorway } = parseUniversalRoadSignage(data);
 
-          if (isMotorway || interstate !== null) {
+          const isTrueHighway = isMotorway || interstate !== null;
+
+          if (isTrueHighway && !isLink) {
             isHighwayLocked = true;
             highwayLockSignature = interstate || usRoute || rawRoad || "HIGHWAY";
             consecutiveSurfaceReads = 0;
           } else if (isHighwayLocked) {
-            if (isLink || !rawRoad || /^Unnamed/i.test(rawRoad)) {
-              // Retain highway lock
-            } else {
-              const isDecelerating = speedMph < 45;
-              const isSettled = isVehicleHeadingSettled();
+            const isExiting = isLink || speedMph < 40;
+            const isUnnamedOrLocal = !rawRoad || /^Unnamed/i.test(rawRoad) || !isTrueHighway;
 
-              if (isDecelerating && isSettled) {
-                consecutiveSurfaceReads++;
-                if (consecutiveSurfaceReads >= 2) {
-                  isHighwayLocked = false;
-                  highwayLockSignature = null;
-                }
+            if (isExiting || isUnnamedOrLocal) {
+              consecutiveSurfaceReads++;
+              if (consecutiveSurfaceReads >= 2) {
+                // PURGE HIGHWAY LOCK AND ALL GHOST CACHES
+                isHighwayLocked = false;
+                highwayLockSignature = null;
+                lastValidDisplayTitle = "";
+                lastValidFullAddress = "";
+                lastValidInterstate = null;
+                lastValidRouteShield = null;
+                currentInterstateShield = null;
+                currentRouteShield = null;
               }
+            } else {
+              consecutiveSurfaceReads = 0;
             }
           }
 
